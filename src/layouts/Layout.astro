@@ -1,0 +1,145 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = "Discover the best music festivals across Central Europe. Interactive map, calendar, and comprehensive festival information." } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Festival Atlas" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <title>{title}</title>
+  </head>
+  <body class="min-h-screen bg-background text-foreground">
+    <header class="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+      <nav class="container mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <a href="/" class="flex items-center gap-3 group">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center transition-transform group-hover:scale-110">
+              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+            </div>
+            <div>
+              <span class="text-xl font-bold text-foreground">Festival Atlas</span>
+              <span class="hidden sm:inline text-xs text-muted-foreground ml-2">2026 Festivals</span>
+            </div>
+          </a>
+
+          <div class="hidden md:flex items-center gap-1">
+            <a href="/" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              Home
+            </a>
+            <a href="/map" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              Map
+            </a>
+            <a href="/calendar" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              Calendar
+            </a>
+            <a href="/list" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              List
+            </a>
+          </div>
+
+          <!-- Mobile Menu -->
+          <div class="md:hidden">
+            <button id="mobile-menu-btn" class="p-2 rounded-lg hover:bg-muted transition-colors">
+              <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Navigation -->
+        <div id="mobile-menu" class="hidden md:hidden mt-4 pb-2 border-t border-border pt-4">
+          <div class="flex flex-col gap-2">
+            <a href="/" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              Home
+            </a>
+            <a href="/map" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              Map
+            </a>
+            <a href="/calendar" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              Calendar
+            </a>
+            <a href="/list" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+              List
+            </a>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="container mx-auto px-4 py-8">
+      <slot />
+    </main>
+
+    <footer class="border-t border-border mt-16">
+      <div class="container mx-auto px-4 py-8">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+              <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+              </svg>
+            </div>
+            <span class="text-sm font-medium text-foreground">Festival Atlas</span>
+          </div>
+          <p class="text-sm text-muted-foreground">
+            Your Central European Festival Compass
+          </p>
+          <p class="text-sm text-muted-foreground">
+            Made with love for festival lovers
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+
+      mobileMenuBtn?.addEventListener('click', () => {
+        mobileMenu?.classList.toggle('hidden');
+      });
+
+      // Highlight active nav link
+      const currentPath = window.location.pathname;
+      document.querySelectorAll('nav a').forEach(link => {
+        if (link.getAttribute('href') === currentPath) {
+          link.classList.remove('text-muted-foreground');
+          link.classList.add('text-foreground', 'bg-muted');
+        }
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  @import "../styles/globals.css";
+</style>

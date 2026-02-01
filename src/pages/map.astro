@@ -1,0 +1,18 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { MapPage } from "../components/MapPage";
+import festivals from "../data/festivals.json";
+---
+
+<Layout title="Map View - Festival Atlas" description="Explore music festivals across Central Europe on an interactive map.">
+  <div class="space-y-6">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-foreground mb-3">Festival Map</h1>
+      <p class="text-muted-foreground max-w-lg mx-auto">
+        Explore all festivals on an interactive map. Toggle heat map view to see festival density across the region.
+      </p>
+    </div>
+
+    <MapPage client:load festivals={festivals} />
+  </div>
+</Layout>

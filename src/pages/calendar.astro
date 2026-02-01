@@ -1,0 +1,18 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { CalendarView } from "../components/CalendarView";
+import festivals from "../data/festivals.json";
+---
+
+<Layout title="Calendar View - Festival Atlas" description="View music festivals organized by month in a timeline format.">
+  <div class="space-y-6">
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-foreground mb-3">Festival Calendar</h1>
+      <p class="text-muted-foreground max-w-lg mx-auto">
+        Plan your festival season with our monthly timeline. Only months with festivals are shown.
+      </p>
+    </div>
+
+    <CalendarView client:load festivals={festivals} />
+  </div>
+</Layout>

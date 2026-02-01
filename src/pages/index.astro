@@ -1,0 +1,188 @@
+---
+import Layout from "../layouts/Layout.astro";
+import festivals from "../data/festivals.json";
+import { formatDateRange, getCountryFlag, getGenreColorHex } from "../lib/utils";
+
+const featuredFestivals = festivals.filter((f) => f.featured);
+const allGenres = [...new Set(festivals.flatMap((f) => f.genres))];
+const allCountries = [...new Set(festivals.map((f) => f.location.country))];
+---
+
+<Layout title="Festival Atlas - Your Central European Festival Compass">
+  <div class="space-y-20">
+    <!-- Hero Section -->
+    <section class="text-center py-16 md:py-24 relative">
+      <div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent rounded-3xl"></div>
+      <div class="relative">
+        <h1 class="text-5xl md:text-7xl font-extrabold text-foreground mb-6 tracking-tight">
+          Festival Atlas
+        </h1>
+        <p class="text-xl md:text-2xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          Your Central European Festival Compass
+        </p>
+        <p class="text-lg text-muted-foreground mb-12 max-w-xl mx-auto">
+          Discover, explore, and plan your perfect festival experience across Europe's most exciting music destinations.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            href="/map"
+            class="px-8 py-4 rounded-xl bg-primary text-primary-foreground font-semibold text-lg shadow-lg shadow-primary/25 hover:scale-105 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300"
+          >
+            Explore Map
+          </a>
+          <a
+            href="/calendar"
+            class="px-8 py-4 rounded-xl bg-secondary text-secondary-foreground font-semibold text-lg shadow-lg shadow-secondary/25 hover:scale-105 hover:shadow-xl hover:shadow-secondary/30 transition-all duration-300"
+          >
+            View Calendar
+          </a>
+          <a
+            href="/list"
+            class="px-8 py-4 rounded-xl border-2 border-border text-foreground font-semibold text-lg hover:bg-muted hover:border-primary/50 transition-all duration-300"
+          >
+            Browse All
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Stats -->
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      <div class="bg-card rounded-2xl p-6 border border-border text-center hover:border-primary/50 transition-colors">
+        <div class="text-4xl md:text-5xl font-bold text-primary mb-2">{festivals.length}</div>
+        <div class="text-muted-foreground">Festivals</div>
+      </div>
+      <div class="bg-card rounded-2xl p-6 border border-border text-center hover:border-secondary/50 transition-colors">
+        <div class="text-4xl md:text-5xl font-bold text-secondary mb-2">{allCountries.length}</div>
+        <div class="text-muted-foreground">Countries</div>
+      </div>
+      <div class="bg-card rounded-2xl p-6 border border-border text-center hover:border-accent/50 transition-colors">
+        <div class="text-4xl md:text-5xl font-bold text-accent mb-2">{allGenres.length}</div>
+        <div class="text-muted-foreground">Genres</div>
+      </div>
+      <div class="bg-card rounded-2xl p-6 border border-border text-center hover:border-primary/50 transition-colors">
+        <div class="text-4xl md:text-5xl font-bold text-foreground mb-2">2026</div>
+        <div class="text-muted-foreground">Festival Season</div>
+      </div>
+    </section>
+
+    <!-- Featured Festivals -->
+    <section>
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h2 class="text-3xl font-bold text-foreground mb-2">Featured Festivals</h2>
+          <p class="text-muted-foreground">The most anticipated events of 2026</p>
+        </div>
+        <a
+          href="/list"
+          class="text-primary hover:text-primary/80 font-medium transition-colors"
+        >
+          View all →
+        </a>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {featuredFestivals.map((festival) => (
+          <a
+            href={`/list?festival=${festival.id}`}
+            class="group relative bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10"
+          >
+            <div class="relative h-48 overflow-hidden">
+              {festival.image ? (
+                <img
+                  src={festival.image}
+                  alt={festival.name}
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              ) : (
+                <div class="w-full h-full bg-gradient-to-br from-primary/30 to-secondary/30" />
+              )}
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+              <div class="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
+                {festival.genres.map((genre) => (
+                  <span
+                    class="px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white rounded-full"
+                    style={`background-color: ${getGenreColorHex(genre)}`}
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div class="p-5">
+              <h3 class="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+                {festival.name}
+              </h3>
+              <p class="text-sm text-muted-foreground mb-2">
+                {getCountryFlag(festival.location.countryCode)} {festival.location.city}, {festival.location.country}
+              </p>
+              <p class="text-sm text-muted-foreground">
+                {formatDateRange(festival.dates.start, festival.dates.end)}
+              </p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <!-- Genre Overview -->
+    <section>
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-bold text-foreground mb-4">Find Your Sound</h2>
+        <p class="text-muted-foreground max-w-lg mx-auto">
+          From earth-shaking bass drops to face-melting guitar solos, find the festival that matches your vibe.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+        {["EDM", "Techno", "Rock", "Metal", "Else"].map((genre) => {
+          const count = festivals.filter((f) => f.genres.includes(genre as any)).length;
+          return (
+            <a
+              href={`/list?genre=${genre}`}
+              class="group bg-card rounded-2xl p-6 border border-border text-center hover:scale-105 transition-all duration-300"
+              style={`border-color: ${getGenreColorHex(genre as any)}40`}
+            >
+              <div
+                class="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center transition-transform group-hover:scale-110"
+                style={`background-color: ${getGenreColorHex(genre as any)}20`}
+              >
+                <span
+                  class="text-2xl font-bold"
+                  style={`color: ${getGenreColorHex(genre as any)}`}
+                >
+                  {count}
+                </span>
+              </div>
+              <h3 class="font-semibold text-foreground">{genre}</h3>
+              <p class="text-sm text-muted-foreground">
+                {count} festival{count !== 1 ? "s" : ""}
+              </p>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="relative bg-gradient-to-br from-primary/10 via-secondary/10 to-accent/10 rounded-3xl p-12 text-center overflow-hidden">
+      <div class="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(59,130,246,0.1),transparent_50%)]"></div>
+      <div class="relative">
+        <h2 class="text-3xl md:text-4xl font-bold text-foreground mb-4">
+          Ready to Plan Your Festival Summer?
+        </h2>
+        <p class="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
+          Use our interactive map and calendar to discover the perfect festivals for your 2026 adventure.
+        </p>
+        <div class="flex flex-wrap justify-center gap-4">
+          <a
+            href="/map"
+            class="px-8 py-4 rounded-xl bg-foreground text-background font-semibold text-lg hover:scale-105 transition-transform"
+          >
+            Start Exploring
+          </a>
+        </div>
+      </div>
+    </section>
+  </div>
+</Layout>

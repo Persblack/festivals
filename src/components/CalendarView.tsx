@@ -1,0 +1,161 @@
+import { useState, useMemo } from "react";
+import { motion } from "framer-motion";
+import { FestivalCard } from "./FestivalCard";
+import { FestivalDetail } from "./FestivalDetail";
+import { FilterBar } from "./FilterBar";
+import { getMonthName } from "@/lib/utils";
+import type { Festival, Filters } from "@/types/festival";
+import { Calendar } from "lucide-react";
+
+interface CalendarViewProps {
+  festivals: Festival[];
+}
+
+export function CalendarView({ festivals }: CalendarViewProps) {
+  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], search: "" });
+  const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
+
+  // Filter festivals
+  const filteredFestivals = useMemo(() => {
+    return festivals.filter((festival) => {
+      const matchesGenre =
+        filters.genres.length === 0 ||
+        festival.genres.some((g) => filters.genres.includes(g));
+      const matchesCountry =
+        filters.countries.length === 0 ||
+        filters.countries.includes(festival.location.countryCode);
+      const matchesSearch =
+        !filters.search ||
+        festival.lineup?.some((artist) =>
+          artist.toLowerCase().includes(filters.search.toLowerCase())
+        ) ||
+        festival.name.toLowerCase().includes(filters.search.toLowerCase());
+      return matchesGenre && matchesCountry && matchesSearch;
+    });
+  }, [festivals, filters]);
+
+  // Group festivals by month
+  const festivalsByMonth = useMemo(() => {
+    const grouped = new Map<number, Festival[]>();
+
+    filteredFestivals.forEach((festival) => {
+      const month = new Date(festival.dates.start).getMonth();
+      if (!grouped.has(month)) {
+        grouped.set(month, []);
+      }
+      grouped.get(month)!.push(festival);
+    });
+
+    // Sort festivals within each month
+    grouped.forEach((festivals) => {
+      festivals.sort((a, b) => new Date(a.dates.start).getTime() - new Date(b.dates.start).getTime());
+    });
+
+    // Return sorted entries
+    return Array.from(grouped.entries()).sort(([a], [b]) => a - b);
+  }, [filteredFestivals]);
+
+  const monthsWithFestivals = festivalsByMonth.map(([month]) => month);
+
+  const scrollToMonth = (month: number) => {
+    const element = document.getElementById(`month-${month}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Filters */}
+      <FilterBar
+        filters={filters}
+        onFiltersChange={setFilters}
+        resultCount={filteredFestivals.length}
+      />
+
+      {/* Quick Jump Navigation */}
+      {monthsWithFestivals.length > 2 && (
+        <div className="flex flex-wrap gap-2">
+          <span className="text-sm text-muted-foreground mr-2">Jump to:</span>
+          {monthsWithFestivals.map((month) => (
+            <button
+              key={month}
+              onClick={() => scrollToMonth(month)}
+              className="px-3 py-1.5 rounded-full bg-muted text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+            >
+              {getMonthName(month)}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Timeline */}
+      <div className="space-y-12">
+        {festivalsByMonth.map(([month, monthFestivals], index) => (
+          <motion.section
+            key={month}
+            id={`month-${month}`}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            className="scroll-mt-24"
+          >
+            {/* Month Header */}
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground">
+                    {getMonthName(month)} 2026
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {monthFestivals.length} festival{monthFestivals.length !== 1 ? "s" : ""}
+                  </p>
+                </div>
+              </div>
+              <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
+            </div>
+
+            {/* Festival Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {monthFestivals.map((festival, i) => (
+                <FestivalCard
+                  key={festival.id}
+                  festival={festival}
+                  onClick={() => setSelectedFestival(festival)}
+                  index={i}
+                />
+              ))}
+            </div>
+          </motion.section>
+        ))}
+      </div>
+
+      {/* Empty state */}
+      {filteredFestivals.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center py-16"
+        >
+          <Calendar className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-xl font-semibold text-foreground mb-2">
+            No festivals found
+          </h3>
+          <p className="text-muted-foreground">
+            Try adjusting your filters to see more results.
+          </p>
+        </motion.div>
+      )}
+
+      {/* Festival Detail Modal */}
+      <FestivalDetail
+        festival={selectedFestival}
+        open={!!selectedFestival}
+        onClose={() => setSelectedFestival(null)}
+      />
+    </div>
+  );
+}

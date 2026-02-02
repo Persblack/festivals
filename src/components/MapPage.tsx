@@ -21,7 +21,7 @@ export function MapPage({ festivals }: MapPageProps) {
         festival.genres.some((g) => filters.genres.includes(g));
       const matchesCountry =
         filters.countries.length === 0 ||
-        filters.countries.includes(festival.location.countryCode);
+        filters.countries.includes(festival.country_code);
       const matchesSearch =
         !filters.search ||
         festival.lineup?.some((artist) =>

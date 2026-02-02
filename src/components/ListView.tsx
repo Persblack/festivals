@@ -5,7 +5,7 @@ import { FestivalDetail } from "./FestivalDetail";
 import { FilterBar } from "./FilterBar";
 import { GenreBadge } from "./GenreBadge";
 import { Button } from "@/components/ui/button";
-import { formatDateRange, getCountryFlag } from "@/lib/utils";
+import { formatDateRange, getCountryFlag, formatPriceRange } from "@/lib/utils";
 import type { Festival, Filters } from "@/types/festival";
 import { Grid3X3, Table, ArrowUp, ExternalLink } from "lucide-react";
 
@@ -42,7 +42,7 @@ export function ListView({ festivals }: ListViewProps) {
         festival.genres.some((g) => filters.genres.includes(g));
       const matchesCountry =
         filters.countries.length === 0 ||
-        filters.countries.includes(festival.location.countryCode);
+        filters.countries.includes(festival.country_code);
       const matchesSearch =
         !filters.search ||
         festival.lineup?.some((artist) =>
@@ -58,13 +58,13 @@ export function ListView({ festivals }: ListViewProps) {
     const sorted = [...filteredFestivals];
     switch (sortBy) {
       case "date":
-        sorted.sort((a, b) => new Date(a.dates.start).getTime() - new Date(b.dates.start).getTime());
+        sorted.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
         break;
       case "name":
         sorted.sort((a, b) => a.name.localeCompare(b.name));
         break;
       case "country":
-        sorted.sort((a, b) => a.location.country.localeCompare(b.location.country));
+        sorted.sort((a, b) => a.country_name.localeCompare(b.country_name));
         break;
     }
     return sorted;
@@ -170,22 +170,15 @@ export function ListView({ festivals }: ListViewProps) {
                   >
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
-                        {festival.image && (
-                          <img
-                            src={festival.image}
-                            alt={festival.name}
-                            className="w-12 h-12 rounded-lg object-cover"
-                          />
-                        )}
                         <span className="font-medium text-foreground">{festival.name}</span>
                       </div>
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
-                      {formatDateRange(festival.dates.start, festival.dates.end)}
+                      {formatDateRange(festival.start_date, festival.end_date)}
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
-                      {getCountryFlag(festival.location.countryCode)} {festival.location.city},{" "}
-                      {festival.location.country}
+                      {getCountryFlag(festival.country_code)} {festival.city},{" "}
+                      {festival.country_name}
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex flex-wrap gap-1">
@@ -195,7 +188,7 @@ export function ListView({ festivals }: ListViewProps) {
                       </div>
                     </td>
                     <td className="px-4 py-4 text-sm text-muted-foreground">
-                      {festival.ticketInfo.priceRange}
+                      {formatPriceRange(festival.ticket_price_min, festival.ticket_price_max, festival.currency)}
                     </td>
                     <td className="px-4 py-4">
                       <Button

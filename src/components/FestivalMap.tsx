@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { formatDateRange, getCountryFlag, getGenreColorHex } from "@/lib/utils";
 import type { Festival, Genre } from "@/types/festival";
@@ -16,6 +16,12 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
   const [L, setL] = useState<any>(null);
   const mapRef = useRef<any>(null);
   const heatLayerRef = useRef<any>(null);
+
+  // Filter out festivals with null coordinates
+  const validFestivals = useMemo(
+    () => festivals.filter((f) => f.latitude != null && f.longitude != null),
+    [festivals]
+  );
 
   useEffect(() => {
     setIsClient(true);
@@ -38,7 +44,12 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
       });
 
       setL(leaflet.default);
-      setMapComponents(reactLeaflet);
+      setMapComponents({
+        MapContainer: reactLeaflet.MapContainer,
+        TileLayer: reactLeaflet.TileLayer,
+        Marker: reactLeaflet.Marker,
+        Popup: reactLeaflet.Popup,
+      });
     });
   }, []);
 
@@ -56,9 +67,9 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
 
     if (showHeatMap) {
       import("leaflet.heat").then(() => {
-        const points = festivals.map(
+        const points = validFestivals.map(
           (f) =>
-            [f.location.coordinates.lat, f.location.coordinates.lng, 0.8] as [
+            [f.latitude, f.longitude, 0.8] as [
               number,
               number,
               number
@@ -82,7 +93,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
         heatLayerRef.current = heat;
       });
     }
-  }, [showHeatMap, L, festivals]);
+  }, [showHeatMap, L, validFestivals]);
 
   if (!isClient || !MapComponents || !L) {
     return (
@@ -147,12 +158,12 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
         />
 
         {!showHeatMap &&
-          festivals.map((festival) => (
+          validFestivals.map((festival) => (
             <Marker
               key={festival.id}
               position={[
-                festival.location.coordinates.lat,
-                festival.location.coordinates.lng,
+                festival.latitude,
+                festival.longitude,
               ]}
               icon={createCustomIcon(festival.genres[0])}
             >
@@ -163,11 +174,11 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
                   </h3>
                   <div className="space-y-1.5 text-sm text-gray-600">
                     <p>
-                      {getCountryFlag(festival.location.countryCode)}{" "}
-                      {festival.location.city}, {festival.location.country}
+                      {getCountryFlag(festival.country_code)}{" "}
+                      {festival.city}, {festival.country_name}
                     </p>
                     <p>
-                      {formatDateRange(festival.dates.start, festival.dates.end)}
+                      {formatDateRange(festival.start_date, festival.end_date)}
                     </p>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {festival.genres.map((genre) => (

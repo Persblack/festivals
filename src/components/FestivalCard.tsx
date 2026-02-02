@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { MapPin, Calendar, Ticket } from "lucide-react";
 import { GenreBadge } from "./GenreBadge";
-import { formatDateRange, getCountryFlag } from "@/lib/utils";
+import { formatDateRange, getCountryFlag, formatPriceRange, getGenreCoverImage } from "@/lib/utils";
 import type { Festival } from "@/types/festival";
 
 interface FestivalCardProps {
@@ -22,21 +22,25 @@ export function FestivalCard({ festival, onClick, index = 0 }: FestivalCardProps
     >
       {/* Image Container */}
       <div className="relative h-48 overflow-hidden">
-        {festival.image ? (
-          <img
-            src={festival.image}
-            alt={festival.name}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-br from-primary/30 to-secondary/30" />
-        )}
+        {/* Blurred genre cover image */}
+        <img
+          src={getGenreCoverImage(festival.genres)}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover blur-[2px] scale-105"
+        />
 
-        {/* Gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/40" />
+
+        {/* Centered festival name */}
+        <div className="absolute inset-0 flex items-center justify-center p-4">
+          <h3 className="text-xl font-bold text-white text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+            {festival.name}
+          </h3>
+        </div>
 
         {/* View Details overlay on hover */}
-        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/40">
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black/50">
           <span className="px-4 py-2 rounded-full bg-primary text-white font-medium text-sm">
             View Details
           </span>
@@ -51,27 +55,23 @@ export function FestivalCard({ festival, onClick, index = 0 }: FestivalCardProps
       </div>
 
       {/* Content */}
-      <div className="p-5">
-        <h3 className="text-xl font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
-          {festival.name}
-        </h3>
-
+      <div className="p-4">
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
             <MapPin className="w-4 h-4 text-primary" />
             <span>
-              {getCountryFlag(festival.location.countryCode)} {festival.location.city}, {festival.location.country}
+              {getCountryFlag(festival.country_code)} {festival.city}, {festival.country_name}
             </span>
           </div>
 
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="w-4 h-4 text-secondary" />
-            <span>{formatDateRange(festival.dates.start, festival.dates.end)}</span>
+            <span>{formatDateRange(festival.start_date, festival.end_date)}</span>
           </div>
 
           <div className="flex items-center gap-2 text-muted-foreground">
             <Ticket className="w-4 h-4 text-accent" />
-            <span>{festival.ticketInfo.priceRange}</span>
+            <span>{formatPriceRange(festival.ticket_price_min, festival.ticket_price_max, festival.currency)}</span>
           </div>
         </div>
       </div>

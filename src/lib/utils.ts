@@ -75,3 +75,36 @@ export function getMonthName(monthIndex: number): string {
   ];
   return months[monthIndex] || '';
 }
+
+export function formatPriceRange(
+  min: number | null,
+  max: number | null,
+  currency: string = 'EUR'
+): string {
+  const symbol = currency === 'EUR' ? '€' : currency;
+  if (min === null && max === null) {
+    return 'Price TBA';
+  }
+  if (min !== null && max !== null) {
+    if (min === max) {
+      return `${symbol}${min}`;
+    }
+    return `${symbol}${min}-${symbol}${max}`;
+  }
+  if (min !== null) {
+    return `From ${symbol}${min}`;
+  }
+  return `Up to ${symbol}${max}`;
+}
+
+export function getGenreCoverImage(genres: string[]): string {
+  const genre = genres[0]?.toLowerCase() || 'else';
+  const genreMap: Record<string, string> = {
+    'edm': '/cover_edm.jpg',
+    'techno': '/cover_techno.jpg',
+    'rock': '/cover_rock.jpg',
+    'metal': '/cover_metal.jpg',
+    'else': '/cover_else.jpg',
+  };
+  return genreMap[genre] || '/cover_else.jpg';
+}

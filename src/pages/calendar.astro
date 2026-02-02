@@ -1,7 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { CalendarView } from "../components/CalendarView";
-import festivals from "../data/festivals.json";
+import festivalsData from "../data/festivals.json";
+
+const festivals = festivalsData.festivals;
 ---
 
 <Layout title="Calendar View - Festival Atlas" description="View music festivals organized by month in a timeline format.">

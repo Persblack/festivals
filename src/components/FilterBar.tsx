@@ -15,12 +15,10 @@ import { GenreBadge } from "./GenreBadge";
 import type { Genre, Filters } from "@/types/festival";
 
 const GENRES: Genre[] = ["EDM", "Techno", "Rock", "Metal", "Else"];
-const COUNTRIES = [
-  { code: "BE", name: "Belgium" },
+const DEFAULT_COUNTRIES = [
   { code: "DE", name: "Germany" },
-  { code: "RS", name: "Serbia" },
-  { code: "HU", name: "Hungary" },
   { code: "AT", name: "Austria" },
+  { code: "CH", name: "Switzerland" },
 ];
 
 interface FilterBarProps {
@@ -30,6 +28,7 @@ interface FilterBarProps {
   sortBy?: string;
   onSortChange?: (sort: string) => void;
   resultCount: number;
+  countries?: { code: string; name: string }[];
 }
 
 export function FilterBar({
@@ -39,7 +38,9 @@ export function FilterBar({
   sortBy = "date",
   onSortChange,
   resultCount,
+  countries = DEFAULT_COUNTRIES,
 }: FilterBarProps) {
+  const COUNTRIES = countries;
   const [isExpanded, setIsExpanded] = useState(false);
 
   const toggleGenre = (genre: Genre) => {

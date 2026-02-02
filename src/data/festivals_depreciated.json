@@ -1,0 +1,442 @@
+[
+  {
+    "id": "tomorrowland-2026",
+    "name": "Tomorrowland",
+    "description": "The world's most iconic electronic music festival, transforming the Belgian countryside into a magical wonderland of music and art.",
+    "location": {
+      "city": "Boom",
+      "country": "Belgium",
+      "countryCode": "BE",
+      "venue": "De Schorre Recreation Area",
+      "coordinates": { "lat": 51.0866, "lng": 4.3636 }
+    },
+    "dates": {
+      "start": "2026-07-17",
+      "end": "2026-07-26",
+      "year": 2026
+    },
+    "genres": ["EDM", "Techno"],
+    "size": "massive",
+    "ticketInfo": {
+      "priceRange": "€300-€600",
+      "currency": "EUR",
+      "ticketLink": "https://www.tomorrowland.com/en/festival/tickets"
+    },
+    "website": "https://www.tomorrowland.com",
+    "instagram": "https://www.instagram.com/tomorrowland",
+    "image": "/cover1.jpg",
+    "featured": true,
+    "lineup": ["Martin Garrix", "David Guetta", "Armin van Buuren", "Charlotte de Witte", "Amelie Lens", "Tiësto", "Dimitri Vegas & Like Mike", "Afrojack", "Hardwell", "Carl Cox"],
+    "reviewSummary": "An absolutely magical experience that transcends typical festival vibes. The production value is unmatched - the stages are like walking into different worlds. The crowd energy is incredible, and despite the massive size, the organization is flawless. Must experience at least once in your lifetime.",
+    "historicalData": {
+      "years": [
+        { "year": 2022, "attendance": 400000, "notable_acts": ["Martin Garrix", "Armin van Buuren", "Charlotte de Witte"] },
+        { "year": 2023, "attendance": 400000, "notable_acts": ["David Guetta", "Amelie Lens", "Tale of Us"] },
+        { "year": 2024, "attendance": 450000, "notable_acts": ["Hardwell", "Tiësto", "Nina Kraviz"] },
+        { "year": 2025, "attendance": 450000, "notable_acts": ["Carl Cox", "Fisher", "Peggy Gou"] }
+      ]
+    }
+  },
+  {
+    "id": "rock-am-ring-2026",
+    "name": "Rock am Ring",
+    "description": "Germany's legendary rock festival at the iconic Nürburgring, featuring the biggest names in rock and metal.",
+    "location": {
+      "city": "Nürburg",
+      "country": "Germany",
+      "countryCode": "DE",
+      "venue": "Nürburgring",
+      "coordinates": { "lat": 50.3356, "lng": 6.9475 }
+    },
+    "dates": {
+      "start": "2026-06-05",
+      "end": "2026-06-07",
+      "year": 2026
+    },
+    "genres": ["Rock", "Metal"],
+    "size": "large",
+    "ticketInfo": {
+      "priceRange": "€200-€350",
+      "currency": "EUR",
+      "ticketLink": "https://www.rock-am-ring.com/tickets"
+    },
+    "website": "https://www.rock-am-ring.com",
+    "instagram": "https://www.instagram.com/rockamring",
+    "image": "/cover2.jpg",
+    "featured": true,
+    "lineup": ["Linkin Park", "Iron Maiden", "Volbeat", "Limp Bizkit", "The Offspring", "Papa Roach", "Electric Callboy", "Sabaton"],
+    "reviewSummary": "The atmosphere at the Nürburgring is electric. Rock fans from all over Europe come together for an unforgettable weekend. The sound quality is excellent and the lineup always delivers a mix of legends and rising stars.",
+    "historicalData": {
+      "years": [
+        { "year": 2022, "attendance": 80000, "notable_acts": ["Muse", "Volbeat", "Korn"] },
+        { "year": 2023, "attendance": 85000, "notable_acts": ["Metallica", "Limp Bizkit", "Parkway Drive"] },
+        { "year": 2024, "attendance": 90000, "notable_acts": ["Tool", "Queens of the Stone Age", "Evanescence"] },
+        { "year": 2025, "attendance": 90000, "notable_acts": ["System of a Down", "Fall Out Boy", "Gojira"] }
+      ]
+    }
+  },
+  {
+    "id": "rock-im-park-2026",
+    "name": "Rock im Park",
+    "description": "The sister festival of Rock am Ring, bringing the same incredible lineup to Nuremberg's historic Zeppelinfeld.",
+    "location": {
+      "city": "Nuremberg",
+      "country": "Germany",
+      "countryCode": "DE",
+      "venue": "Zeppelinfeld",
+      "coordinates": { "lat": 49.4294, "lng": 11.1231 }
+    },
+    "dates": {
+      "start": "2026-06-05",
+      "end": "2026-06-07",
+      "year": 2026
+    },
+    "genres": ["Rock", "Metal"],
+    "size": "large",
+    "ticketInfo": {
+      "priceRange": "€200-€350",
+      "currency": "EUR",
+      "ticketLink": "https://www.rock-im-park.com/tickets"
+    },
+    "website": "https://www.rock-im-park.com",
+    "instagram": "https://www.instagram.com/rockimpark",
+    "image": "/cover10.jpg",
+    "featured": true,
+    "lineup": ["Linkin Park", "Iron Maiden", "Volbeat", "Limp Bizkit", "The Offspring", "Papa Roach", "Electric Callboy", "Sabaton"],
+    "reviewSummary": "Rock im Park offers the same world-class lineup as Rock am Ring but in the heart of Nuremberg. The historic venue and city-center location make it accessible while maintaining the authentic festival atmosphere."
+  },
+  {
+    "id": "exit-festival-2026",
+    "name": "EXIT Festival",
+    "description": "Award-winning festival in the stunning Petrovaradin Fortress, blending electronic beats with an unforgettable historic setting.",
+    "location": {
+      "city": "Novi Sad",
+      "country": "Serbia",
+      "countryCode": "RS",
+      "venue": "Petrovaradin Fortress",
+      "coordinates": { "lat": 45.2521, "lng": 19.8627 }
+    },
+    "dates": {
+      "start": "2026-07-09",
+      "end": "2026-07-12",
+      "year": 2026
+    },
+    "genres": ["EDM", "Else"],
+    "size": "large",
+    "ticketInfo": {
+      "priceRange": "€100-€180",
+      "currency": "EUR",
+      "ticketLink": "https://www.exitfest.org/en/tickets"
+    },
+    "website": "https://www.exitfest.org",
+    "instagram": "https://www.instagram.com/exitfestival",
+    "image": "/cover3.jpg",
+    "featured": true,
+    "lineup": ["Calvin Harris", "Disclosure", "Jamie XX", "Rüfüs Du Sol", "Moderat", "Four Tet", "Bonobo", "Caribou"],
+    "reviewSummary": "The fortress setting is absolutely breathtaking. Dancing under the stars in a 17th-century citadel creates a surreal experience. Great value for money compared to Western European festivals, with an eclectic mix of genres.",
+    "historicalData": {
+      "years": [
+        { "year": 2022, "attendance": 180000, "notable_acts": ["Nick Cave", "Iggy Pop", "Maceo Plex"] },
+        { "year": 2023, "attendance": 200000, "notable_acts": ["Calvin Harris", "The Killers", "Honey Dijon"] },
+        { "year": 2024, "attendance": 210000, "notable_acts": ["Skepta", "Paul Kalkbrenner", "Amelie Lens"] },
+        { "year": 2025, "attendance": 220000, "notable_acts": ["Black Coffee", "Peggy Gou", "Jungle"] }
+      ]
+    }
+  },
+  {
+    "id": "wacken-open-air-2026",
+    "name": "Wacken Open Air",
+    "description": "The world's largest heavy metal festival, turning a small German village into the metal capital of the world.",
+    "location": {
+      "city": "Wacken",
+      "country": "Germany",
+      "countryCode": "DE",
+      "venue": "Festival Grounds Wacken",
+      "coordinates": { "lat": 54.0233, "lng": 9.3764 }
+    },
+    "dates": {
+      "start": "2026-07-30",
+      "end": "2026-08-01",
+      "year": 2026
+    },
+    "genres": ["Metal"],
+    "size": "massive",
+    "ticketInfo": {
+      "priceRange": "€250-€400",
+      "currency": "EUR",
+      "ticketLink": "https://www.wacken.com/en/tickets"
+    },
+    "website": "https://www.wacken.com",
+    "instagram": "https://www.instagram.com/waborig",
+    "image": "/cover4.jpg",
+    "featured": true,
+    "lineup": ["Def Leppard", "Judas Priest", "Powerwolf", "In Flames", "Sepultura", "Lamb of God", "Arch Enemy", "Saxon", "Black Label Society", "Emperor"],
+    "reviewSummary": "The ultimate pilgrimage for metalheads. 85,000+ metal fans coming together in the middle of nowhere creates an unbelievable sense of community. The beer flows freely, the mosh pits are legendary, and the lineup is always stacked with icons."
+  },
+  {
+    "id": "sziget-festival-2026",
+    "name": "Sziget Festival",
+    "description": "The 'Island of Freedom' on the Danube, a week-long celebration of music, art, and culture in the heart of Budapest.",
+    "location": {
+      "city": "Budapest",
+      "country": "Hungary",
+      "countryCode": "HU",
+      "venue": "Óbudai Island",
+      "coordinates": { "lat": 47.5500, "lng": 19.0522 }
+    },
+    "dates": {
+      "start": "2026-08-12",
+      "end": "2026-08-18",
+      "year": 2026
+    },
+    "genres": ["Else"],
+    "size": "massive",
+    "ticketInfo": {
+      "priceRange": "€300-€400",
+      "currency": "EUR",
+      "ticketLink": "https://szigetfestival.com/en/tickets"
+    },
+    "website": "https://szigetfestival.com",
+    "instagram": "https://www.instagram.com/szigetofficial",
+    "image": "/cover5.jpg",
+    "featured": false,
+    "lineup": ["Arctic Monkeys", "Dua Lipa", "Florence + The Machine", "Kygo", "Tame Impala", "Sam Smith", "Major Lazer", "James Bay"]
+  },
+  {
+    "id": "parookaville-2026",
+    "name": "Parookaville",
+    "description": "A fantasy city that comes alive with electronic music, featuring elaborate themed areas and world-class DJs.",
+    "location": {
+      "city": "Weeze",
+      "country": "Germany",
+      "countryCode": "DE",
+      "venue": "Weeze Airport",
+      "coordinates": { "lat": 51.6024, "lng": 6.1422 }
+    },
+    "dates": {
+      "start": "2026-07-17",
+      "end": "2026-07-19",
+      "year": 2026
+    },
+    "genres": ["EDM", "Techno"],
+    "size": "large",
+    "ticketInfo": {
+      "priceRange": "€180-€300",
+      "currency": "EUR",
+      "ticketLink": "https://parookaville.com/tickets"
+    },
+    "website": "https://parookaville.com",
+    "instagram": "https://www.instagram.com/parookaville",
+    "image": "/cover6.jpg",
+    "featured": false,
+    "lineup": ["Armin van Buuren", "The Chainsmokers", "Charlotte de Witte", "Fisher", "R3hab", "Scooter", "Axwell", "Alle Farben"]
+  },
+  {
+    "id": "nova-rock-2026",
+    "name": "Nova Rock",
+    "description": "Austria's premier rock festival, bringing international rock giants to the plains of Burgenland.",
+    "location": {
+      "city": "Nickelsdorf",
+      "country": "Austria",
+      "countryCode": "AT",
+      "venue": "Pannonia Fields",
+      "coordinates": { "lat": 47.9394, "lng": 17.0689 }
+    },
+    "dates": {
+      "start": "2026-06-11",
+      "end": "2026-06-14",
+      "year": 2026
+    },
+    "genres": ["Rock", "Metal"],
+    "size": "large",
+    "ticketInfo": {
+      "priceRange": "€200-€320",
+      "currency": "EUR",
+      "ticketLink": "https://www.novarock.at/tickets"
+    },
+    "website": "https://www.novarock.at",
+    "instagram": "https://www.instagram.com/novarockfestival",
+    "image": "/cover7.jpg",
+    "featured": false,
+    "lineup": ["Linkin Park", "Avenged Sevenfold", "Disturbed", "Halestorm", "The Offspring", "In Flames", "Electric Callboy", "Fever 333"]
+  },
+  {
+    "id": "airbeat-one-2026",
+    "name": "Airbeat One",
+    "description": "Germany's massive electronic music festival with spectacular stage designs and a 72-hour non-stop party atmosphere.",
+    "location": {
+      "city": "Neustadt-Glewe",
+      "country": "Germany",
+      "countryCode": "DE",
+      "venue": "Military Airfield",
+      "coordinates": { "lat": 53.3667, "lng": 11.5833 }
+    },
+    "dates": {
+      "start": "2026-07-09",
+      "end": "2026-07-12",
+      "year": 2026
+    },
+    "genres": ["EDM", "Techno"],
+    "size": "large",
+    "ticketInfo": {
+      "priceRange": "€150-€260",
+      "currency": "EUR",
+      "ticketLink": "https://www.airbeat-one.de/tickets"
+    },
+    "website": "https://www.airbeat-one.de",
+    "instagram": "https://www.instagram.com/airbeatone",
+    "image": "/cover8.jpg",
+    "featured": false,
+    "lineup": ["Armin van Buuren", "Alok", "Da Tweekaz", "Headhunterz", "Brennan Heart", "Sub Zero Project", "Ran-D", "Miss K8"]
+  },
+  {
+    "id": "hurricane-festival-2026",
+    "name": "Hurricane Festival",
+    "description": "One of Germany's largest rock and alternative festivals celebrating 30 years in 2026 with an eclectic lineup of rock, indie, and electronic acts.",
+    "location": {
+      "city": "Scheeßel",
+      "country": "Germany",
+      "countryCode": "DE",
+      "venue": "Eichenring",
+      "coordinates": { "lat": 53.1667, "lng": 9.4833 }
+    },
+    "dates": {
+      "start": "2026-06-19",
+      "end": "2026-06-21",
+      "year": 2026
+    },
+    "genres": ["Rock", "Else"],
+    "size": "large",
+    "ticketInfo": {
+      "priceRange": "€200-€300",
+      "currency": "EUR",
+      "ticketLink": "https://hurricane.de/en/tickets"
+    },
+    "website": "https://hurricane.de/en/",
+    "instagram": "https://www.instagram.com/hurricanefestival",
+    "image": "/cover11.jpg",
+    "featured": true,
+    "lineup": ["Twenty One Pilots", "Kraftklub", "Florence + The Machine", "The Offspring", "Empire of the Sun", "Papa Roach", "All Time Low", "A Day to Remember", "Yungblud"],
+    "reviewSummary": "Hurricane's 30th anniversary edition promises to be epic. The diverse lineup spans generations and genres, creating an inclusive atmosphere. The campground, nicknamed 'Mordor,' is legendary for its party atmosphere."
+  },
+  {
+    "id": "southside-festival-2026",
+    "name": "Southside Festival",
+    "description": "Hurricane's twin sister festival in southern Germany, featuring the identical lineup over the same weekend on a former military airport.",
+    "location": {
+      "city": "Neuhausen ob Eck",
+      "country": "Germany",
+      "countryCode": "DE",
+      "venue": "Take-Off Park",
+      "coordinates": { "lat": 47.9667, "lng": 8.9333 }
+    },
+    "dates": {
+      "start": "2026-06-19",
+      "end": "2026-06-21",
+      "year": 2026
+    },
+    "genres": ["Rock", "Else"],
+    "size": "large",
+    "ticketInfo": {
+      "priceRange": "€200-€300",
+      "currency": "EUR",
+      "ticketLink": "https://www.southside.de/en/tickets"
+    },
+    "website": "https://www.southside.de/en/",
+    "instagram": "https://www.instagram.com/southsidefestival",
+    "image": "/cover12.jpg",
+    "featured": false,
+    "lineup": ["Twenty One Pilots", "Kraftklub", "Florence + The Machine", "The Offspring", "Empire of the Sun", "Papa Roach", "All Time Low", "A Day to Remember", "Yungblud"],
+    "reviewSummary": "Southside offers the same incredible lineup as Hurricane but with a different geographic and cultural vibe in southern Germany. Great for those who want to combine the festival with exploring Bavaria."
+  },
+  {
+    "id": "nature-one-2026",
+    "name": "Nature One",
+    "description": "Germany's iconic techno and electronic music festival celebrating 30 years, transforming a Cold War missile base into a massive outdoor rave with over 350 DJs across 20 stages.",
+    "location": {
+      "city": "Kastellaun",
+      "country": "Germany",
+      "countryCode": "DE",
+      "venue": "Raketenbasis Pydna",
+      "coordinates": { "lat": 50.0711, "lng": 7.4458 }
+    },
+    "dates": {
+      "start": "2026-07-30",
+      "end": "2026-08-02",
+      "year": 2026
+    },
+    "genres": ["Techno", "EDM"],
+    "size": "massive",
+    "ticketInfo": {
+      "priceRange": "€180-€300",
+      "currency": "EUR",
+      "ticketLink": "https://www.nature-one.de/en/tickets"
+    },
+    "website": "https://www.nature-one.de/en",
+    "instagram": "https://www.instagram.com/natureone",
+    "image": "/cover13.jpg",
+    "featured": true,
+    "lineup": ["Sven Väth", "Paul van Dyk", "Eric Prydz", "Reinier Zonneveld", "Felix Jaehn", "Lilly Palmer", "I Hate Models", "Ben Böhmer"],
+    "reviewSummary": "Nature One's unique setting at a former missile base creates an unparalleled atmosphere. With 20 stages including massive open-air arenas and underground bunker clubs, it's Europe's largest campsite rave and a techno lover's paradise."
+  },
+  {
+    "id": "lollapalooza-berlin-2026",
+    "name": "Lollapalooza Berlin",
+    "description": "Berlin's biggest multi-genre festival bringing international superstars to the historic Olympiastadion for two days of music, art, and culture.",
+    "location": {
+      "city": "Berlin",
+      "country": "Germany",
+      "countryCode": "DE",
+      "venue": "Olympiastadion & Olympiapark Berlin",
+      "coordinates": { "lat": 52.5148, "lng": 13.2395 }
+    },
+    "dates": {
+      "start": "2026-07-18",
+      "end": "2026-07-19",
+      "year": 2026
+    },
+    "genres": ["Else"],
+    "size": "large",
+    "ticketInfo": {
+      "priceRange": "€150-€300",
+      "currency": "EUR",
+      "ticketLink": "https://www.lollapaloozade.com/en/tickets"
+    },
+    "website": "https://www.lollapaloozade.com/en",
+    "instagram": "https://www.instagram.com/lollapaloozade",
+    "image": "/cover14.jpg",
+    "featured": true,
+    "lineup": ["Pitbull", "Lorde", "Lewis Capaldi", "Teddy Swims", "Lily Allen", "Zara Larsson", "Boys Noize", "Makko", "Zartmann"],
+    "reviewSummary": "Lollapalooza Berlin combines world-class music with interactive exhibition areas including Fashionpalooza, Grüne Kiez sustainability zone, and Kidzapalooza for families. The historic Olympic venue adds a unique grandeur to the experience."
+  },
+  {
+    "id": "fusion-festival-2026",
+    "name": "Fusion Festival",
+    "description": "Germany's legendary counter-culture festival on a former Soviet airfield, creating a temporary autonomous zone of music, art, theater, and radical self-expression over five days.",
+    "location": {
+      "city": "Lärz",
+      "country": "Germany",
+      "countryCode": "DE",
+      "venue": "Kulturkosmos Lärz",
+      "coordinates": { "lat": 53.3458, "lng": 12.7397 }
+    },
+    "dates": {
+      "start": "2026-06-24",
+      "end": "2026-06-28",
+      "year": 2026
+    },
+    "genres": ["Techno", "Else"],
+    "size": "large",
+    "ticketInfo": {
+      "priceRange": "€200-€250",
+      "currency": "EUR",
+      "ticketLink": "https://tickets.fusion-festival.de/"
+    },
+    "website": "https://fusion-festival.de/en",
+    "instagram": "https://www.instagram.com/fusionfestival",
+    "image": "/cover15.jpg",
+    "featured": true,
+    "lineup": ["TBA - lineup announced week before festival"],
+    "reviewSummary": "Fusion is described as Europe's Burning Man - a transformational experience combining electronic music with avant-garde art, performance, and a unique clothing-optional culture. Tickets are lottery-based due to extreme demand. Note: No Fusion in 2027."
+  }
+]

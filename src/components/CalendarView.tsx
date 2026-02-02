@@ -23,7 +23,7 @@ export function CalendarView({ festivals }: CalendarViewProps) {
         festival.genres.some((g) => filters.genres.includes(g));
       const matchesCountry =
         filters.countries.length === 0 ||
-        filters.countries.includes(festival.location.countryCode);
+        filters.countries.includes(festival.country_code);
       const matchesSearch =
         !filters.search ||
         festival.lineup?.some((artist) =>
@@ -39,7 +39,7 @@ export function CalendarView({ festivals }: CalendarViewProps) {
     const grouped = new Map<number, Festival[]>();
 
     filteredFestivals.forEach((festival) => {
-      const month = new Date(festival.dates.start).getMonth();
+      const month = new Date(festival.start_date).getMonth();
       if (!grouped.has(month)) {
         grouped.set(month, []);
       }
@@ -48,7 +48,7 @@ export function CalendarView({ festivals }: CalendarViewProps) {
 
     // Sort festivals within each month
     grouped.forEach((festivals) => {
-      festivals.sort((a, b) => new Date(a.dates.start).getTime() - new Date(b.dates.start).getTime());
+      festivals.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
     });
 
     // Return sorted entries

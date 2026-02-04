@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { formatDateRange, getCountryFlag, getGenreColorHex } from "@/lib/utils";
+import { formatDateRange, getCountryFlag, getGenreColorHex, getSizeLabel } from "@/lib/utils";
 import type { Festival, Genre } from "@/types/festival";
 import { Flame, MapPin } from "lucide-react";
 
@@ -169,10 +169,10 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
             >
               <Popup>
                 <div className="p-2 min-w-[200px]">
-                  <h3 className="font-bold text-lg text-gray-900 mb-2">
+                  <h3 className="font-bold text-lg text-grey-200 mb-2">
                     {festival.name}
                   </h3>
-                  <div className="space-y-1.5 text-sm text-gray-600">
+                  <div className="space-y-1.5 text-sm text-gray-300">
                     <p>
                       {getCountryFlag(festival.country_code)}{" "}
                       {festival.city}, {festival.country_name}
@@ -180,6 +180,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
                     <p>
                       {formatDateRange(festival.start_date, festival.end_date)}
                     </p>
+                    <p>{getSizeLabel(festival.size)}</p>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {festival.genres.map((genre) => (
                         <span

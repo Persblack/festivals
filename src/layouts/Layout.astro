@@ -38,7 +38,7 @@ const { title, description = "Discover the best music festivals across Central E
     <header class="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <nav class="container mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
-          <a href="/" class="flex items-center gap-3 group">
+          <a href="/" class="logo-link flex items-center gap-3 group">
             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center transition-transform group-hover:scale-110">
               <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
@@ -128,9 +128,9 @@ const { title, description = "Discover the best music festivals across Central E
         mobileMenu?.classList.toggle('hidden');
       });
 
-      // Highlight active nav link
+      // Highlight active nav link (exclude logo link)
       const currentPath = window.location.pathname;
-      document.querySelectorAll('nav a').forEach(link => {
+      document.querySelectorAll('nav a[href]:not(.logo-link)').forEach(link => {
         if (link.getAttribute('href') === currentPath) {
           link.classList.remove('text-muted-foreground');
           link.classList.add('text-foreground', 'bg-muted');

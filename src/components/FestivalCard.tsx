@@ -1,3 +1,5 @@
+"use client";
+
 import { motion } from "framer-motion";
 import { MapPin, Calendar, Ticket } from "lucide-react";
 import { GenreBadge } from "./GenreBadge";

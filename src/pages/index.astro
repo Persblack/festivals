@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import festivalsData from "../data/festivals.json";
 import { formatDateRange, getCountryFlag, getGenreColorHex, getGenreCoverImage } from "../lib/utils";
+import { FeaturedFestivals } from "../components/FeaturedFestivals";
 
 const festivals = festivalsData.festivals;
 const featuredFestivals = festivals.filter((f) => f.featured);
@@ -82,50 +83,7 @@ const allCountries = [...new Set(festivals.map((f) => f.country_name))];
         </a>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {featuredFestivals.map((festival) => (
-          <a
-            href={`/list?festival=${festival.id}`}
-            class="group relative bg-card rounded-2xl overflow-hidden border border-border hover:border-primary/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-primary/10"
-          >
-            <div class="relative h-48 overflow-hidden">
-              <!-- Blurred genre cover image -->
-              <img
-                src={getGenreCoverImage(festival.genres)}
-                alt=""
-                class="absolute inset-0 w-full h-full object-cover blur-[2px] scale-105"
-              />
-              <!-- Dark overlay -->
-              <div class="absolute inset-0 bg-black/40" />
-              <!-- Centered festival name -->
-              <div class="absolute inset-0 flex items-center justify-center p-4">
-                <h3 class="text-xl font-bold text-white text-center drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                  {festival.name}
-                </h3>
-              </div>
-              <!-- Genre badges at bottom -->
-              <div class="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
-                {festival.genres.map((genre) => (
-                  <span
-                    class="px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-white rounded-full"
-                    style={`background-color: ${getGenreColorHex(genre)}`}
-                  >
-                    {genre}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div class="p-4">
-              <p class="text-sm text-muted-foreground mb-2">
-                {getCountryFlag(festival.country_code)} {festival.city}, {festival.country_name}
-              </p>
-              <p class="text-sm text-muted-foreground">
-                {formatDateRange(festival.start_date, festival.end_date)}
-              </p>
-            </div>
-          </a>
-        ))}
-      </div>
+      <FeaturedFestivals client:load festivals={featuredFestivals} />
     </section>
 
     <!-- Genre Overview -->

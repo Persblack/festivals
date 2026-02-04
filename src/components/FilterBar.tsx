@@ -183,38 +183,6 @@ export function FilterBar({
           </div>
         </div>
       </motion.div>
-
-      {/* Always visible genre pills on desktop */}
-      <div className="hidden md:flex flex-wrap gap-2 border-t border-border pt-4">
-        {GENRES.map((genre) => (
-          <button
-            key={genre}
-            onClick={() => toggleGenre(genre)}
-            className={`transition-all duration-200 ${
-              filters.genres.includes(genre)
-                ? "ring-2 ring-primary ring-offset-2 ring-offset-card scale-105"
-                : "opacity-70 hover:opacity-100"
-            }`}
-          >
-            <GenreBadge genre={genre} />
-          </button>
-        ))}
-
-        <div className="w-px h-6 bg-border mx-2" />
-
-        {COUNTRIES.map((country) => (
-          <label
-            key={country.code}
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <Checkbox
-              checked={filters.countries.includes(country.code)}
-              onCheckedChange={() => toggleCountry(country.code)}
-            />
-            <span className="text-sm text-foreground">{country.name}</span>
-          </label>
-        ))}
-      </div>
     </motion.div>
   );
 }

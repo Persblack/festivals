@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { GenreBadge } from "./GenreBadge";
+import { SelectFestivalButton } from "./SelectFestivalButton";
 import { formatDateRange, getCountryFlag, getSizeLabel, formatPriceRange, getGenreCoverImage } from "@/lib/utils";
 import type { Festival } from "@/types/festival";
 import {
@@ -107,6 +108,7 @@ export function FestivalDetail({ festival, open, onClose }: FestivalDetailProps)
                 </a>
               </Button>
             )}
+            <SelectFestivalButton festivalId={festival.id} variant="full" />
           </div>
 
           {/* Description */}

@@ -1,0 +1,11 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { PlannerPage } from "../components/PlannerPage";
+import festivalsData from "../data/festivals.json";
+
+const festivals = festivalsData.festivals;
+---
+
+<Layout title="Festival Planner - Festival Atlas" description="Plan your festival season with an interactive timeline. Add festivals to your planner and see them laid out chronologically.">
+  <PlannerPage client:load festivals={festivals} />
+</Layout>

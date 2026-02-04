@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { MapPin, Calendar, Ticket } from "lucide-react";
 import { GenreBadge } from "./GenreBadge";
+import { SelectFestivalButton } from "./SelectFestivalButton";
 import { formatDateRange, getCountryFlag, formatPriceRange, getGenreCoverImage } from "@/lib/utils";
 import type { Festival } from "@/types/festival";
 
@@ -33,6 +34,11 @@ export function FestivalCard({ festival, onClick, index = 0 }: FestivalCardProps
 
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-black/40" />
+
+        {/* Selection button */}
+        <div className="absolute top-3 right-3 z-10">
+          <SelectFestivalButton festivalId={festival.id} variant="icon" />
+        </div>
 
         {/* Centered festival name */}
         <div className="absolute inset-0 flex items-center justify-center p-4">

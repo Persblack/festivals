@@ -39,5 +39,7 @@ export type FestivalSize = 'small' | 'medium' | 'large' | 'massive';
 export interface Filters {
   genres: Genre[];
   countries: string[];
+  sizes: FestivalSize[];
+  dateRange: [number, number]; // [startMonth, endMonth] 1-12
   search: string;
 }

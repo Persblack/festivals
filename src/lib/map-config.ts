@@ -103,12 +103,12 @@ export type TileLayerKey = keyof typeof tileLayers;
 // ============================================================================
 
 export const defaultMarkerOptions: MarkerOptions = {
-  size: 32,
-  borderWidth: 3,
-  borderColor: "#ffffff",
-  shape: "pin",
+  size: 16,
+  borderWidth: 4,
+  borderColor: "#000000",
+  shape: "circle",
   shadow: true,
-  innerDot: true,
+  innerDot: false,
   innerDotSize: 10,
   pulseAnimation: false,
   bounceOnHover: true,
@@ -121,7 +121,7 @@ export const defaultControlOptions: ControlStyleOptions = {
   blur: true,
 };
 
-export const defaultTileLayer: TileLayerKey = "cartoDark";
+export const defaultTileLayer: TileLayerKey = "esriWorldGray";
 
 export const defaultMapConfig: MapConfig = {
   markerOptions: defaultMarkerOptions,

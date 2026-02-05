@@ -13,8 +13,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import { GenreBadge } from "./GenreBadge";
-import type { Genre, Filters } from "@/types/festival";
+import type { Genre, FestivalSize, Filters } from "@/types/festival";
+
+const SIZES: { value: FestivalSize; label: string }[] = [
+  { value: "small", label: "Small" },
+  { value: "medium", label: "Medium" },
+  { value: "large", label: "Large" },
+];
+
+const MONTHS = [
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+];
 
 const GENRES: Genre[] = ["EDM", "Techno", "Rock", "Metal", "Else"];
 const DEFAULT_COUNTRIES = [
@@ -59,12 +71,28 @@ export function FilterBar({
     onFiltersChange({ ...filters, countries: newCountries });
   };
 
-  const clearFilters = () => {
-    onFiltersChange({ genres: [], countries: [], search: "" });
+  const toggleSize = (size: FestivalSize) => {
+    const newSizes = filters.sizes.includes(size)
+      ? filters.sizes.filter((s) => s !== size)
+      : [...filters.sizes, size];
+    onFiltersChange({ ...filters, sizes: newSizes });
   };
 
+  const handleDateRangeChange = (value: number[]) => {
+    onFiltersChange({ ...filters, dateRange: [value[0], value[1]] });
+  };
+
+  const clearFilters = () => {
+    onFiltersChange({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "" });
+  };
+
+  const isDateRangeFiltered = filters.dateRange[0] !== 1 || filters.dateRange[1] !== 12;
   const activeFilterCount =
-    filters.genres.length + filters.countries.length + (filters.search ? 1 : 0);
+    filters.genres.length +
+    filters.countries.length +
+    filters.sizes.length +
+    (isDateRangeFiltered ? 1 : 0) +
+    (filters.search ? 1 : 0);
 
   return (
     <motion.div
@@ -179,6 +207,47 @@ export function FilterBar({
                   <span className="text-sm text-foreground">{country.name}</span>
                 </label>
               ))}
+            </div>
+          </div>
+
+          {/* Size Filters */}
+          <div className="space-y-2">
+            <span className="text-sm font-medium text-muted-foreground">Size</span>
+            <div className="flex flex-wrap gap-3">
+              {SIZES.map((size) => (
+                <label
+                  key={size.value}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Checkbox
+                    checked={filters.sizes.includes(size.value)}
+                    onCheckedChange={() => toggleSize(size.value)}
+                  />
+                  <span className="text-sm text-foreground">{size.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Date Range Filter */}
+          <div className="space-y-3 min-w-[200px] flex-1 max-w-[300px]">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-muted-foreground">Date Range</span>
+              <span className="text-sm text-foreground">
+                {MONTHS[filters.dateRange[0] - 1]} – {MONTHS[filters.dateRange[1] - 1]}
+              </span>
+            </div>
+            <Slider
+              value={filters.dateRange}
+              onValueChange={handleDateRangeChange}
+              min={1}
+              max={12}
+              step={1}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-muted-foreground">
+              <span>Jan</span>
+              <span>Dec</span>
             </div>
           </div>
         </div>

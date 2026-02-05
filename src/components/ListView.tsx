@@ -19,7 +19,7 @@ type ViewMode = "grid" | "table";
 type SortOption = "date" | "name" | "country";
 
 export function ListView({ festivals }: ListViewProps) {
-  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], search: "" });
+  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "" });
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("date");
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
@@ -45,13 +45,19 @@ export function ListView({ festivals }: ListViewProps) {
       const matchesCountry =
         filters.countries.length === 0 ||
         filters.countries.includes(festival.country_code);
+      const matchesSize =
+        filters.sizes.length === 0 ||
+        filters.sizes.includes(festival.size === "massive" ? "large" : festival.size);
+      const festivalMonth = new Date(festival.start_date).getMonth() + 1;
+      const matchesDateRange =
+        festivalMonth >= filters.dateRange[0] && festivalMonth <= filters.dateRange[1];
       const matchesSearch =
         !filters.search ||
         festival.lineup?.some((artist) =>
           artist.toLowerCase().includes(filters.search.toLowerCase())
         ) ||
         festival.name.toLowerCase().includes(filters.search.toLowerCase());
-      return matchesGenre && matchesCountry && matchesSearch;
+      return matchesGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch;
     });
   }, [festivals, filters]);
 

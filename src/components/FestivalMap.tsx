@@ -3,6 +3,14 @@ import { Button } from "@/components/ui/button";
 import { formatDateRange, getCountryFlag, getGenreColorHex, getSizeLabel } from "@/lib/utils";
 import type { Festival, Genre } from "@/types/festival";
 import { Flame, MapPin } from "lucide-react";
+import {
+  getMapConfig,
+  generateMarkerHTML,
+  getMarkerIconOptions,
+  generateControlCSS,
+  tileLayers,
+  type MapConfig,
+} from "@/lib/map-config";
 
 interface FestivalMapProps {
   festivals: Festival[];
@@ -14,8 +22,10 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
   const [showHeatMap, setShowHeatMap] = useState(false);
   const [MapComponents, setMapComponents] = useState<any>(null);
   const [L, setL] = useState<any>(null);
+  const [mapConfig, setMapConfig] = useState<MapConfig | null>(null);
   const mapRef = useRef<any>(null);
   const heatLayerRef = useRef<any>(null);
+  const styleRef = useRef<HTMLStyleElement | null>(null);
 
   // Filter out festivals with null coordinates
   const validFestivals = useMemo(
@@ -25,6 +35,9 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
 
   useEffect(() => {
     setIsClient(true);
+
+    // Load saved map configuration
+    setMapConfig(getMapConfig());
 
     // Dynamically import Leaflet and react-leaflet on client side only
     Promise.all([
@@ -52,6 +65,25 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
       });
     });
   }, []);
+
+  // Inject control CSS based on saved config
+  useEffect(() => {
+    if (!mapConfig) return;
+
+    if (!styleRef.current) {
+      styleRef.current = document.createElement("style");
+      styleRef.current.id = "festival-map-control-styles";
+      document.head.appendChild(styleRef.current);
+    }
+    styleRef.current.textContent = generateControlCSS(mapConfig.controlOptions);
+
+    return () => {
+      if (styleRef.current) {
+        styleRef.current.remove();
+        styleRef.current = null;
+      }
+    };
+  }, [mapConfig]);
 
   // Handle heat map toggle
   useEffect(() => {
@@ -95,7 +127,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
     }
   }, [showHeatMap, L, validFestivals]);
 
-  if (!isClient || !MapComponents || !L) {
+  if (!isClient || !MapComponents || !L || !mapConfig) {
     return (
       <div className="h-full w-full flex items-center justify-center bg-card rounded-2xl">
         <div className="text-center">
@@ -110,35 +142,15 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
 
   const createCustomIcon = (genre: Genre) => {
     const color = getGenreColorHex(genre);
+    const iconOptions = getMarkerIconOptions(mapConfig.markerOptions);
     return L.divIcon({
       className: "custom-marker",
-      html: `
-        <div style="
-          width: 32px;
-          height: 32px;
-          background: ${color};
-          border: 3px solid white;
-          border-radius: 50% 50% 50% 0;
-          transform: rotate(-45deg);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        ">
-          <div style="
-            width: 10px;
-            height: 10px;
-            background: white;
-            border-radius: 50%;
-            transform: rotate(45deg);
-          "></div>
-        </div>
-      `,
-      iconSize: [32, 32],
-      iconAnchor: [16, 32],
-      popupAnchor: [0, -32],
+      html: generateMarkerHTML(color, mapConfig.markerOptions),
+      ...iconOptions,
     });
   };
+
+  const tileLayer = tileLayers[mapConfig.tileLayer];
 
   const center: [number, number] = [50.5, 10.5];
 
@@ -153,8 +165,8 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
         ref={mapRef}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution={tileLayer.attribution}
+          url={tileLayer.url}
         />
 
         {!showHeatMap &&

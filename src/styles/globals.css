@@ -87,6 +87,59 @@
   color: #FAFAFA !important;
 }
 
+/* Marker cluster styling */
+.custom-cluster-marker {
+  background: transparent !important;
+}
+
+.cluster-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.85);
+  border: 3px solid rgba(59, 130, 246, 0.4);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.cluster-small {
+  width: 36px;
+  height: 36px;
+  font-size: 12px;
+}
+
+.cluster-medium {
+  width: 42px;
+  height: 42px;
+  font-size: 13px;
+  background: rgba(168, 85, 247, 0.85);
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.cluster-large {
+  width: 48px;
+  height: 48px;
+  font-size: 14px;
+  background: rgba(239, 68, 68, 0.85);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Override default markercluster styles */
+.marker-cluster-small,
+.marker-cluster-medium,
+.marker-cluster-large {
+  background: transparent !important;
+}
+
+.marker-cluster-small div,
+.marker-cluster-medium div,
+.marker-cluster-large div {
+  background: transparent !important;
+}
+
 /* Control styles are now injected dynamically via map-config.ts */
 
 /* Map tiles dark filter */

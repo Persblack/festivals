@@ -1,11 +1,36 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { MapPin, Calendar, Ticket } from "lucide-react";
+import { MapPin, Calendar, Ticket, Clock } from "lucide-react";
 import { GenreBadge } from "./GenreBadge";
 import { SelectFestivalButton } from "./SelectFestivalButton";
 import { formatDateRange, getCountryFlag, formatPriceRange, getGenreCoverImage } from "@/lib/utils";
 import type { Festival } from "@/types/festival";
+
+function getCountdown(startDate: string, endDate: string) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(endDate);
+  end.setHours(0, 0, 0, 0);
+
+  if (now > end) {
+    return { label: "Already over", color: "text-muted-foreground" };
+  }
+  if (now >= start) {
+    const daysLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return {
+      label: daysLeft === 0 ? "Ends today" : `Ends in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
+      color: "text-green-400",
+    };
+  }
+  const daysUntil = Math.ceil((start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return {
+    label: daysUntil === 1 ? "Starts tomorrow" : `In ${daysUntil} days`,
+    color: daysUntil <= 7 ? "text-yellow-400" : "text-muted-foreground",
+  };
+}
 
 interface FestivalCardProps {
   festival: Festival;
@@ -81,6 +106,16 @@ export function FestivalCard({ festival, onClick, index = 0 }: FestivalCardProps
             <Ticket className="w-4 h-4 text-accent" />
             <span>{formatPriceRange(festival.ticket_price_min, festival.ticket_price_max, festival.currency)}</span>
           </div>
+
+          {(() => {
+            const countdown = getCountdown(festival.start_date, festival.end_date);
+            return (
+              <div className={`flex items-center gap-2 ${countdown.color}`}>
+                <Clock className="w-4 h-4" />
+                <span>{countdown.label}</span>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </motion.div>

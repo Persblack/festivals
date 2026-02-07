@@ -4,6 +4,7 @@ import festivalsData from "../data/festivals.json";
 import { formatDateRange, getCountryFlag, getGenreColorHex, getGenreCoverImage } from "../lib/utils";
 import { FeaturedFestivals } from "../components/FeaturedFestivals";
 import { ThisWeekFestivals } from "../components/ThisWeekFestivals";
+import { RandomFestivalButton } from "../components/RandomFestivalButton";
 
 const festivals = festivalsData.festivals;
 const featuredFestivals = festivals.filter((f) => f.featured);
@@ -92,6 +93,9 @@ const thisWeekFestivals = festivals.filter((f) => {
           >
             Browse All
           </a>
+        </div>
+        <div class="mt-6 flex justify-center">
+          <RandomFestivalButton client:load festivals={festivals} />
         </div>
       </div>
     </section>

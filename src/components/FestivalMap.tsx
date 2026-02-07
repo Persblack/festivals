@@ -24,9 +24,11 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
   const [MapComponents, setMapComponents] = useState<any>(null);
   const [L, setL] = useState<any>(null);
   const [mapConfig, setMapConfig] = useState<MapConfig | null>(null);
+  const [mapReady, setMapReady] = useState(false);
   const mapRef = useRef<any>(null);
   const heatLayerRef = useRef<any>(null);
   const clusterGroupRef = useRef<any>(null);
+  const soloMarkersRef = useRef<any[]>([]);
   const styleRef = useRef<HTMLStyleElement | null>(null);
   const { isSelected, toggleSelection } = useSelectedFestivals();
 
@@ -43,14 +45,12 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
     setMapConfig(getMapConfig());
 
     // Dynamically import Leaflet, react-leaflet, and clustering on client side only
+    // leaflet.markercluster requires global L, so import leaflet first, assign to window, then import plugin
     Promise.all([
       import("leaflet"),
       import("react-leaflet"),
       import("leaflet/dist/leaflet.css"),
-      import("leaflet.markercluster"),
-      import("leaflet.markercluster/dist/MarkerCluster.css"),
-      import("leaflet.markercluster/dist/MarkerCluster.Default.css"),
-    ]).then(([leaflet, reactLeaflet]) => {
+    ]).then(async ([leaflet, reactLeaflet]) => {
       // Fix for default marker icons
       delete (leaflet.default.Icon.Default.prototype as any)._getIconUrl;
       leaflet.default.Icon.Default.mergeOptions({
@@ -61,6 +61,14 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
         shadowUrl:
           "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png",
       });
+
+      // Expose L globally for plugins that expect it
+      (window as any).L = leaflet.default;
+
+      // Now safe to import markercluster plugin
+      await import("leaflet.markercluster");
+      await import("leaflet.markercluster/dist/MarkerCluster.css");
+      await import("leaflet.markercluster/dist/MarkerCluster.Default.css");
 
       setL(leaflet.default);
       setMapComponents({
@@ -102,6 +110,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
     }
 
     if (showHeatMap) {
+      (window as any).L = L;
       import("leaflet.heat").then(() => {
         const points = validFestivals.map(
           (f) =>
@@ -165,16 +174,46 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
 
   // Manage clustered markers imperatively
   useEffect(() => {
-    if (!mapRef.current || !L || !mapConfig) return;
+    if (!mapReady || !mapRef.current || !L || !mapConfig) return;
     const map = mapRef.current;
 
-    // Remove old cluster group
+    // Remove old cluster group and solo markers
     if (clusterGroupRef.current) {
       map.removeLayer(clusterGroupRef.current);
       clusterGroupRef.current = null;
     }
+    soloMarkersRef.current.forEach((m) => map.removeLayer(m));
+    soloMarkersRef.current = [];
 
     if (showHeatMap) return;
+
+    // Pre-compute neighbor counts to implement minimum cluster size of 5
+    // Markers with fewer than 4 neighbors within ~0.2 degrees (~20km) go directly on the map
+    const MIN_NEIGHBORS = 4;
+    const NEIGHBOR_RADIUS = 0.2;
+    const denseIds = new Set<string>();
+
+    validFestivals.forEach((f1) => {
+      let count = 0;
+      for (const f2 of validFestivals) {
+        if (f1.id === f2.id) continue;
+        const d = Math.hypot(f1.latitude - f2.latitude, f1.longitude - f2.longitude);
+        if (d < NEIGHBOR_RADIUS) {
+          count++;
+          if (count >= MIN_NEIGHBORS) { denseIds.add(f1.id); break; }
+        }
+      }
+    });
+
+    // Also include all neighbors of dense markers so clusters are complete
+    validFestivals.forEach((f1) => {
+      if (!denseIds.has(f1.id)) return;
+      for (const f2 of validFestivals) {
+        if (f1.id === f2.id) continue;
+        const d = Math.hypot(f1.latitude - f2.latitude, f1.longitude - f2.longitude);
+        if (d < NEIGHBOR_RADIUS) denseIds.add(f2.id);
+      }
+    });
 
     const clusterGroup = L.markerClusterGroup({
       maxClusterRadius: 40,
@@ -183,15 +222,18 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
       zoomToBoundsOnClick: true,
       iconCreateFunction: (cluster: any) => {
         const count = cluster.getChildCount();
-        let size = "small";
-        let dim = 36;
-        if (count >= 50) { size = "large"; dim = 48; }
-        else if (count >= 10) { size = "medium"; dim = 42; }
+        const baseSize = mapConfig.markerOptions.size;
+        const scale = count >= 50 ? 2.2 : count >= 10 ? 1.8 : 1.5;
+        const dim = Math.round(baseSize * scale);
+        const clusterOpts = { ...mapConfig.markerOptions, size: dim, innerDot: false };
+        const markerHTML = generateMarkerHTML("#3B82F6", clusterOpts);
+        const iconOpts = getMarkerIconOptions(clusterOpts);
 
         return L.divIcon({
-          html: `<div class="cluster-icon cluster-${size}"><span>${count}</span></div>`,
+          html: `<div style="position:relative">${markerHTML}<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:${dim * 0.4}px;${mapConfig.markerOptions.shape === 'pin' ? 'transform:rotate(45deg)' : mapConfig.markerOptions.shape === 'diamond' ? 'transform:rotate(-45deg)' : ''}">${count}</span></div>`,
           className: "custom-cluster-marker",
-          iconSize: L.point(dim, dim),
+          iconSize: L.point(iconOpts.iconSize[0], iconOpts.iconSize[1]),
+          iconAnchor: L.point(iconOpts.iconAnchor[0], iconOpts.iconAnchor[1]),
         });
       },
     });
@@ -208,7 +250,13 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
 
       const marker = L.marker([festival.latitude, festival.longitude], { icon });
       marker.bindPopup(() => buildPopupHTML(festival), { maxWidth: 300 });
-      clusterGroup.addLayer(marker);
+
+      if (denseIds.has(festival.id)) {
+        clusterGroup.addLayer(marker);
+      } else {
+        marker.addTo(map);
+        soloMarkersRef.current.push(marker);
+      }
     });
 
     map.addLayer(clusterGroup);
@@ -227,12 +275,10 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
       } else if (selectBtn) {
         const id = selectBtn.dataset.toggleSelect!;
         toggleSelection(id);
-        // Re-render popup to update button state
         const festival = festivalMap.get(id);
         if (festival) {
           const popup = map._popup;
           if (popup) {
-            // Small delay to let state update
             setTimeout(() => popup.setContent(buildPopupHTML(festival)), 0);
           }
         }
@@ -247,8 +293,10 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
         map.removeLayer(clusterGroupRef.current);
         clusterGroupRef.current = null;
       }
+      soloMarkersRef.current.forEach((m) => map.removeLayer(m));
+      soloMarkersRef.current = [];
     };
-  }, [L, mapConfig, validFestivals, showHeatMap, buildPopupHTML, onFestivalClick, toggleSelection]);
+  }, [mapReady, L, mapConfig, validFestivals, showHeatMap, buildPopupHTML, onFestivalClick, toggleSelection]);
 
   if (!isClient || !MapComponents || !L || !mapConfig) {
     return (
@@ -275,7 +323,10 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
         scrollWheelZoom={true}
         className="h-full w-full rounded-2xl"
         style={{ minHeight: "500px" }}
-        ref={mapRef}
+        ref={(instance: any) => {
+          mapRef.current = instance;
+          if (instance && !mapReady) setMapReady(true);
+        }}
       >
         <TileLayer
           attribution={tileLayer.attribution}

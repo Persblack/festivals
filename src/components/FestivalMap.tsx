@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { formatDateRange, getCountryFlag, getGenreColorHex, getSizeLabel } from "@/lib/utils";
+import { SelectFestivalButton } from "./SelectFestivalButton";
 import type { Festival, Genre } from "@/types/festival";
 import { Flame, MapPin } from "lucide-react";
 import {
@@ -180,8 +181,11 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
               icon={createCustomIcon(festival.genres[0])}
             >
               <Popup>
-                <div className="p-2 min-w-[200px]">
-                  <h3 className="font-bold text-lg text-grey-200 mb-2">
+                <div className="p-2 min-w-[200px] relative">
+                  <div className="absolute top-0 right-0">
+                    <SelectFestivalButton festivalId={festival.id} variant="icon" />
+                  </div>
+                  <h3 className="font-bold text-lg text-grey-200 mb-2 pr-10">
                     {festival.name}
                   </h3>
                   <div className="space-y-1.5 text-sm text-gray-300">

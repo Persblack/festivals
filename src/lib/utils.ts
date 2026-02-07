@@ -100,11 +100,11 @@ export function formatPriceRange(
 export function getGenreCoverImage(genres: string[]): string {
   const genre = genres[0]?.toLowerCase() || 'else';
   const genreMap: Record<string, string> = {
-    'edm': '/cover_edm.jpg',
-    'techno': '/cover_techno.jpg',
-    'rock': '/cover_rock.jpg',
-    'metal': '/cover_metal.jpg',
-    'else': '/cover_else.jpg',
+    'edm': '/cover_edm.webp',
+    'techno': '/cover_techno.webp',
+    'rock': '/cover_rock.webp',
+    'metal': '/cover_metal.webp',
+    'else': '/cover_else.webp',
   };
-  return genreMap[genre] || '/cover_else.jpg';
+  return genreMap[genre] || '/cover_else.webp';
 }

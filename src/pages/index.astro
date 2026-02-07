@@ -3,11 +3,29 @@ import Layout from "../layouts/Layout.astro";
 import festivalsData from "../data/festivals.json";
 import { formatDateRange, getCountryFlag, getGenreColorHex, getGenreCoverImage } from "../lib/utils";
 import { FeaturedFestivals } from "../components/FeaturedFestivals";
+import { ThisWeekFestivals } from "../components/ThisWeekFestivals";
 
 const festivals = festivalsData.festivals;
 const featuredFestivals = festivals.filter((f) => f.featured);
 const allGenres = [...new Set(festivals.flatMap((f) => f.genres))];
 const allCountries = [...new Set(festivals.map((f) => f.country_name))];
+
+// Festivals this week (Mon-Sun containing today)
+const today = new Date();
+const day = today.getDay();
+const mondayOffset = day === 0 ? -6 : 1 - day;
+const weekStart = new Date(today);
+weekStart.setHours(0, 0, 0, 0);
+weekStart.setDate(today.getDate() + mondayOffset);
+const weekEnd = new Date(weekStart);
+weekEnd.setDate(weekStart.getDate() + 6);
+weekEnd.setHours(23, 59, 59, 999);
+
+const thisWeekFestivals = festivals.filter((f) => {
+  const start = new Date(f.start_date);
+  const end = new Date(f.end_date);
+  return start <= weekEnd && end >= weekStart;
+});
 ---
 
 <Layout title="Festival Atlas - Your Central European Festival Compass">
@@ -115,6 +133,20 @@ const allCountries = [...new Set(festivals.map((f) => f.country_name))];
 
       <FeaturedFestivals client:load festivals={featuredFestivals} />
     </section>
+
+    <!-- This Week -->
+    {thisWeekFestivals.length > 0 && (
+      <section>
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <h2 class="text-3xl font-bold text-foreground mb-2">Festivals This Week</h2>
+            <p class="text-muted-foreground">Happening right now or in the coming days</p>
+          </div>
+        </div>
+
+        <ThisWeekFestivals client:load festivals={thisWeekFestivals} />
+      </section>
+    )}
 
     <!-- Genre Overview -->
     <section>

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Search, X, Filter, ChevronDown } from "lucide-react";
+import { Search, X, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -14,8 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { GenreBadge } from "./GenreBadge";
-import type { Genre, FestivalSize, Filters } from "@/types/festival";
+import type { FestivalSize, Filters } from "@/types/festival";
 
 const SIZES: { value: FestivalSize; label: string }[] = [
   { value: "small", label: "Small" },
@@ -28,7 +27,6 @@ const MONTHS = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
 
-const GENRES: Genre[] = ["EDM", "Techno", "Rock", "Metal", "Else"];
 const DEFAULT_COUNTRIES = [
   { code: "DE", name: "Germany" },
   { code: "AT", name: "Austria" },
@@ -57,13 +55,6 @@ export function FilterBar({
   const COUNTRIES = countries;
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const toggleGenre = (genre: Genre) => {
-    const newGenres = filters.genres.includes(genre)
-      ? filters.genres.filter((g) => g !== genre)
-      : [...filters.genres, genre];
-    onFiltersChange({ ...filters, genres: newGenres });
-  };
-
   const toggleCountry = (country: string) => {
     const newCountries = filters.countries.includes(country)
       ? filters.countries.filter((c) => c !== country)
@@ -88,7 +79,6 @@ export function FilterBar({
 
   const isDateRangeFiltered = filters.dateRange[0] !== 1 || filters.dateRange[1] !== 12;
   const activeFilterCount =
-    filters.genres.length +
     filters.countries.length +
     filters.sizes.length +
     (isDateRangeFiltered ? 1 : 0) +
@@ -171,26 +161,6 @@ export function FilterBar({
         className={`md:!h-auto md:!opacity-100 overflow-hidden`}
       >
         <div className="flex flex-wrap gap-6 pt-3 border-t border-border md:pt-4">
-          {/* Genre Filters */}
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-muted-foreground">Genres</span>
-            <div className="flex flex-wrap gap-2">
-              {GENRES.map((genre) => (
-                <button
-                  key={genre}
-                  onClick={() => toggleGenre(genre)}
-                  className={`transition-all duration-200 ${
-                    filters.genres.includes(genre)
-                      ? "ring-2 ring-primary ring-offset-2 ring-offset-card scale-105"
-                      : "opacity-70 hover:opacity-100"
-                  }`}
-                >
-                  <GenreBadge genre={genre} />
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Country Filters */}
           <div className="space-y-2">
             <span className="text-sm font-medium text-muted-foreground">Countries</span>

@@ -79,6 +79,8 @@
 
 .leaflet-popup-close-button {
   color: #9CA3AF !important;
+  right: auto !important;
+  left: 0 !important;
 }
 
 .leaflet-popup-close-button:hover {

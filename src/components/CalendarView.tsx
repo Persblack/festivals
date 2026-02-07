@@ -4,6 +4,7 @@ import { FestivalCard } from "./FestivalCard";
 import { FestivalDetail } from "./FestivalDetail";
 import { FilterBar } from "./FilterBar";
 import { getMonthName } from "@/lib/utils";
+import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
 import { Calendar } from "lucide-react";
 
@@ -14,13 +15,14 @@ interface CalendarViewProps {
 export function CalendarView({ festivals }: CalendarViewProps) {
   const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "" });
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
+  const { genres: globalGenres } = useGlobalGenreFilter();
 
   // Filter festivals
   const filteredFestivals = useMemo(() => {
     return festivals.filter((festival) => {
-      const matchesGenre =
-        filters.genres.length === 0 ||
-        festival.genres.some((g) => filters.genres.includes(g));
+      const matchesGlobalGenre =
+        globalGenres.length === 0 ||
+        festival.genres.some((g) => globalGenres.includes(g));
       const matchesCountry =
         filters.countries.length === 0 ||
         filters.countries.includes(festival.country_code);
@@ -36,9 +38,9 @@ export function CalendarView({ festivals }: CalendarViewProps) {
           artist.toLowerCase().includes(filters.search.toLowerCase())
         ) ||
         festival.name.toLowerCase().includes(filters.search.toLowerCase());
-      return matchesGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch;
+      return matchesGlobalGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch;
     });
-  }, [festivals, filters]);
+  }, [festivals, filters, globalGenres]);
 
   // Group festivals by month
   const festivalsByMonth = useMemo(() => {

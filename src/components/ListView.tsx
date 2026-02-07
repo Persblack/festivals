@@ -8,6 +8,7 @@ import { FilterBar } from "./FilterBar";
 import { GenreBadge } from "./GenreBadge";
 import { Button } from "@/components/ui/button";
 import { formatDateRange, getCountryFlag, formatPriceRange } from "@/lib/utils";
+import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
 import { Grid3X3, Table, ArrowUp, ExternalLink } from "lucide-react";
 
@@ -24,6 +25,7 @@ export function ListView({ festivals }: ListViewProps) {
   const [sortBy, setSortBy] = useState<SortOption>("date");
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const { genres: globalGenres } = useGlobalGenreFilter();
 
   // Handle scroll
   if (typeof window !== "undefined") {
@@ -39,9 +41,9 @@ export function ListView({ festivals }: ListViewProps) {
   // Filter festivals
   const filteredFestivals = useMemo(() => {
     return festivals.filter((festival) => {
-      const matchesGenre =
-        filters.genres.length === 0 ||
-        festival.genres.some((g) => filters.genres.includes(g));
+      const matchesGlobalGenre =
+        globalGenres.length === 0 ||
+        festival.genres.some((g) => globalGenres.includes(g));
       const matchesCountry =
         filters.countries.length === 0 ||
         filters.countries.includes(festival.country_code);
@@ -57,9 +59,9 @@ export function ListView({ festivals }: ListViewProps) {
           artist.toLowerCase().includes(filters.search.toLowerCase())
         ) ||
         festival.name.toLowerCase().includes(filters.search.toLowerCase());
-      return matchesGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch;
+      return matchesGlobalGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch;
     });
-  }, [festivals, filters]);
+  }, [festivals, filters, globalGenres]);
 
   // Sort festivals
   const sortedFestivals = useMemo(() => {

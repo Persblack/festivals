@@ -19,6 +19,8 @@ import {
   Instagram,
   Users,
   Music,
+  Navigation,
+  Share2,
 } from "lucide-react";
 
 interface FestivalDetailProps {
@@ -108,6 +110,32 @@ export function FestivalDetail({ festival, open, onClose }: FestivalDetailProps)
                 </a>
               </Button>
             )}
+            <Button variant="outline" asChild>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${festival.latitude},${festival.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Navigation className="w-4 h-4 mr-2" />
+                Google Maps
+              </a>
+            </Button>
+            <Button
+              variant="outline"
+              className="md:hidden"
+              onClick={() => {
+                if (navigator.share) {
+                  navigator.share({
+                    title: festival.name,
+                    text: `${festival.name} — ${formatDateRange(festival.start_date, festival.end_date)} in ${festival.city}, ${festival.country_name}`,
+                    url: festival.website,
+                  });
+                }
+              }}
+            >
+              <Share2 className="w-4 h-4 mr-2" />
+              Share
+            </Button>
             <SelectFestivalButton festivalId={festival.id} variant="full" />
           </div>
 

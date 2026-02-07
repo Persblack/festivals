@@ -21,7 +21,33 @@ import {
   Music,
   Navigation,
   Share2,
+  Clock,
 } from "lucide-react";
+
+function getCountdown(startDate: string, endDate: string) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const start = new Date(startDate);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(endDate);
+  end.setHours(0, 0, 0, 0);
+
+  if (now > end) {
+    return { label: "Already over", color: "text-muted-foreground" };
+  }
+  if (now >= start) {
+    const daysLeft = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    return {
+      label: daysLeft === 0 ? "Ends today" : `Ends in ${daysLeft} day${daysLeft !== 1 ? "s" : ""}`,
+      color: "text-green-400",
+    };
+  }
+  const daysUntil = Math.ceil((start.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+  return {
+    label: daysUntil === 1 ? "Starts tomorrow" : `In ${daysUntil} days`,
+    color: daysUntil <= 7 ? "text-yellow-400" : "text-muted-foreground",
+  };
+}
 
 interface FestivalDetailProps {
   festival: Festival | null;
@@ -78,6 +104,16 @@ export function FestivalDetail({ festival, open, onClose }: FestivalDetailProps)
               <Users className="w-4 h-4" />
               {getSizeLabel(festival.size)}
             </span>
+            <span className="text-muted-foreground">•</span>
+            {(() => {
+              const countdown = getCountdown(festival.start_date, festival.end_date);
+              return (
+                <span className={`text-sm flex items-center gap-1 ${countdown.color}`}>
+                  <Clock className="w-4 h-4" />
+                  {countdown.label}
+                </span>
+              );
+            })()}
           </div>
 
           {/* Action Buttons */}

@@ -13,8 +13,38 @@ const allCountries = [...new Set(festivals.map((f) => f.country_name))];
 <Layout title="Festival Atlas - Your Central European Festival Compass">
   <div class="space-y-20">
     <!-- Hero Section -->
-    <section class="text-center py-16 md:py-24 relative">
-      <div class="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent rounded-3xl"></div>
+    <section class="text-center py-16 md:py-24 relative overflow-hidden rounded-3xl">
+      <!-- Hero background image -->
+      <img
+        id="hero-bg"
+        src="/hero-10.webp"
+        alt=""
+        class="absolute inset-0 w-full h-full object-cover"
+      />
+      <div class="absolute inset-0 bg-black/60"></div>
+
+      <!-- DEV: hero image switcher (remove later) -->
+      <!--
+      <div class="absolute top-3 right-3 z-10 flex items-center gap-2 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5 text-xs text-white/70 border border-white/10">
+        <label for="hero-num">Hero</label>
+        <input
+          id="hero-num"
+          type="number"
+          min="1"
+          max="10"
+          value="10"
+          class="w-12 bg-white/10 border border-white/20 rounded px-1.5 py-0.5 text-white text-center text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+        />
+      </div>
+      <script>
+        document.getElementById('hero-num')?.addEventListener('input', (e) => {
+          const val = (e.target as HTMLInputElement).value;
+          const num = Math.min(10, Math.max(1, parseInt(val) || 1));
+          (document.getElementById('hero-bg') as HTMLImageElement).src = `/hero-${num}.webp`;
+        });
+      </script>
+      -->
+
       <div class="relative">
         <h1 class="text-5xl md:text-7xl font-extrabold text-foreground mb-6 tracking-tight">
           Festival Atlas

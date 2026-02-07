@@ -36,6 +36,13 @@ export type Genre = 'EDM' | 'Techno' | 'Rock' | 'Metal' | 'Else';
 
 export type FestivalSize = 'small' | 'medium' | 'large' | 'massive';
 
+export interface Artist {
+  name: string;
+  festivalCount: number;
+  festivals: Festival[];
+  genres: Genre[];
+}
+
 export interface Filters {
   genres: Genre[];
   countries: string[];

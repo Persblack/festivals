@@ -108,3 +108,15 @@ export function getGenreCoverImage(genres: string[]): string {
   };
   return genreMap[genre] || '/cover_else.webp';
 }
+
+export function getArtistCoverImage(genres: string[]): string {
+  const genre = genres[0]?.toLowerCase() || 'else';
+  const genreMap: Record<string, string> = {
+    'edm': '/artist_edm.webp',
+    'techno': '/artist_techno.webp',
+    'rock': '/artist_rock.webp',
+    'metal': '/artist_metal.webp',
+    'else': '/artist_else.webp',
+  };
+  return genreMap[genre] || '/artist_else.webp';
+}

@@ -1,7 +1,7 @@
-import { useEffect, useState, useRef, useMemo } from "react";
+import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { formatDateRange, getCountryFlag, getGenreColorHex, getSizeLabel } from "@/lib/utils";
-import { SelectFestivalButton } from "./SelectFestivalButton";
+import { useSelectedFestivals } from "@/hooks/useSelectedFestivals";
 import type { Festival, Genre } from "@/types/festival";
 import { Flame, MapPin } from "lucide-react";
 import {
@@ -26,7 +26,9 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
   const [mapConfig, setMapConfig] = useState<MapConfig | null>(null);
   const mapRef = useRef<any>(null);
   const heatLayerRef = useRef<any>(null);
+  const clusterGroupRef = useRef<any>(null);
   const styleRef = useRef<HTMLStyleElement | null>(null);
+  const { isSelected, toggleSelection } = useSelectedFestivals();
 
   // Filter out festivals with null coordinates
   const validFestivals = useMemo(
@@ -40,11 +42,14 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
     // Load saved map configuration
     setMapConfig(getMapConfig());
 
-    // Dynamically import Leaflet and react-leaflet on client side only
+    // Dynamically import Leaflet, react-leaflet, and clustering on client side only
     Promise.all([
       import("leaflet"),
       import("react-leaflet"),
       import("leaflet/dist/leaflet.css"),
+      import("leaflet.markercluster"),
+      import("leaflet.markercluster/dist/MarkerCluster.css"),
+      import("leaflet.markercluster/dist/MarkerCluster.Default.css"),
     ]).then(([leaflet, reactLeaflet]) => {
       // Fix for default marker icons
       delete (leaflet.default.Icon.Default.prototype as any)._getIconUrl;
@@ -61,8 +66,6 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
       setMapComponents({
         MapContainer: reactLeaflet.MapContainer,
         TileLayer: reactLeaflet.TileLayer,
-        Marker: reactLeaflet.Marker,
-        Popup: reactLeaflet.Popup,
       });
     });
   }, []);
@@ -128,6 +131,125 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
     }
   }, [showHeatMap, L, validFestivals]);
 
+  // Build popup HTML for a festival
+  const buildPopupHTML = useCallback((festival: Festival) => {
+    const selected = isSelected(festival.id);
+    const genres = festival.genres
+      .map(
+        (g) =>
+          `<span style="background-color:${getGenreColorHex(g)}" class="px-2 py-0.5 text-xs rounded-full text-white inline-block">${g}</span>`
+      )
+      .join(" ");
+
+    return `
+      <div class="p-2 min-w-[200px] relative">
+        <button data-toggle-select="${festival.id}" class="absolute top-0 right-0 w-9 h-9 rounded-full flex items-center justify-center transition-colors ${selected ? "bg-primary text-white" : "bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"}" title="${selected ? "Remove from planner" : "Add to planner"}">
+          ${selected
+            ? '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
+            : '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>'
+          }
+        </button>
+        <h3 class="font-bold text-lg text-grey-200 mb-2 pr-10">${festival.name}</h3>
+        <div class="space-y-1.5 text-sm text-gray-300">
+          <p>${getCountryFlag(festival.country_code)} ${festival.city}, ${festival.country_name}</p>
+          <p>${formatDateRange(festival.start_date, festival.end_date)}</p>
+          <p>${getSizeLabel(festival.size)}</p>
+          <div class="flex flex-wrap gap-1 mt-2">${genres}</div>
+        </div>
+        <button data-view-details="${festival.id}" class="mt-3 w-full px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">
+          View Details
+        </button>
+      </div>
+    `;
+  }, [isSelected]);
+
+  // Manage clustered markers imperatively
+  useEffect(() => {
+    if (!mapRef.current || !L || !mapConfig) return;
+    const map = mapRef.current;
+
+    // Remove old cluster group
+    if (clusterGroupRef.current) {
+      map.removeLayer(clusterGroupRef.current);
+      clusterGroupRef.current = null;
+    }
+
+    if (showHeatMap) return;
+
+    const clusterGroup = L.markerClusterGroup({
+      maxClusterRadius: 40,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: false,
+      zoomToBoundsOnClick: true,
+      iconCreateFunction: (cluster: any) => {
+        const count = cluster.getChildCount();
+        let size = "small";
+        let dim = 36;
+        if (count >= 50) { size = "large"; dim = 48; }
+        else if (count >= 10) { size = "medium"; dim = 42; }
+
+        return L.divIcon({
+          html: `<div class="cluster-icon cluster-${size}"><span>${count}</span></div>`,
+          className: "custom-cluster-marker",
+          iconSize: L.point(dim, dim),
+        });
+      },
+    });
+
+    const festivalMap = new Map<string, Festival>();
+    validFestivals.forEach((festival) => {
+      festivalMap.set(festival.id, festival);
+
+      const icon = L.divIcon({
+        className: "custom-marker",
+        html: generateMarkerHTML(getGenreColorHex(festival.genres[0]), mapConfig.markerOptions),
+        ...getMarkerIconOptions(mapConfig.markerOptions),
+      });
+
+      const marker = L.marker([festival.latitude, festival.longitude], { icon });
+      marker.bindPopup(() => buildPopupHTML(festival), { maxWidth: 300 });
+      clusterGroup.addLayer(marker);
+    });
+
+    map.addLayer(clusterGroup);
+    clusterGroupRef.current = clusterGroup;
+
+    // Handle popup button clicks via event delegation
+    const handlePopupClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const viewBtn = target.closest("[data-view-details]") as HTMLElement | null;
+      const selectBtn = target.closest("[data-toggle-select]") as HTMLElement | null;
+
+      if (viewBtn) {
+        const id = viewBtn.dataset.viewDetails!;
+        const festival = festivalMap.get(id);
+        if (festival) onFestivalClick(festival);
+      } else if (selectBtn) {
+        const id = selectBtn.dataset.toggleSelect!;
+        toggleSelection(id);
+        // Re-render popup to update button state
+        const festival = festivalMap.get(id);
+        if (festival) {
+          const popup = map._popup;
+          if (popup) {
+            // Small delay to let state update
+            setTimeout(() => popup.setContent(buildPopupHTML(festival)), 0);
+          }
+        }
+      }
+    };
+
+    map.getContainer().addEventListener("click", handlePopupClick);
+
+    return () => {
+      map.getContainer().removeEventListener("click", handlePopupClick);
+      if (clusterGroupRef.current) {
+        map.removeLayer(clusterGroupRef.current);
+        clusterGroupRef.current = null;
+      }
+    };
+  }, [L, mapConfig, validFestivals, showHeatMap, buildPopupHTML, onFestivalClick, toggleSelection]);
+
   if (!isClient || !MapComponents || !L || !mapConfig) {
     return (
       <div className="h-full w-full flex items-center justify-center bg-card rounded-2xl">
@@ -139,17 +261,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
     );
   }
 
-  const { MapContainer, TileLayer, Marker, Popup } = MapComponents;
-
-  const createCustomIcon = (genre: Genre) => {
-    const color = getGenreColorHex(genre);
-    const iconOptions = getMarkerIconOptions(mapConfig.markerOptions);
-    return L.divIcon({
-      className: "custom-marker",
-      html: generateMarkerHTML(color, mapConfig.markerOptions),
-      ...iconOptions,
-    });
-  };
+  const { MapContainer, TileLayer } = MapComponents;
 
   const tileLayer = tileLayers[mapConfig.tileLayer];
 
@@ -170,55 +282,6 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
           url={tileLayer.url}
         />
 
-        {!showHeatMap &&
-          validFestivals.map((festival) => (
-            <Marker
-              key={festival.id}
-              position={[
-                festival.latitude,
-                festival.longitude,
-              ]}
-              icon={createCustomIcon(festival.genres[0])}
-            >
-              <Popup>
-                <div className="p-2 min-w-[200px] relative">
-                  <div className="absolute top-0 right-0">
-                    <SelectFestivalButton festivalId={festival.id} variant="icon" />
-                  </div>
-                  <h3 className="font-bold text-lg text-grey-200 mb-2 pr-10">
-                    {festival.name}
-                  </h3>
-                  <div className="space-y-1.5 text-sm text-gray-300">
-                    <p>
-                      {getCountryFlag(festival.country_code)}{" "}
-                      {festival.city}, {festival.country_name}
-                    </p>
-                    <p>
-                      {formatDateRange(festival.start_date, festival.end_date)}
-                    </p>
-                    <p>{getSizeLabel(festival.size)}</p>
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {festival.genres.map((genre) => (
-                        <span
-                          key={genre}
-                          className="px-2 py-0.5 text-xs rounded-full text-white"
-                          style={{ backgroundColor: getGenreColorHex(genre) }}
-                        >
-                          {genre}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => onFestivalClick(festival)}
-                    className="mt-3 w-full px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
-                  >
-                    View Details
-                  </button>
-                </div>
-              </Popup>
-            </Marker>
-          ))}
       </MapContainer>
 
       {/* Map Controls */}

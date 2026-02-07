@@ -8,6 +8,8 @@ import { PlannerTimeline } from "./PlannerTimeline";
 import { FestivalDetail } from "./FestivalDetail";
 import { FestivalSearch } from "./FestivalSearch";
 import { FestivalMap } from "./FestivalMap";
+import { RecommendedFestivals } from "./RecommendedFestivals";
+import { getRecommendedForPlanner } from "@/lib/recommendations";
 import { useSelectedFestivals } from "@/hooks/useSelectedFestivals";
 import type { Festival } from "@/types/festival";
 
@@ -49,6 +51,11 @@ export function PlannerPage({ festivals }: PlannerPageProps) {
       totalDays,
     };
   }, [selectedFestivals]);
+
+  const recommendations = useMemo(() => {
+    if (selectedFestivals.length === 0) return [];
+    return getRecommendedForPlanner(selectedFestivals, festivals);
+  }, [selectedFestivals, festivals]);
 
   if (count === 0) {
     return (
@@ -146,11 +153,20 @@ export function PlannerPage({ festivals }: PlannerPageProps) {
         </div>
       </div>
 
+      {/* Recommended Festivals */}
+      <RecommendedFestivals
+        festivals={recommendations}
+        onFestivalClick={handleFestivalClick}
+        title="Recommended For You"
+      />
+
       {/* Festival Detail Modal */}
       <FestivalDetail
         festival={selectedFestival}
         open={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
+        allFestivals={festivals}
+        onFestivalClick={handleFestivalClick}
       />
     </div>
   );

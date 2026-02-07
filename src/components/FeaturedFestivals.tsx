@@ -71,6 +71,8 @@ export function FeaturedFestivals({ festivals }: FeaturedFestivalsProps) {
         festival={selectedFestival}
         open={selectedFestival !== null}
         onClose={() => setSelectedFestival(null)}
+        allFestivals={festivals}
+        onFestivalClick={(f) => setSelectedFestival(f)}
       />
     </>
   );

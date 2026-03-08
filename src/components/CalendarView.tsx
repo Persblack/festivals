@@ -163,6 +163,8 @@ export function CalendarView({ festivals }: CalendarViewProps) {
         festival={selectedFestival}
         open={!!selectedFestival}
         onClose={() => setSelectedFestival(null)}
+        allFestivals={festivals}
+        onFestivalClick={(f) => setSelectedFestival(f)}
       />
     </div>
   );

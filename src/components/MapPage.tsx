@@ -66,6 +66,8 @@ export function MapPage({ festivals }: MapPageProps) {
         festival={selectedFestival}
         open={!!selectedFestival}
         onClose={() => setSelectedFestival(null)}
+        allFestivals={festivals}
+        onFestivalClick={(f) => setSelectedFestival(f)}
       />
     </div>
   );

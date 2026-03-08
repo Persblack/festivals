@@ -255,6 +255,8 @@ export function ListView({ festivals }: ListViewProps) {
         festival={selectedFestival}
         open={!!selectedFestival}
         onClose={() => setSelectedFestival(null)}
+        allFestivals={festivals}
+        onFestivalClick={(f) => setSelectedFestival(f)}
       />
     </div>
   );

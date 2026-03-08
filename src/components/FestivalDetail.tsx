@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
   Dialog,
@@ -9,6 +10,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { GenreBadge } from "./GenreBadge";
 import { SelectFestivalButton } from "./SelectFestivalButton";
+import { RecommendedFestivals } from "./RecommendedFestivals";
+import { getRecommendedFestivals } from "@/lib/recommendations";
 import { formatDateRange, getCountryFlag, getSizeLabel, formatPriceRange, getGenreCoverImage } from "@/lib/utils";
 import type { Festival } from "@/types/festival";
 import {
@@ -53,9 +56,16 @@ interface FestivalDetailProps {
   festival: Festival | null;
   open: boolean;
   onClose: () => void;
+  allFestivals?: Festival[];
+  onFestivalClick?: (festival: Festival) => void;
 }
 
-export function FestivalDetail({ festival, open, onClose }: FestivalDetailProps) {
+export function FestivalDetail({ festival, open, onClose, allFestivals, onFestivalClick }: FestivalDetailProps) {
+  const recommendations = useMemo(() => {
+    if (!festival || !allFestivals) return [];
+    return getRecommendedFestivals(festival, allFestivals);
+  }, [festival, allFestivals]);
+
   if (!festival) return null;
 
   return (
@@ -216,6 +226,14 @@ export function FestivalDetail({ festival, open, onClose }: FestivalDetailProps)
                 ))}
               </div>
             </motion.div>
+          )}
+
+          {/* Recommendations */}
+          {onFestivalClick && recommendations.length > 0 && (
+            <RecommendedFestivals
+              festivals={recommendations}
+              onFestivalClick={onFestivalClick}
+            />
           )}
         </div>
       </DialogContent>

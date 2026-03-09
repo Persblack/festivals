@@ -29,3 +29,6 @@ npm-debug.log*
 
 # Source images
 ignorimages/
+
+# data files
+src/data/festivals_depreciated.json 

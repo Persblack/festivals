@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import { SUB_GENRES } from "@/lib/genre-utils";
 import type { FestivalSize, Filters } from "@/types/festival";
 
 const SIZES: { value: FestivalSize; label: string }[] = [
@@ -69,18 +70,26 @@ export function FilterBar({
     onFiltersChange({ ...filters, sizes: newSizes });
   };
 
+  const toggleSubGenre = (subGenre: string) => {
+    const newSubGenres = filters.subGenres.includes(subGenre)
+      ? filters.subGenres.filter((g) => g !== subGenre)
+      : [...filters.subGenres, subGenre];
+    onFiltersChange({ ...filters, subGenres: newSubGenres });
+  };
+
   const handleDateRangeChange = (value: number[]) => {
     onFiltersChange({ ...filters, dateRange: [value[0], value[1]] });
   };
 
   const clearFilters = () => {
-    onFiltersChange({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
+    onFiltersChange({ genres: [], subGenres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
   };
 
   const isDateRangeFiltered = filters.dateRange[0] !== 1 || filters.dateRange[1] !== 12;
   const activeFilterCount =
     filters.countries.length +
     filters.sizes.length +
+    filters.subGenres.length +
     (isDateRangeFiltered ? 1 : 0) +
     (filters.search ? 1 : 0) +
     (filters.showPast ? 1 : 0);
@@ -195,6 +204,25 @@ export function FilterBar({
                     onCheckedChange={() => toggleSize(size.value)}
                   />
                   <span className="text-sm text-foreground">{size.label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Sub-Genre Filters */}
+          <div className="space-y-2">
+            <span className="text-sm font-medium text-muted-foreground">Sub-Genres</span>
+            <div className="flex flex-wrap gap-3">
+              {SUB_GENRES.map((subGenre) => (
+                <label
+                  key={subGenre.value}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <Checkbox
+                    checked={filters.subGenres.includes(subGenre.value)}
+                    onCheckedChange={() => toggleSubGenre(subGenre.value)}
+                  />
+                  <span className="text-sm text-foreground">{subGenre.label}</span>
                 </label>
               ))}
             </div>

@@ -6,6 +6,7 @@ import { FestivalCard } from "./FestivalCard";
 import { FestivalDetail } from "./FestivalDetail";
 import { Button } from "@/components/ui/button";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
+import { genreMatchesCategories } from "@/lib/genre-utils";
 import { ChevronDown } from "lucide-react";
 import type { Festival } from "@/types/festival";
 
@@ -27,8 +28,7 @@ export function FeaturedFestivals({ festivals }: FeaturedFestivalsProps) {
     return festivals.filter((f) => {
       const isPast = now > new Date(f.end_date);
       if (isPast) return false;
-      if (globalGenres.length === 0) return true;
-      return f.genres.some((g) => globalGenres.includes(g));
+      return genreMatchesCategories(f.genres, globalGenres);
     });
   }, [festivals, globalGenres]);
 

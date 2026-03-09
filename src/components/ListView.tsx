@@ -8,6 +8,7 @@ import { FilterBar } from "./FilterBar";
 import { GenreBadge } from "./GenreBadge";
 import { Button } from "@/components/ui/button";
 import { formatDateRange, getCountryFlag, formatPriceRange, getUniqueCountries } from "@/lib/utils";
+import { genreMatchesCategories } from "@/lib/genre-utils";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
 import { Grid3X3, Table, ArrowUp, ExternalLink } from "lucide-react";
@@ -20,7 +21,7 @@ type ViewMode = "grid" | "table";
 type SortOption = "date" | "name" | "country";
 
 export function ListView({ festivals }: ListViewProps) {
-  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
+  const [filters, setFilters] = useState<Filters>({ genres: [], subGenres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("date");
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
@@ -44,9 +45,10 @@ export function ListView({ festivals }: ListViewProps) {
   // Filter festivals
   const filteredFestivals = useMemo(() => {
     return festivals.filter((festival) => {
-      const matchesGlobalGenre =
-        globalGenres.length === 0 ||
-        festival.genres.some((g) => globalGenres.includes(g));
+      const matchesGlobalGenre = genreMatchesCategories(festival.genres, globalGenres);
+      const matchesSubGenre =
+        filters.subGenres.length === 0 ||
+        festival.genres.some((g) => filters.subGenres.includes(g));
       const matchesCountry =
         filters.countries.length === 0 ||
         filters.countries.includes(festival.country_code);
@@ -64,7 +66,7 @@ export function ListView({ festivals }: ListViewProps) {
         festival.name.toLowerCase().includes(filters.search.toLowerCase());
       const isPast = new Date() > new Date(festival.end_date);
       const matchesPast = filters.showPast || !isPast;
-      return matchesGlobalGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch && matchesPast;
+      return matchesGlobalGenre && matchesSubGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch && matchesPast;
     });
   }, [festivals, filters, globalGenres]);
 

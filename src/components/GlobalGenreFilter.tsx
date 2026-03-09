@@ -3,9 +3,9 @@
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import { GenreBadge } from "./GenreBadge";
 import { X } from "lucide-react";
-import type { Genre } from "@/types/festival";
+import type { GenreCategory } from "@/types/festival";
 
-const GENRES: Genre[] = ["EDM", "Techno", "Rock", "Metal", "Else"];
+const GENRES: GenreCategory[] = ["EDM", "Hip-Hop", "Rock", "Metal", "Else"];
 
 export function GlobalGenreFilter() {
   const { genres, toggleGenre, clearGenres, hasActiveFilter } = useGlobalGenreFilter();

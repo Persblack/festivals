@@ -11,7 +11,7 @@ export interface Festival {
   venue: string;
   latitude: number;
   longitude: number;
-  genres: Genre[];
+  genres: string[];
   size: FestivalSize;
   featured: boolean;
   website: string;
@@ -34,17 +34,20 @@ export interface FestivalsData {
 
 export type Genre = 'EDM' | 'Techno' | 'Rock' | 'Metal' | 'Else';
 
+export type GenreCategory = 'EDM' | 'Hip-Hop' | 'Rock' | 'Metal' | 'Else';
+
 export type FestivalSize = 'small' | 'medium' | 'large' | 'massive';
 
 export interface Artist {
   name: string;
   festivalCount: number;
   festivals: Festival[];
-  genres: Genre[];
+  genres: string[];
 }
 
 export interface Filters {
-  genres: Genre[];
+  genres: GenreCategory[];
+  subGenres: string[];
   countries: string[];
   sizes: FestivalSize[];
   dateRange: [number, number]; // [startMonth, endMonth] 1-12

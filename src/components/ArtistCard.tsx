@@ -4,12 +4,11 @@ import { motion } from "framer-motion";
 import { Music, ChevronDown } from "lucide-react";
 import { GenreBadge } from "./GenreBadge";
 import { getArtistCoverImage } from "@/lib/utils";
-import type { Genre } from "@/types/festival";
 
 interface ArtistCardProps {
   name: string;
   festivalCount: number;
-  genres: Genre[];
+  genres: string[];
   isExpanded: boolean;
   onToggle: () => void;
   index: number;

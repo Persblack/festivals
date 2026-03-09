@@ -15,7 +15,8 @@ import { ArtistCard } from "./ArtistCard";
 import { FestivalCard } from "./FestivalCard";
 import { FestivalDetail } from "./FestivalDetail";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
-import type { Festival, Artist, Genre } from "@/types/festival";
+import { genreMatchesCategories } from "@/lib/genre-utils";
+import type { Festival, Artist } from "@/types/festival";
 
 interface ArtistsPageProps {
   festivals: Festival[];
@@ -39,11 +40,9 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
 
   // Derive artists from festival lineups, applying global genre filter
   const artists = useMemo(() => {
-    const filtered = globalGenres.length > 0
-      ? festivals.filter((f) => f.genres.some((g) => globalGenres.includes(g)))
-      : festivals;
+    const filtered = festivals.filter((f) => genreMatchesCategories(f.genres, globalGenres));
 
-    const artistMap = new Map<string, { festivals: Festival[]; genres: Set<Genre> }>();
+    const artistMap = new Map<string, { festivals: Festival[]; genres: Set<string> }>();
 
     for (const festival of filtered) {
       if (!festival.lineup) continue;
@@ -67,7 +66,7 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
         name,
         festivalCount: data.festivals.length,
         festivals: data.festivals,
-        genres: Array.from(data.genres) as Genre[],
+        genres: Array.from(data.genres),
       });
     }
 

@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { getUniqueCountries } from "@/lib/utils";
+import { genreMatchesCategories } from "@/lib/genre-utils";
 import { motion } from "framer-motion";
 import { FilterBar } from "./FilterBar";
 import { FestivalDetail } from "./FestivalDetail";
@@ -12,7 +13,7 @@ interface MapPageProps {
 }
 
 export function MapPage({ festivals }: MapPageProps) {
-  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
+  const [filters, setFilters] = useState<Filters>({ genres: [], subGenres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
   const { genres: globalGenres } = useGlobalGenreFilter();
 
@@ -22,9 +23,10 @@ export function MapPage({ festivals }: MapPageProps) {
   // Filter festivals
   const filteredFestivals = useMemo(() => {
     return festivals.filter((festival) => {
-      const matchesGlobalGenre =
-        globalGenres.length === 0 ||
-        festival.genres.some((g) => globalGenres.includes(g));
+      const matchesGlobalGenre = genreMatchesCategories(festival.genres, globalGenres);
+      const matchesSubGenre =
+        filters.subGenres.length === 0 ||
+        festival.genres.some((g) => filters.subGenres.includes(g));
       const matchesCountry =
         filters.countries.length === 0 ||
         filters.countries.includes(festival.country_code);
@@ -42,7 +44,7 @@ export function MapPage({ festivals }: MapPageProps) {
         festival.name.toLowerCase().includes(filters.search.toLowerCase());
       const isPast = new Date() > new Date(festival.end_date);
       const matchesPast = filters.showPast || !isPast;
-      return matchesGlobalGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch && matchesPast;
+      return matchesGlobalGenre && matchesSubGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch && matchesPast;
     });
   }, [festivals, filters, globalGenres]);
 

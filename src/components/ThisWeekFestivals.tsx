@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import { FestivalCard } from "./FestivalCard";
 import { FestivalDetail } from "./FestivalDetail";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
+import { genreMatchesCategories } from "@/lib/genre-utils";
 import type { Festival } from "@/types/festival";
 
 interface ThisWeekFestivalsProps {
@@ -15,10 +16,7 @@ export function ThisWeekFestivals({ festivals }: ThisWeekFestivalsProps) {
   const { genres: globalGenres } = useGlobalGenreFilter();
 
   const filteredFestivals = useMemo(() => {
-    if (globalGenres.length === 0) return festivals;
-    return festivals.filter((f) =>
-      f.genres.some((g) => globalGenres.includes(g))
-    );
+    return festivals.filter((f) => genreMatchesCategories(f.genres, globalGenres));
   }, [festivals, globalGenres]);
 
   if (filteredFestivals.length === 0) return null;

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import type { Genre } from "@/types/festival";
+import type { GenreCategory } from "@/types/festival";
 
 const STORAGE_KEY = "festival-atlas-global-genres";
 const EVENT_NAME = "global-genre-filter-change";
 
-function readStorage(): Genre[] {
+function readStorage(): GenreCategory[] {
   try {
     const stored = sessionStorage.getItem(STORAGE_KEY);
     return stored ? JSON.parse(stored) : [];
@@ -16,7 +16,7 @@ function readStorage(): Genre[] {
 }
 
 export function useGlobalGenreFilter() {
-  const [genres, setGenres] = useState<Genre[]>(() => {
+  const [genres, setGenres] = useState<GenreCategory[]>(() => {
     if (typeof window === "undefined") return [];
     return readStorage();
   });
@@ -35,13 +35,13 @@ export function useGlobalGenreFilter() {
     return () => window.removeEventListener(EVENT_NAME, handleChange);
   }, []);
 
-  const updateStorage = useCallback((newGenres: Genre[]) => {
+  const updateStorage = useCallback((newGenres: GenreCategory[]) => {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(newGenres));
     window.dispatchEvent(new CustomEvent(EVENT_NAME));
   }, []);
 
   const toggleGenre = useCallback(
-    (genre: Genre) => {
+    (genre: GenreCategory) => {
       const newGenres = genres.includes(genre)
         ? genres.filter((g) => g !== genre)
         : [...genres, genre];

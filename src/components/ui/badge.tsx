@@ -16,6 +16,7 @@ const badgeVariants = cva(
         rock: "bg-genre-rock text-white shadow-genre-rock/30",
         metal: "bg-genre-metal text-white shadow-genre-metal/30",
         else: "bg-genre-else text-white shadow-genre-else/30",
+        "hip-hop": "bg-orange-500 text-white shadow-orange-500/30",
       },
     },
     defaultVariants: {

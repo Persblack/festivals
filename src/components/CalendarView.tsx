@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { FestivalCard } from "./FestivalCard";
 import { FestivalDetail } from "./FestivalDetail";
 import { FilterBar } from "./FilterBar";
-import { getMonthName } from "@/lib/utils";
+import { getMonthName, getUniqueCountries } from "@/lib/utils";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
 import { Calendar } from "lucide-react";
@@ -13,9 +13,12 @@ interface CalendarViewProps {
 }
 
 export function CalendarView({ festivals }: CalendarViewProps) {
-  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "" });
+  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], sizes: [], dateRange: [new Date().getMonth() + 1, 12], search: "", showPast: false });
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
   const { genres: globalGenres } = useGlobalGenreFilter();
+
+  // Get unique countries from festival data
+  const countries = useMemo(() => getUniqueCountries(festivals), [festivals]);
 
   // Filter festivals
   const filteredFestivals = useMemo(() => {
@@ -38,7 +41,9 @@ export function CalendarView({ festivals }: CalendarViewProps) {
           artist.toLowerCase().includes(filters.search.toLowerCase())
         ) ||
         festival.name.toLowerCase().includes(filters.search.toLowerCase());
-      return matchesGlobalGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch;
+      const isPast = new Date() > new Date(festival.end_date);
+      const matchesPast = filters.showPast || !isPast;
+      return matchesGlobalGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch && matchesPast;
     });
   }, [festivals, filters, globalGenres]);
 
@@ -79,6 +84,7 @@ export function CalendarView({ festivals }: CalendarViewProps) {
         filters={filters}
         onFiltersChange={setFilters}
         resultCount={filteredFestivals.length}
+        countries={countries}
       />
 
       {/* Quick Jump Navigation */}
@@ -163,6 +169,8 @@ export function CalendarView({ festivals }: CalendarViewProps) {
         festival={selectedFestival}
         open={!!selectedFestival}
         onClose={() => setSelectedFestival(null)}
+        allFestivals={festivals}
+        onFestivalClick={(f) => setSelectedFestival(f)}
       />
     </div>
   );

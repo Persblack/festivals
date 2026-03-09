@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { getUniqueCountries } from "@/lib/utils";
 import { motion } from "framer-motion";
 import { FilterBar } from "./FilterBar";
 import { FestivalDetail } from "./FestivalDetail";
@@ -11,9 +12,12 @@ interface MapPageProps {
 }
 
 export function MapPage({ festivals }: MapPageProps) {
-  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "" });
+  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
   const { genres: globalGenres } = useGlobalGenreFilter();
+
+  // Get unique countries from festival data
+  const countries = useMemo(() => getUniqueCountries(festivals), [festivals]);
 
   // Filter festivals
   const filteredFestivals = useMemo(() => {
@@ -36,7 +40,9 @@ export function MapPage({ festivals }: MapPageProps) {
           artist.toLowerCase().includes(filters.search.toLowerCase())
         ) ||
         festival.name.toLowerCase().includes(filters.search.toLowerCase());
-      return matchesGlobalGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch;
+      const isPast = new Date() > new Date(festival.end_date);
+      const matchesPast = filters.showPast || !isPast;
+      return matchesGlobalGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch && matchesPast;
     });
   }, [festivals, filters, globalGenres]);
 
@@ -47,6 +53,7 @@ export function MapPage({ festivals }: MapPageProps) {
         filters={filters}
         onFiltersChange={setFilters}
         resultCount={filteredFestivals.length}
+        countries={countries}
       />
 
       {/* Map Container */}
@@ -66,6 +73,8 @@ export function MapPage({ festivals }: MapPageProps) {
         festival={selectedFestival}
         open={!!selectedFestival}
         onClose={() => setSelectedFestival(null)}
+        allFestivals={festivals}
+        onFestivalClick={(f) => setSelectedFestival(f)}
       />
     </div>
   );

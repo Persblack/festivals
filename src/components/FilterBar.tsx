@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Search, X, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { SUB_GENRES } from "@/lib/genre-utils";
+import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { FestivalSize, Filters } from "@/types/festival";
 
 const SIZES: { value: FestivalSize; label: string }[] = [
@@ -55,6 +56,21 @@ export function FilterBar({
 }: FilterBarProps) {
   const COUNTRIES = countries;
   const [isExpanded, setIsExpanded] = useState(false);
+  const { genres: globalGenres } = useGlobalGenreFilter();
+
+  // Compute visible sub-genres based on active global genre categories
+  const visibleSubGenres = globalGenres.length === 0
+    ? []
+    : SUB_GENRES.filter(sg => globalGenres.includes(sg.category));
+
+  // Auto-clear selected sub-genres that are no longer visible when the global filter changes
+  useEffect(() => {
+    const validValues = new Set(visibleSubGenres.map(sg => sg.value));
+    const stale = filters.subGenres.filter(g => !validValues.has(g));
+    if (stale.length > 0) {
+      onFiltersChange({ ...filters, subGenres: filters.subGenres.filter(g => validValues.has(g)) });
+    }
+  }, [globalGenres]);
 
   const toggleCountry = (country: string) => {
     const newCountries = filters.countries.includes(country)
@@ -210,23 +226,25 @@ export function FilterBar({
           </div>
 
           {/* Sub-Genre Filters */}
-          <div className="space-y-2">
-            <span className="text-sm font-medium text-muted-foreground">Sub-Genres</span>
-            <div className="flex flex-wrap gap-3">
-              {SUB_GENRES.map((subGenre) => (
-                <label
-                  key={subGenre.value}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <Checkbox
-                    checked={filters.subGenres.includes(subGenre.value)}
-                    onCheckedChange={() => toggleSubGenre(subGenre.value)}
-                  />
-                  <span className="text-sm text-foreground">{subGenre.label}</span>
-                </label>
-              ))}
+          {visibleSubGenres.length > 0 && (
+            <div className="space-y-2">
+              <span className="text-sm font-medium text-muted-foreground">Sub-Genres</span>
+              <div className="flex flex-wrap gap-3">
+                {visibleSubGenres.map((subGenre) => (
+                  <label
+                    key={subGenre.value}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Checkbox
+                      checked={filters.subGenres.includes(subGenre.value)}
+                      onCheckedChange={() => toggleSubGenre(subGenre.value)}
+                    />
+                    <span className="text-sm text-foreground">{subGenre.label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Date Range Filter */}
           <div className="space-y-3 min-w-[200px] flex-1 max-w-[300px]">

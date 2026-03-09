@@ -74,7 +74,7 @@ export function FilterBar({
   };
 
   const clearFilters = () => {
-    onFiltersChange({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "" });
+    onFiltersChange({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
   };
 
   const isDateRangeFiltered = filters.dateRange[0] !== 1 || filters.dateRange[1] !== 12;
@@ -82,7 +82,8 @@ export function FilterBar({
     filters.countries.length +
     filters.sizes.length +
     (isDateRangeFiltered ? 1 : 0) +
-    (filters.search ? 1 : 0);
+    (filters.search ? 1 : 0) +
+    (filters.showPast ? 1 : 0);
 
   return (
     <motion.div
@@ -219,6 +220,20 @@ export function FilterBar({
               <span>Jan</span>
               <span>Dec</span>
             </div>
+          </div>
+
+          {/* Show Past Festivals Toggle */}
+          <div className="space-y-2">
+            <span className="text-sm font-medium text-muted-foreground">More</span>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <Checkbox
+                checked={filters.showPast}
+                onCheckedChange={(checked) =>
+                  onFiltersChange({ ...filters, showPast: checked === true })
+                }
+              />
+              <span className="text-sm text-foreground">Show past festivals</span>
+            </label>
           </div>
         </div>
       </motion.div>

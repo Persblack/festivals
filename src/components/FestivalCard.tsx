@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { MapPin, Calendar, Ticket, Clock } from "lucide-react";
 import { GenreBadge } from "./GenreBadge";
 import { SelectFestivalButton } from "./SelectFestivalButton";
-import { formatDateRange, getCountryFlag, formatPriceRange, getGenreCoverImage } from "@/lib/utils";
+import { cn, formatDateRange, getCountryFlag, formatPriceRange, getGenreCoverImage } from "@/lib/utils";
 import type { Festival } from "@/types/festival";
 
 function getCountdown(startDate: string, endDate: string) {
@@ -39,6 +39,8 @@ interface FestivalCardProps {
 }
 
 export function FestivalCard({ festival, onClick, index = 0 }: FestivalCardProps) {
+  const isPast = new Date() > new Date(festival.end_date);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -46,7 +48,10 @@ export function FestivalCard({ festival, onClick, index = 0 }: FestivalCardProps
       transition={{ duration: 0.4, delay: index * 0.1 }}
       whileHover={{ y: -8, scale: 1.02 }}
       onClick={onClick}
-      className="group relative cursor-pointer rounded-2xl bg-card overflow-hidden shadow-lg shadow-black/20 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 border border-border/50"
+      className={cn(
+        "group relative cursor-pointer rounded-2xl bg-card overflow-hidden shadow-lg shadow-black/20 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 border border-border/50",
+        isPast && "opacity-60 grayscale"
+      )}
     >
       {/* Image Container */}
       <div className="relative h-48 overflow-hidden">

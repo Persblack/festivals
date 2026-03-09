@@ -108,3 +108,15 @@ export function getGenreCoverImage(genres: string[]): string {
   };
   return genreMap[genre] || '/cover_else.webp';
 }
+
+export function getUniqueCountries(festivals: { country_code: string; country_name: string }[]) {
+  const countryMap = new Map<string, string>();
+  festivals.forEach(f => {
+    if (f.country_code && f.country_name) {
+      countryMap.set(f.country_code, f.country_name);
+    }
+  });
+  return Array.from(countryMap.entries())
+    .map(([code, name]) => ({ code, name }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+}

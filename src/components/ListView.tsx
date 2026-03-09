@@ -7,7 +7,7 @@ import { FestivalDetail } from "./FestivalDetail";
 import { FilterBar } from "./FilterBar";
 import { GenreBadge } from "./GenreBadge";
 import { Button } from "@/components/ui/button";
-import { formatDateRange, getCountryFlag, formatPriceRange } from "@/lib/utils";
+import { formatDateRange, getCountryFlag, formatPriceRange, getUniqueCountries } from "@/lib/utils";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
 import { Grid3X3, Table, ArrowUp, ExternalLink } from "lucide-react";
@@ -20,12 +20,15 @@ type ViewMode = "grid" | "table";
 type SortOption = "date" | "name" | "country";
 
 export function ListView({ festivals }: ListViewProps) {
-  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "" });
+  const [filters, setFilters] = useState<Filters>({ genres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("date");
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const { genres: globalGenres } = useGlobalGenreFilter();
+
+  // Get unique countries from festival data
+  const countries = useMemo(() => getUniqueCountries(festivals), [festivals]);
 
   // Handle scroll
   if (typeof window !== "undefined") {
@@ -59,7 +62,9 @@ export function ListView({ festivals }: ListViewProps) {
           artist.toLowerCase().includes(filters.search.toLowerCase())
         ) ||
         festival.name.toLowerCase().includes(filters.search.toLowerCase());
-      return matchesGlobalGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch;
+      const isPast = new Date() > new Date(festival.end_date);
+      const matchesPast = filters.showPast || !isPast;
+      return matchesGlobalGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch && matchesPast;
     });
   }, [festivals, filters, globalGenres]);
 
@@ -92,6 +97,7 @@ export function ListView({ festivals }: ListViewProps) {
             sortBy={sortBy}
             onSortChange={(s) => setSortBy(s as SortOption)}
             resultCount={sortedFestivals.length}
+            countries={countries}
           />
         </div>
 

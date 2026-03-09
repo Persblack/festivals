@@ -23,10 +23,13 @@ export function FeaturedFestivals({ festivals }: FeaturedFestivalsProps) {
   const { genres: globalGenres } = useGlobalGenreFilter();
 
   const filteredFestivals = useMemo(() => {
-    if (globalGenres.length === 0) return festivals;
-    return festivals.filter((f) =>
-      f.genres.some((g) => globalGenres.includes(g))
-    );
+    const now = new Date();
+    return festivals.filter((f) => {
+      const isPast = now > new Date(f.end_date);
+      if (isPast) return false;
+      if (globalGenres.length === 0) return true;
+      return f.genres.some((g) => globalGenres.includes(g));
+    });
   }, [festivals, globalGenres]);
 
   const hasMore = filteredFestivals.length > INITIAL_COUNT;

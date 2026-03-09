@@ -42,4 +42,5 @@ export interface Filters {
   sizes: FestivalSize[];
   dateRange: [number, number]; // [startMonth, endMonth] 1-12
   search: string;
+  showPast: boolean;
 }

@@ -20,12 +20,16 @@ interface ListViewProps {
 type ViewMode = "grid" | "table";
 type SortOption = "date" | "name" | "country";
 
+const GRID_PAGE_SIZE = 30;
+const TABLE_PAGE_SIZE = 50;
+
 export function ListView({ festivals }: ListViewProps) {
   const [filters, setFilters] = useState<Filters>({ genres: [], subGenres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("date");
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(GRID_PAGE_SIZE);
   const { genres: globalGenres } = useGlobalGenreFilter();
 
   // Get unique countries from festival data
@@ -70,6 +74,11 @@ export function ListView({ festivals }: ListViewProps) {
     });
   }, [festivals, filters, globalGenres]);
 
+  // Reset visible count when filters or view mode change
+  useEffect(() => {
+    setVisibleCount(viewMode === "grid" ? GRID_PAGE_SIZE : TABLE_PAGE_SIZE);
+  }, [filteredFestivals, viewMode]);
+
   // Sort festivals
   const sortedFestivals = useMemo(() => {
     const sorted = [...filteredFestivals];
@@ -86,6 +95,10 @@ export function ListView({ festivals }: ListViewProps) {
     }
     return sorted;
   }, [filteredFestivals, sortBy]);
+
+  const visibleFestivals = sortedFestivals.slice(0, visibleCount);
+  const hasMore = visibleCount < sortedFestivals.length;
+  const pageSize = viewMode === "grid" ? GRID_PAGE_SIZE : TABLE_PAGE_SIZE;
 
   return (
     <div className="space-y-6">
@@ -134,16 +147,29 @@ export function ListView({ festivals }: ListViewProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {sortedFestivals.map((festival, i) => (
-              <FestivalCard
-                key={festival.id}
-                festival={festival}
-                onClick={() => setSelectedFestival(festival)}
-                index={i}
-              />
-            ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visibleFestivals.map((festival, i) => (
+                <FestivalCard
+                  key={festival.id}
+                  festival={festival}
+                  onClick={() => setSelectedFestival(festival)}
+                  index={i}
+                />
+              ))}
+            </div>
+            {hasMore && (
+              <div className="flex justify-center mt-8">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="rounded-xl"
+                  onClick={() => setVisibleCount((c) => c + pageSize)}
+                >
+                  Show More ({sortedFestivals.length - visibleCount} remaining)
+                </Button>
+              </div>
+            )}
           </motion.div>
         ) : (
           <motion.div
@@ -151,79 +177,92 @@ export function ListView({ festivals }: ListViewProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="overflow-x-auto rounded-2xl border border-border"
           >
-            <table className="w-full">
-              <thead>
-                <tr className="bg-muted border-b border-border">
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                    Festival
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                    Date
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                    Location
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                    Genres
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                    Price
-                  </th>
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {sortedFestivals.map((festival, i) => (
-                  <motion.tr
-                    key={festival.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: Math.min(i * 0.02, 0.3) }}
-                    className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer"
-                    onClick={() => setSelectedFestival(festival)}
-                  >
-                    <td className="px-4 py-4">
-                      <div className="flex items-center gap-3">
-                        <span className="font-medium text-foreground">{festival.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-muted-foreground">
-                      {formatDateRange(festival.start_date, festival.end_date)}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-muted-foreground">
-                      {getCountryFlag(festival.country_code)} {festival.city},{" "}
-                      {festival.country_name}
-                    </td>
-                    <td className="px-4 py-4">
-                      <div className="flex flex-wrap gap-1">
-                        {festival.genres.map((genre) => (
-                          <GenreBadge key={genre} genre={genre} />
-                        ))}
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-muted-foreground">
-                      {formatPriceRange(festival.ticket_price_min, festival.ticket_price_max, festival.currency)}
-                    </td>
-                    <td className="px-4 py-4">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        asChild
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <a href={festival.website} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="w-4 h-4" />
-                        </a>
-                      </Button>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="overflow-x-auto rounded-2xl border border-border">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-muted border-b border-border">
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
+                      Festival
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
+                      Date
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
+                      Location
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
+                      Genres
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
+                      Price
+                    </th>
+                    <th className="px-4 py-3 text-left text-sm font-semibold text-foreground">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleFestivals.map((festival, i) => (
+                    <motion.tr
+                      key={festival.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: Math.min(i * 0.02, 0.3) }}
+                      className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer"
+                      onClick={() => setSelectedFestival(festival)}
+                    >
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-3">
+                          <span className="font-medium text-foreground">{festival.name}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-muted-foreground">
+                        {formatDateRange(festival.start_date, festival.end_date)}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-muted-foreground">
+                        {getCountryFlag(festival.country_code)} {festival.city},{" "}
+                        {festival.country_name}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex flex-wrap gap-1">
+                          {festival.genres.map((genre) => (
+                            <GenreBadge key={genre} genre={genre} />
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-muted-foreground">
+                        {formatPriceRange(festival.ticket_price_min, festival.ticket_price_max, festival.currency)}
+                      </td>
+                      <td className="px-4 py-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          asChild
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <a href={festival.website} target="_blank" rel="noopener noreferrer">
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        </Button>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {hasMore && (
+              <div className="flex justify-center mt-8">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="rounded-xl"
+                  onClick={() => setVisibleCount((c) => c + pageSize)}
+                >
+                  Show More ({sortedFestivals.length - visibleCount} remaining)
+                </Button>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -259,13 +298,15 @@ export function ListView({ festivals }: ListViewProps) {
       </AnimatePresence>
 
       {/* Festival Detail Modal */}
-      <FestivalDetail
-        festival={selectedFestival}
-        open={!!selectedFestival}
-        onClose={() => setSelectedFestival(null)}
-        allFestivals={festivals}
-        onFestivalClick={(f) => setSelectedFestival(f)}
-      />
+      {selectedFestival && (
+        <FestivalDetail
+          festival={selectedFestival}
+          open={!!selectedFestival}
+          onClose={() => setSelectedFestival(null)}
+          allFestivals={festivals}
+          onFestivalClick={(f) => setSelectedFestival(f)}
+        />
+      )}
     </div>
   );
 }

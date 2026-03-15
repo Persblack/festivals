@@ -1,13 +1,17 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { motion } from "framer-motion";
 import { FestivalCard } from "./FestivalCard";
 import { FestivalDetail } from "./FestivalDetail";
 import { FilterBar } from "./FilterBar";
+import { Button } from "@/components/ui/button";
 import { getMonthName, getUniqueCountries } from "@/lib/utils";
 import { genreMatchesCategories } from "@/lib/genre-utils";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
 import { Calendar } from "lucide-react";
+
+const MONTH_INITIAL_COUNT = 12;
+const MONTH_LOAD_MORE = 12;
 
 interface CalendarViewProps {
   festivals: Festival[];
@@ -16,7 +20,19 @@ interface CalendarViewProps {
 export function CalendarView({ festivals }: CalendarViewProps) {
   const [filters, setFilters] = useState<Filters>({ genres: [], subGenres: [], countries: [], sizes: [], dateRange: [new Date().getMonth() + 1, 12], search: "", showPast: false });
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
+  const [expandedMonths, setExpandedMonths] = useState<Record<number, number>>({});
   const { genres: globalGenres } = useGlobalGenreFilter();
+
+  const getMonthVisibleCount = useCallback((month: number) => {
+    return expandedMonths[month] ?? MONTH_INITIAL_COUNT;
+  }, [expandedMonths]);
+
+  const showMoreInMonth = useCallback((month: number) => {
+    setExpandedMonths((prev) => ({
+      ...prev,
+      [month]: (prev[month] ?? MONTH_INITIAL_COUNT) + MONTH_LOAD_MORE,
+    }));
+  }, []);
 
   // Get unique countries from festival data
   const countries = useMemo(() => getUniqueCountries(festivals), [festivals]);
@@ -107,46 +123,63 @@ export function CalendarView({ festivals }: CalendarViewProps) {
 
       {/* Timeline */}
       <div className="space-y-12">
-        {festivalsByMonth.map(([month, monthFestivals], index) => (
-          <motion.section
-            key={month}
-            id={`month-${month}`}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="scroll-mt-24"
-          >
-            {/* Month Header */}
-            <div className="flex items-center gap-4 mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-                  <Calendar className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-2xl font-bold text-foreground">
-                    {getMonthName(month)} 2026
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {monthFestivals.length} festival{monthFestivals.length !== 1 ? "s" : ""}
-                  </p>
-                </div>
-              </div>
-              <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
-            </div>
+        {festivalsByMonth.map(([month, monthFestivals], index) => {
+          const monthVisible = getMonthVisibleCount(month);
+          const visibleInMonth = monthFestivals.slice(0, monthVisible);
+          const hasMoreInMonth = monthVisible < monthFestivals.length;
 
-            {/* Festival Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {monthFestivals.map((festival, i) => (
-                <FestivalCard
-                  key={festival.id}
-                  festival={festival}
-                  onClick={() => setSelectedFestival(festival)}
-                  index={i}
-                />
-              ))}
-            </div>
-          </motion.section>
-        ))}
+          return (
+            <motion.section
+              key={month}
+              id={`month-${month}`}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.2) }}
+              className="scroll-mt-24"
+            >
+              {/* Month Header */}
+              <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                    <Calendar className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-foreground">
+                      {getMonthName(month)} 2026
+                    </h2>
+                    <p className="text-sm text-muted-foreground">
+                      {monthFestivals.length} festival{monthFestivals.length !== 1 ? "s" : ""}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
+              </div>
+
+              {/* Festival Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {visibleInMonth.map((festival, i) => (
+                  <FestivalCard
+                    key={festival.id}
+                    festival={festival}
+                    onClick={() => setSelectedFestival(festival)}
+                    index={i}
+                  />
+                ))}
+              </div>
+              {hasMoreInMonth && (
+                <div className="flex justify-center mt-6">
+                  <Button
+                    variant="outline"
+                    className="rounded-xl"
+                    onClick={() => showMoreInMonth(month)}
+                  >
+                    Show more in {getMonthName(month)} ({monthFestivals.length - monthVisible} remaining)
+                  </Button>
+                </div>
+              )}
+            </motion.section>
+          );
+        })}
       </div>
 
       {/* Empty state */}
@@ -167,13 +200,15 @@ export function CalendarView({ festivals }: CalendarViewProps) {
       )}
 
       {/* Festival Detail Modal */}
-      <FestivalDetail
-        festival={selectedFestival}
-        open={!!selectedFestival}
-        onClose={() => setSelectedFestival(null)}
-        allFestivals={festivals}
-        onFestivalClick={(f) => setSelectedFestival(f)}
-      />
+      {selectedFestival && (
+        <FestivalDetail
+          festival={selectedFestival}
+          open={!!selectedFestival}
+          onClose={() => setSelectedFestival(null)}
+          allFestivals={festivals}
+          onFestivalClick={(f) => setSelectedFestival(f)}
+        />
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { motion } from "framer-motion";
 import { Music, ChevronDown } from "lucide-react";
 import { GenreBadge } from "./GenreBadge";
@@ -14,7 +15,7 @@ interface ArtistCardProps {
   index: number;
 }
 
-export function ArtistCard({
+export const ArtistCard = memo(function ArtistCard({
   name,
   festivalCount,
   genres,
@@ -75,4 +76,4 @@ export function ArtistCard({
       </div>
     </motion.div>
   );
-}
+});

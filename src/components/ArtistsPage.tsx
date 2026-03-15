@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Trophy, ArrowUp, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -30,6 +30,7 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
   const [expandedArtist, setExpandedArtist] = useState<string | null>(null);
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(40);
   const { genres: globalGenres } = useGlobalGenreFilter();
 
   useEffect(() => {
@@ -98,9 +99,21 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
       .slice(0, 6);
   }, [artists]);
 
-  const handleToggle = (name: string) => {
+  // Reset pagination when filters change
+  useEffect(() => {
+    setVisibleCount(40);
+  }, [search, sortBy, globalGenres]);
+
+  const handleToggle = useCallback((name: string) => {
     setExpandedArtist((prev) => (prev === name ? null : name));
-  };
+  }, []);
+
+  const visibleArtists = useMemo(
+    () => sortedArtists.slice(0, visibleCount),
+    [sortedArtists, visibleCount]
+  );
+
+  const hasMore = visibleCount < sortedArtists.length;
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -183,64 +196,74 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
 
       {/* Artist Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <AnimatePresence mode="sync">
-          {sortedArtists.map((artist, i) => (
-            <motion.div
-              key={artist.name}
-              id={`artist-${artist.name}`}
-              className={expandedArtist === artist.name ? "col-span-full" : ""}
-            >
-              {expandedArtist === artist.name ? (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  className="rounded-2xl bg-card border border-border/50 p-6 space-y-6"
+        {visibleArtists.map((artist, i) => (
+          <div
+            key={artist.name}
+            id={`artist-${artist.name}`}
+            className={expandedArtist === artist.name ? "col-span-full" : ""}
+          >
+            {expandedArtist === artist.name ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="rounded-2xl bg-card border border-border/50 p-6 space-y-6"
+              >
+                {/* Expanded Header */}
+                <div
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => handleToggle(artist.name)}
                 >
-                  {/* Expanded Header */}
-                  <div
-                    className="flex items-center justify-between cursor-pointer"
-                    onClick={() => handleToggle(artist.name)}
-                  >
-                    <div>
-                      <h3 className="text-2xl font-bold text-foreground">
-                        {artist.name}
-                      </h3>
-                      <p className="text-muted-foreground text-sm mt-1">
-                        Performing at {artist.festivalCount} festival
-                        {artist.festivalCount !== 1 ? "s" : ""}
-                      </p>
-                    </div>
-                    <span className="text-sm text-primary hover:underline">
-                      Collapse
-                    </span>
+                  <div>
+                    <h3 className="text-2xl font-bold text-foreground">
+                      {artist.name}
+                    </h3>
+                    <p className="text-muted-foreground text-sm mt-1">
+                      Performing at {artist.festivalCount} festival
+                      {artist.festivalCount !== 1 ? "s" : ""}
+                    </p>
                   </div>
+                  <span className="text-sm text-primary hover:underline">
+                    Collapse
+                  </span>
+                </div>
 
-                  {/* Festival Cards */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {artist.festivals.map((festival, fi) => (
-                      <FestivalCard
-                        key={festival.id}
-                        festival={festival}
-                        onClick={() => setSelectedFestival(festival)}
-                        index={fi}
-                      />
-                    ))}
-                  </div>
-                </motion.div>
-              ) : (
-                <ArtistCard
-                  name={artist.name}
-                  festivalCount={artist.festivalCount}
-                  genres={artist.genres}
-                  isExpanded={false}
-                  onToggle={() => handleToggle(artist.name)}
-                  index={i}
-                />
-              )}
-            </motion.div>
-          ))}
-        </AnimatePresence>
+                {/* Festival Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {artist.festivals.map((festival, fi) => (
+                    <FestivalCard
+                      key={festival.id}
+                      festival={festival}
+                      onClick={() => setSelectedFestival(festival)}
+                      index={fi}
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            ) : (
+              <ArtistCard
+                name={artist.name}
+                festivalCount={artist.festivalCount}
+                genres={artist.genres}
+                isExpanded={false}
+                onToggle={() => handleToggle(artist.name)}
+                index={i}
+              />
+            )}
+          </div>
+        ))}
       </div>
+
+      {/* Show More */}
+      {hasMore && (
+        <div className="flex justify-center pt-4">
+          <button
+            onClick={() => setVisibleCount((c) => c + 40)}
+            className="px-8 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:scale-105 transition-transform shadow-lg shadow-primary/20"
+          >
+            Show More ({sortedArtists.length - visibleCount} remaining)
+          </button>
+        </div>
+      )}
 
       {/* Empty State */}
       {sortedArtists.length === 0 && (
@@ -277,11 +300,15 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
       </AnimatePresence>
 
       {/* Festival Detail Modal */}
-      <FestivalDetail
-        festival={selectedFestival}
-        open={!!selectedFestival}
-        onClose={() => setSelectedFestival(null)}
-      />
+      {selectedFestival && (
+        <FestivalDetail
+          festival={selectedFestival}
+          open={!!selectedFestival}
+          onClose={() => setSelectedFestival(null)}
+          allFestivals={festivals}
+          onFestivalClick={(f) => setSelectedFestival(f)}
+        />
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Trophy, ArrowUp, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -32,11 +32,11 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const { genres: globalGenres } = useGlobalGenreFilter();
 
-  if (typeof window !== "undefined") {
-    window.addEventListener("scroll", () => {
-      setShowScrollTop(window.scrollY > 400);
-    });
-  }
+  useEffect(() => {
+    const handler = () => setShowScrollTop(window.scrollY > 400);
+    window.addEventListener("scroll", handler);
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
 
   // Derive artists from festival lineups, applying global genre filter
   const artists = useMemo(() => {
@@ -183,12 +183,11 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
 
       {/* Artist Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="sync">
           {sortedArtists.map((artist, i) => (
             <motion.div
               key={artist.name}
               id={`artist-${artist.name}`}
-              layout
               className={expandedArtist === artist.name ? "col-span-full" : ""}
             >
               {expandedArtist === artist.name ? (

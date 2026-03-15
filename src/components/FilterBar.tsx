@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import { Search, X, Filter } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -34,6 +34,44 @@ const DEFAULT_COUNTRIES = [
   { code: "AT", name: "Austria" },
   { code: "CH", name: "Switzerland" },
 ];
+
+function SearchInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [localValue, setLocalValue] = useState(value);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  // Sync local state when parent clears the search (e.g. "Clear all")
+  useEffect(() => {
+    if (value === "" && localValue !== "") setLocalValue("");
+  }, [value]);
+
+  const handleChange = (v: string) => {
+    setLocalValue(v);
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => onChange(v), 250);
+  };
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
+
+  return (
+    <div className="relative flex-1 min-w-[200px]">
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <Input
+        placeholder="Search artists in lineup..."
+        value={localValue}
+        onChange={(e) => handleChange(e.target.value)}
+        className="pl-10"
+      />
+      {localValue && (
+        <button
+          onClick={() => handleChange("")}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+        >
+          <X className="w-4 h-4" />
+        </button>
+      )}
+    </div>
+  );
+}
 
 interface FilterBarProps {
   filters: Filters;
@@ -119,23 +157,10 @@ export function FilterBar({
       {/* Search and Controls Row */}
       <div className="flex flex-wrap gap-3 items-center">
         {/* Lineup Search */}
-        <div className="relative flex-1 min-w-[200px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search artists in lineup..."
-            value={filters.search}
-            onChange={(e) => onFiltersChange({ ...filters, search: e.target.value })}
-            className="pl-10"
-          />
-          {filters.search && (
-            <button
-              onClick={() => onFiltersChange({ ...filters, search: "" })}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+        <SearchInput
+          value={filters.search}
+          onChange={(value) => onFiltersChange({ ...filters, search: value })}
+        />
 
         {/* Filter Toggle (Mobile) */}
         <Button

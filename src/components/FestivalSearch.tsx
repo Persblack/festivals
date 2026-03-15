@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Search, Plus, Check, X, MapPin, Calendar } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -23,17 +23,16 @@ export function FestivalSearch({ festivals, className }: FestivalSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Filter festivals based on search query
-  const filteredFestivals = query.trim()
-    ? festivals.filter((f) => {
-        const searchTerm = query.toLowerCase();
-        return (
-          f.name.toLowerCase().includes(searchTerm) ||
-          f.city.toLowerCase().includes(searchTerm) ||
-          f.country_name.toLowerCase().includes(searchTerm) ||
-          f.genres.some((g) => g.toLowerCase().includes(searchTerm))
-        );
-      })
-    : [];
+  const filteredFestivals = useMemo(() => {
+    if (!query.trim()) return [];
+    const searchTerm = query.toLowerCase();
+    return festivals.filter((f) =>
+      f.name.toLowerCase().includes(searchTerm) ||
+      f.city.toLowerCase().includes(searchTerm) ||
+      f.country_name.toLowerCase().includes(searchTerm) ||
+      f.genres.some((g) => g.toLowerCase().includes(searchTerm))
+    );
+  }, [query, festivals]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

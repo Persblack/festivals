@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FestivalCard } from "./FestivalCard";
 import { FestivalDetail } from "./FestivalDetail";
@@ -32,11 +32,11 @@ export function ListView({ festivals }: ListViewProps) {
   const countries = useMemo(() => getUniqueCountries(festivals), [festivals]);
 
   // Handle scroll
-  if (typeof window !== "undefined") {
-    window.addEventListener("scroll", () => {
-      setShowScrollTop(window.scrollY > 400);
-    });
-  }
+  useEffect(() => {
+    const handler = () => setShowScrollTop(window.scrollY > 400);
+    window.addEventListener("scroll", handler);
+    return () => window.removeEventListener("scroll", handler);
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -182,7 +182,7 @@ export function ListView({ festivals }: ListViewProps) {
                     key={festival.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
+                    transition={{ delay: Math.min(i * 0.02, 0.3) }}
                     className="border-b border-border hover:bg-muted/50 transition-colors cursor-pointer"
                     onClick={() => setSelectedFestival(festival)}
                   >

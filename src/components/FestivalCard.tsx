@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { motion } from "framer-motion";
 import { MapPin, Calendar, Ticket, Clock } from "lucide-react";
 import { GenreBadge } from "./GenreBadge";
@@ -38,14 +39,14 @@ interface FestivalCardProps {
   index?: number;
 }
 
-export function FestivalCard({ festival, onClick, index = 0 }: FestivalCardProps) {
+export const FestivalCard = React.memo(function FestivalCard({ festival, onClick, index = 0 }: FestivalCardProps) {
   const isPast = new Date() > new Date(festival.end_date);
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.1 }}
+      transition={{ duration: 0.4, delay: Math.min(index * 0.03, 0.3) }}
       whileHover={{ y: -8, scale: 1.02 }}
       onClick={onClick}
       className={cn(
@@ -125,4 +126,4 @@ export function FestivalCard({ festival, onClick, index = 0 }: FestivalCardProps
       </div>
     </motion.div>
   );
-}
+});

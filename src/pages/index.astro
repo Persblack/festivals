@@ -5,11 +5,14 @@ import { formatDateRange, getCountryFlag, getGenreColorHex, getGenreCoverImage }
 import { FeaturedFestivals } from "../components/FeaturedFestivals";
 import { ThisWeekFestivals } from "../components/ThisWeekFestivals";
 import { RandomFestivalButton } from "../components/RandomFestivalButton";
+import { FestivalAnalytics } from "../components/FestivalAnalytics";
 
 const festivals = festivalsData.festivals;
 const featuredFestivals = festivals.filter((f) => f.featured);
 const allGenres = [...new Set(festivals.flatMap((f) => f.genres))];
 const allCountries = [...new Set(festivals.map((f) => f.country_name))];
+const uniqueArtistCount = new Set(festivals.flatMap((f) => f.lineup ?? [])).size;
+const uniqueArtists = `${Math.round(uniqueArtistCount / 1000)}k+`;
 
 // Festivals this week (Mon-Sun containing today)
 const today = new Date();
@@ -115,8 +118,8 @@ const thisWeekFestivals = festivals.filter((f) => {
         <div class="text-muted-foreground">Genres</div>
       </div>
       <div class="bg-card rounded-2xl p-6 border border-border text-center hover:border-primary/50 transition-colors">
-        <div class="text-4xl md:text-5xl font-bold text-foreground mb-2">2026</div>
-        <div class="text-muted-foreground">Festival Season</div>
+        <div class="text-4xl md:text-5xl font-bold text-foreground mb-2">{uniqueArtists}</div>
+        <div class="text-muted-foreground">Artists</div>
       </div>
     </section>
 
@@ -189,6 +192,11 @@ const thisWeekFestivals = festivals.filter((f) => {
           );
         })}
       </div>
+    </section>
+
+    <!-- Analytics -->
+    <section>
+      <FestivalAnalytics client:visible festivals={festivals} />
     </section>
 
     <!-- CTA Section -->

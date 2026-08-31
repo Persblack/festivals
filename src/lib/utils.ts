@@ -1,39 +1,27 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+// Festival dates live in one place. Re-exported here so the many existing
+// `@/lib/utils` imports keep working against a single implementation.
+export { formatDateRange, formatMonthDay, formatUpdatedAt, parseLocalDate } from "./dates";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDateRange(start: string, end: string): string {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
+const REGIONAL_INDICATOR_A = 0x1f1e6;
 
-  const startMonth = startDate.toLocaleDateString('en-US', { month: 'short' });
-  const endMonth = endDate.toLocaleDateString('en-US', { month: 'short' });
-  const startDay = startDate.getDate();
-  const endDay = endDate.getDate();
-  const year = startDate.getFullYear();
-
-  if (startMonth === endMonth) {
-    return `${startMonth} ${startDay}-${endDay}, ${year}`;
-  }
-  return `${startMonth} ${startDay} - ${endMonth} ${endDay}, ${year}`;
-}
-
+/**
+ * Flag emoji for any ISO-3166 alpha-2 code, derived from regional indicator
+ * symbols instead of a hand-kept table — a country new to the dataset (the
+ * scraper reaches further every year) renders without a code change.
+ */
 export function getCountryFlag(countryCode: string): string {
-  const flags: Record<string, string> = {
-    'BE': '🇧🇪',
-    'DE': '🇩🇪',
-    'RS': '🇷🇸',
-    'HU': '🇭🇺',
-    'AT': '🇦🇹',
-    'NL': '🇳🇱',
-    'CZ': '🇨🇿',
-    'PL': '🇵🇱',
-    'CH': '🇨🇭',
-  };
-  return flags[countryCode] || '🌍';
+  const code = countryCode.trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(code)) return '🌍';
+  return String.fromCodePoint(
+    ...[...code].map((letter) => REGIONAL_INDICATOR_A + letter.charCodeAt(0) - 65),
+  );
 }
 
 export function getGenreColor(genre: string): string {
@@ -68,13 +56,7 @@ export function getSizeLabel(size: string): string {
   return labels[size] || size;
 }
 
-export function getMonthName(monthIndex: number): string {
-  const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
-  ];
-  return months[monthIndex] || '';
-}
+
 
 export function formatPriceRange(
   min: number | null,

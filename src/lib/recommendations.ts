@@ -1,3 +1,5 @@
+import { parseLocalDate } from "@/lib/dates";
+import { hasCoordinates } from "@/lib/guards";
 import type { Festival } from "@/types/festival";
 
 const MILLIS_PER_DAY = 1000 * 60 * 60 * 24;
@@ -27,12 +29,19 @@ function sharedGenreCount(a: Festival, b: Festival): number {
 }
 
 function withinTwoWeeks(a: Festival, b: Festival): boolean {
-  const aStart = new Date(a.start_date).getTime();
-  const bStart = new Date(b.start_date).getTime();
-  return Math.abs(aStart - bStart) <= TWO_WEEKS_MS;
+  const aStart = parseLocalDate(a.start_date);
+  const bStart = parseLocalDate(b.start_date);
+  if (!aStart || !bStart) return false;
+  return Math.abs(aStart.getTime() - bStart.getTime()) <= TWO_WEEKS_MS;
 }
 
+/**
+ * An unknown coordinate cannot disqualify a pair — it is not evidence that the
+ * two are far apart. Such pairs stay eligible and simply earn no proximity
+ * points in `scorePair`.
+ */
 function withinMaxDistance(a: Festival, b: Festival): boolean {
+  if (!hasCoordinates(a) || !hasCoordinates(b)) return true;
   return (
     haversineDistance(a.latitude, a.longitude, b.latitude, b.longitude) <=
     MAX_DISTANCE_KM
@@ -45,14 +54,16 @@ function scorePair(source: Festival, candidate: Festival): number {
   score += sharedGenreCount(source, candidate) * 2;
   // +3 if same country
   if (source.country_code === candidate.country_code) score += 3;
-  // proximity bonus within the 50km cap
-  const dist = haversineDistance(
-    source.latitude,
-    source.longitude,
-    candidate.latitude,
-    candidate.longitude,
-  );
-  score += Math.max(0, 3 - (dist / MAX_DISTANCE_KM) * 3);
+  // proximity bonus within the 50km cap, only when both sides are locatable
+  if (hasCoordinates(source) && hasCoordinates(candidate)) {
+    const dist = haversineDistance(
+      source.latitude,
+      source.longitude,
+      candidate.latitude,
+      candidate.longitude,
+    );
+    score += Math.max(0, 3 - (dist / MAX_DISTANCE_KM) * 3);
+  }
   return score;
 }
 

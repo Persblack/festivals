@@ -1,5 +1,7 @@
 ---
 import { GlobalGenreFilter } from "@/components/GlobalGenreFilter";
+import { dataUpdatedAt, festivals, yearRangeLabel } from "@/lib/festival-data";
+import { formatUpdatedAt } from "@/lib/dates";
 
 interface Props {
   title: string;
@@ -7,6 +9,8 @@ interface Props {
 }
 
 const { title, description = "Discover the best music festivals across Central Europe. Interactive map, calendar, and comprehensive festival information." } = Astro.props;
+
+const updatedLabel = formatUpdatedAt(dataUpdatedAt);
 ---
 
 <!doctype html>
@@ -48,7 +52,7 @@ const { title, description = "Discover the best music festivals across Central E
             </div>
             <div>
               <span class="text-xl font-bold text-foreground">Festival Atlas</span>
-              <span class="hidden sm:inline text-xs text-muted-foreground ml-2">2026 Festivals</span>
+              <span class="hidden sm:inline text-xs text-muted-foreground ml-2">{yearRangeLabel} Festivals</span>
             </div>
           </a>
 
@@ -140,6 +144,9 @@ const { title, description = "Discover the best music festivals across Central E
             Made with love for festival lovers
           </p>
         </div>
+        <p class="mt-6 text-center text-xs text-muted-foreground/70">
+          {festivals.length} festival{festivals.length === 1 ? "" : "s"} · {yearRangeLabel}{updatedLabel ? ` · Data updated ${updatedLabel}` : ""}
+        </p>
       </div>
     </footer>
 

@@ -8,7 +8,14 @@ import { FilterBar } from "./FilterBar";
 import { GenreBadge } from "./GenreBadge";
 import { Button } from "@/components/ui/button";
 import { formatDateRange, getCountryFlag, formatPriceRange, getUniqueCountries } from "@/lib/utils";
-import { genreMatchesCategories } from "@/lib/genre-utils";
+import {
+  applyFilters,
+  availableYears,
+  buildSearchIndex,
+  defaultFilters,
+  sortFestivals,
+  type SortOption,
+} from "@/lib/filters";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
 import { Grid3X3, Table, ArrowUp, ExternalLink } from "lucide-react";
@@ -18,13 +25,12 @@ interface ListViewProps {
 }
 
 type ViewMode = "grid" | "table";
-type SortOption = "date" | "name" | "country";
 
 const GRID_PAGE_SIZE = 30;
 const TABLE_PAGE_SIZE = 50;
 
 export function ListView({ festivals }: ListViewProps) {
-  const [filters, setFilters] = useState<Filters>({ genres: [], subGenres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [sortBy, setSortBy] = useState<SortOption>("date");
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
@@ -34,6 +40,12 @@ export function ListView({ festivals }: ListViewProps) {
 
   // Get unique countries from festival data
   const countries = useMemo(() => getUniqueCountries(festivals), [festivals]);
+
+  // One lowercased haystack per festival, rebuilt only when the dataset changes.
+  const searchIndex = useMemo(() => buildSearchIndex(festivals), [festivals]);
+
+  // Seasons present in the data — drives the year chips in the filter bar.
+  const years = useMemo(() => availableYears(festivals), [festivals]);
 
   // Handle scroll
   useEffect(() => {
@@ -47,32 +59,10 @@ export function ListView({ festivals }: ListViewProps) {
   };
 
   // Filter festivals
-  const filteredFestivals = useMemo(() => {
-    return festivals.filter((festival) => {
-      const matchesGlobalGenre = genreMatchesCategories(festival.genres, globalGenres);
-      const matchesSubGenre =
-        filters.subGenres.length === 0 ||
-        festival.genres.some((g) => filters.subGenres.includes(g));
-      const matchesCountry =
-        filters.countries.length === 0 ||
-        filters.countries.includes(festival.country_code);
-      const matchesSize =
-        filters.sizes.length === 0 ||
-        filters.sizes.includes(festival.size === "massive" ? "large" : festival.size);
-      const festivalMonth = new Date(festival.start_date).getMonth() + 1;
-      const matchesDateRange =
-        festivalMonth >= filters.dateRange[0] && festivalMonth <= filters.dateRange[1];
-      const matchesSearch =
-        !filters.search ||
-        festival.lineup?.some((artist) =>
-          artist.toLowerCase().includes(filters.search.toLowerCase())
-        ) ||
-        festival.name.toLowerCase().includes(filters.search.toLowerCase());
-      const isPast = new Date() > new Date(festival.end_date);
-      const matchesPast = filters.showPast || !isPast;
-      return matchesGlobalGenre && matchesSubGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch && matchesPast;
-    });
-  }, [festivals, filters, globalGenres]);
+  const filteredFestivals = useMemo(
+    () => applyFilters(festivals, filters, globalGenres, { searchIndex }),
+    [festivals, filters, globalGenres, searchIndex],
+  );
 
   // Reset visible count when filters or view mode change
   useEffect(() => {
@@ -80,21 +70,10 @@ export function ListView({ festivals }: ListViewProps) {
   }, [filteredFestivals, viewMode]);
 
   // Sort festivals
-  const sortedFestivals = useMemo(() => {
-    const sorted = [...filteredFestivals];
-    switch (sortBy) {
-      case "date":
-        sorted.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
-        break;
-      case "name":
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case "country":
-        sorted.sort((a, b) => a.country_name.localeCompare(b.country_name));
-        break;
-    }
-    return sorted;
-  }, [filteredFestivals, sortBy]);
+  const sortedFestivals = useMemo(
+    () => sortFestivals(filteredFestivals, sortBy),
+    [filteredFestivals, sortBy],
+  );
 
   const visibleFestivals = sortedFestivals.slice(0, visibleCount);
   const hasMore = visibleCount < sortedFestivals.length;
@@ -113,6 +92,7 @@ export function ListView({ festivals }: ListViewProps) {
             onSortChange={(s) => setSortBy(s as SortOption)}
             resultCount={sortedFestivals.length}
             countries={countries}
+            availableYears={years}
           />
         </div>
 
@@ -235,16 +215,18 @@ export function ListView({ festivals }: ListViewProps) {
                         {formatPriceRange(festival.ticket_price_min, festival.ticket_price_max, festival.currency)}
                       </td>
                       <td className="px-4 py-4">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          asChild
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <a href={festival.website} target="_blank" rel="noopener noreferrer">
-                            <ExternalLink className="w-4 h-4" />
-                          </a>
-                        </Button>
+                        {festival.website && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            asChild
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <a href={festival.website} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          </Button>
+                        )}
                       </td>
                     </motion.tr>
                   ))}

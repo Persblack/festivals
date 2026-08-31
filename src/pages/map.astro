@@ -1,9 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { MapPage } from "../components/MapPage";
-import festivalsData from "../data/festivals.json";
-
-const festivals = festivalsData.festivals;
+import { festivals } from "@/lib/festival-data";
 ---
 
 <Layout title="Map View - Festival Atlas" description="Explore music festivals across Central Europe on an interactive map.">

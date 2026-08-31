@@ -5,9 +5,16 @@ import { motion } from "framer-motion";
 import { Calendar, MapPin } from "lucide-react";
 import { GenreBadge } from "./GenreBadge";
 import { formatDateRange, getCountryFlag } from "@/lib/utils";
-import type { Festival, Genre } from "@/types/festival";
+import {
+  daysBetween,
+  formatMonthDay,
+  MONTH_ABBR,
+  parseLocalDate,
+  toDateString,
+} from "@/lib/dates";
+import type { Festival } from "@/types/festival";
 
-const genreColors: Record<Genre, { bg: string; border: string; shadow: string; gradient: string }> = {
+const genreColors: Record<string, { bg: string; border: string; shadow: string; gradient: string }> = {
   EDM: {
     bg: "bg-blue-500/20",
     border: "border-blue-500/40",
@@ -40,7 +47,7 @@ const genreColors: Record<Genre, { bg: string; border: string; shadow: string; g
   },
 };
 
-function getGenreStyle(genres: Genre[]) {
+function getGenreStyle(genres: string[]) {
   return genreColors[genres[0]] || genreColors.Else;
 }
 
@@ -49,15 +56,42 @@ interface PlannerTimelineProps {
   onFestivalClick: (festival: Festival) => void;
 }
 
-function getDaysBetween(start: string, end: string): number {
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  return Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
-}
+/**
+ * One marker per month boundary. The label carries the year (`Jul '27`) only
+ * when the planner spans more than one calendar year — a planner mixing 2026
+ * and 2027 otherwise shows two identical `Jan` markers.
+ */
+function buildMonthMarkers(
+  firstDate: string,
+  lastDate: string,
+  totalDays: number,
+): { label: string; leftPercent: number }[] {
+  const start = parseLocalDate(firstDate);
+  const end = parseLocalDate(lastDate);
+  if (!start || !end) return [];
 
-function formatMonthDay(dateStr: string): string {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const showYear = start.getFullYear() !== end.getFullYear();
+  const markers: { label: string; leftPercent: number }[] = [];
+
+  // Start from the first day of the month of the first festival
+  const current = new Date(start.getFullYear(), start.getMonth(), 1);
+
+  while (current <= end) {
+    const dayOffset = daysBetween(firstDate, toDateString(current));
+    const leftPercent = Math.max(0, (dayOffset / totalDays) * 100);
+
+    if (leftPercent <= 100) {
+      const month = MONTH_ABBR[current.getMonth()];
+      markers.push({
+        label: showYear ? `${month} '${String(current.getFullYear()).slice(-2)}` : month,
+        leftPercent,
+      });
+    }
+
+    current.setMonth(current.getMonth() + 1);
+  }
+
+  return markers;
 }
 
 // Check if two festivals overlap
@@ -107,7 +141,7 @@ export function PlannerTimeline({ festivals, onFestivalClick }: PlannerTimelineP
     const firstDate = sorted[0].start_date;
     const lastDate = sorted.reduce((max, f) => (f.end_date > max ? f.end_date : max), sorted[0].end_date);
 
-    const totalDays = getDaysBetween(firstDate, lastDate) + 1; // +1 to include both start and end days
+    const totalDays = daysBetween(firstDate, lastDate) + 1; // +1 to include both start and end days
     const rowAssignments = assignRows(sorted);
     const maxRow = Math.max(...Array.from(rowAssignments.values())) + 1;
 
@@ -118,40 +152,18 @@ export function PlannerTimeline({ festivals, onFestivalClick }: PlannerTimelineP
       totalDays,
       rowAssignments,
       maxRow,
+      // Folded in here on purpose: as its own useMemo below the early return
+      // it was a conditional hook, and the hook order broke whenever the
+      // planner went from populated to empty.
+      monthMarkers: buildMonthMarkers(firstDate, lastDate, totalDays),
     };
   }, [festivals]);
 
-  if (!timelineData || festivals.length === 0) {
+  if (!timelineData) {
     return null;
   }
 
-  const { firstDate, lastDate, totalDays, rowAssignments, maxRow } = timelineData;
-
-  // Generate month markers for the timeline header
-  const monthMarkers = useMemo(() => {
-    const markers: { label: string; leftPercent: number }[] = [];
-    const start = new Date(firstDate);
-    const end = new Date(lastDate);
-
-    // Start from the first day of the month of the first festival
-    const current = new Date(start.getFullYear(), start.getMonth(), 1);
-
-    while (current <= end) {
-      const dayOffset = getDaysBetween(firstDate, current.toISOString().split('T')[0]);
-      const leftPercent = Math.max(0, (dayOffset / totalDays) * 100);
-
-      if (leftPercent >= 0 && leftPercent <= 100) {
-        markers.push({
-          label: current.toLocaleDateString("en-US", { month: "short", year: "numeric" }),
-          leftPercent,
-        });
-      }
-
-      current.setMonth(current.getMonth() + 1);
-    }
-
-    return markers;
-  }, [firstDate, lastDate, totalDays]);
+  const { firstDate, lastDate, totalDays, rowAssignments, maxRow, monthMarkers } = timelineData;
 
   return (
     <div className="space-y-4">
@@ -196,8 +208,8 @@ export function PlannerTimeline({ festivals, onFestivalClick }: PlannerTimelineP
 
           {/* Festival blocks */}
           {festivals.map((festival, index) => {
-            const dayOffset = getDaysBetween(firstDate, festival.start_date);
-            const duration = getDaysBetween(festival.start_date, festival.end_date) + 1;
+            const dayOffset = daysBetween(firstDate, festival.start_date);
+            const duration = daysBetween(festival.start_date, festival.end_date) + 1;
             const leftPercent = (dayOffset / totalDays) * 100;
             const widthPercent = Math.max((duration / totalDays) * 100, 3); // Min 3% width for visibility
             const row = rowAssignments.get(festival.id) || 0;

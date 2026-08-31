@@ -1,34 +1,47 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import festivalsData from "../data/festivals.json";
-import { formatDateRange, getCountryFlag, getGenreColorHex, getGenreCoverImage } from "../lib/utils";
+import { festivals } from "@/lib/festival-data";
+import { upcomingFestivals } from "@/lib/filters";
+import { parseLocalDate, startOfToday } from "@/lib/dates";
+import { getGenreColorHex } from "@/lib/utils";
 import { FeaturedFestivals } from "../components/FeaturedFestivals";
 import { ThisWeekFestivals } from "../components/ThisWeekFestivals";
 import { RandomFestivalButton } from "../components/RandomFestivalButton";
 import { FestivalAnalytics } from "../components/FestivalAnalytics";
 
-const festivals = festivalsData.festivals;
 const featuredFestivals = festivals.filter((f) => f.featured);
-const allGenres = [...new Set(festivals.flatMap((f) => f.genres))];
-const allCountries = [...new Set(festivals.map((f) => f.country_name))];
-const uniqueArtistCount = new Set(festivals.flatMap((f) => f.lineup ?? [])).size;
-const uniqueArtists = `${Math.round(uniqueArtistCount / 1000)}k+`;
 
-// Festivals this week (Mon-Sun containing today)
-const today = new Date();
+/**
+ * Every headline number on this page describes the rolling window — everything
+ * from today forward, whatever year it falls in. Counting the whole file would
+ * advertise last season's festivals as if they were still bookable.
+ */
+const upcoming = upcomingFestivals(festivals);
+const upcomingCountries = new Set(upcoming.map((f) => f.country_name));
+const upcomingGenres = new Set(upcoming.flatMap((f) => f.genres));
+const upcomingArtistCount = new Set(upcoming.flatMap((f) => f.lineup)).size;
+// Below 1000 the rounded "0k+" was a lie; say the real number instead.
+const uniqueArtists =
+  upcomingArtistCount >= 1000
+    ? `${(upcomingArtistCount / 1000).toFixed(1)}k+`
+    : String(upcomingArtistCount);
+
+const genreTiles = ["EDM", "Techno", "Rock", "Metal", "Else"];
+
+// Festivals this week (Mon-Sun containing today), all in local time.
+const today = startOfToday();
 const day = today.getDay();
 const mondayOffset = day === 0 ? -6 : 1 - day;
 const weekStart = new Date(today);
-weekStart.setHours(0, 0, 0, 0);
 weekStart.setDate(today.getDate() + mondayOffset);
 const weekEnd = new Date(weekStart);
 weekEnd.setDate(weekStart.getDate() + 6);
 weekEnd.setHours(23, 59, 59, 999);
 
 const thisWeekFestivals = festivals.filter((f) => {
-  const start = new Date(f.start_date);
-  const end = new Date(f.end_date);
-  return start <= weekEnd && end >= weekStart;
+  const start = parseLocalDate(f.start_date);
+  const end = parseLocalDate(f.end_date);
+  return start !== null && end !== null && start <= weekEnd && end >= weekStart;
 });
 ---
 
@@ -38,34 +51,11 @@ const thisWeekFestivals = festivals.filter((f) => {
     <section class="text-center py-16 md:py-24 relative overflow-hidden rounded-3xl">
       <!-- Hero background image -->
       <img
-        id="hero-bg"
         src="/hero-10.webp"
         alt=""
         class="absolute inset-0 w-full h-full object-cover"
       />
       <div class="absolute inset-0 bg-black/60"></div>
-
-      <!-- DEV: hero image switcher (remove later) -->
-      <!--
-      <div class="absolute top-3 right-3 z-10 flex items-center gap-2 bg-black/70 backdrop-blur-sm rounded-lg px-3 py-1.5 text-xs text-white/70 border border-white/10">
-        <label for="hero-num">Hero</label>
-        <input
-          id="hero-num"
-          type="number"
-          min="1"
-          max="10"
-          value="10"
-          class="w-12 bg-white/10 border border-white/20 rounded px-1.5 py-0.5 text-white text-center text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-        />
-      </div>
-      <script>
-        document.getElementById('hero-num')?.addEventListener('input', (e) => {
-          const val = (e.target as HTMLInputElement).value;
-          const num = Math.min(10, Math.max(1, parseInt(val) || 1));
-          (document.getElementById('hero-bg') as HTMLImageElement).src = `/hero-${num}.webp`;
-        });
-      </script>
-      -->
 
       <div class="relative">
         <h1 class="text-5xl md:text-7xl font-extrabold text-foreground mb-6 tracking-tight">
@@ -106,15 +96,15 @@ const thisWeekFestivals = festivals.filter((f) => {
     <!-- Quick Stats -->
     <section class="grid grid-cols-2 md:grid-cols-4 gap-6">
       <div class="bg-card rounded-2xl p-6 border border-border text-center hover:border-primary/50 transition-colors">
-        <div class="text-4xl md:text-5xl font-bold text-primary mb-2">{festivals.length}</div>
-        <div class="text-muted-foreground">Festivals</div>
+        <div class="text-4xl md:text-5xl font-bold text-primary mb-2">{upcoming.length}</div>
+        <div class="text-muted-foreground">Upcoming</div>
       </div>
       <div class="bg-card rounded-2xl p-6 border border-border text-center hover:border-secondary/50 transition-colors">
-        <div class="text-4xl md:text-5xl font-bold text-secondary mb-2">{allCountries.length}</div>
+        <div class="text-4xl md:text-5xl font-bold text-secondary mb-2">{upcomingCountries.size}</div>
         <div class="text-muted-foreground">Countries</div>
       </div>
       <div class="bg-card rounded-2xl p-6 border border-border text-center hover:border-accent/50 transition-colors">
-        <div class="text-4xl md:text-5xl font-bold text-accent mb-2">{allGenres.length}</div>
+        <div class="text-4xl md:text-5xl font-bold text-accent mb-2">{upcomingGenres.size}</div>
         <div class="text-muted-foreground">Genres</div>
       </div>
       <div class="bg-card rounded-2xl p-6 border border-border text-center hover:border-primary/50 transition-colors">
@@ -128,7 +118,7 @@ const thisWeekFestivals = festivals.filter((f) => {
       <div class="flex items-center justify-between mb-8">
         <div>
           <h2 class="text-3xl font-bold text-foreground mb-2">Featured Festivals</h2>
-          <p class="text-muted-foreground">The most anticipated events of 2026</p>
+          <p class="text-muted-foreground">The most anticipated events ahead</p>
         </div>
         <a
           href="/list"
@@ -165,21 +155,21 @@ const thisWeekFestivals = festivals.filter((f) => {
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {["EDM", "Techno", "Rock", "Metal", "Else"].map((genre) => {
-          const count = festivals.filter((f) => f.genres.includes(genre as any)).length;
+        {genreTiles.map((genre) => {
+          const count = upcoming.filter((f) => f.genres.includes(genre)).length;
           return (
             <a
               href={`/list?genre=${genre}`}
               class="group bg-card rounded-2xl p-6 border border-border text-center hover:scale-105 transition-all duration-300"
-              style={`border-color: ${getGenreColorHex(genre as any)}40`}
+              style={`border-color: ${getGenreColorHex(genre)}40`}
             >
               <div
                 class="w-16 h-16 rounded-2xl mx-auto mb-4 flex items-center justify-center transition-transform group-hover:scale-110"
-                style={`background-color: ${getGenreColorHex(genre as any)}20`}
+                style={`background-color: ${getGenreColorHex(genre)}20`}
               >
                 <span
                   class="text-2xl font-bold"
-                  style={`color: ${getGenreColorHex(genre as any)}`}
+                  style={`color: ${getGenreColorHex(genre)}`}
                 >
                   {count}
                 </span>
@@ -207,7 +197,7 @@ const thisWeekFestivals = festivals.filter((f) => {
           Ready to Plan Your Festival Summer?
         </h2>
         <p class="text-lg text-muted-foreground mb-8 max-w-xl mx-auto">
-          Use our interactive map and calendar to discover the perfect festivals for your 2026 adventure.
+          Use our interactive map and calendar to discover the perfect festivals for your next festival adventure.
         </p>
         <div class="flex flex-wrap justify-center gap-4">
           <a

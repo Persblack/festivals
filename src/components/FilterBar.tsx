@@ -15,6 +15,8 @@ import {
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { SUB_GENRES } from "@/lib/genre-utils";
+import { activeFilterCount, defaultFilters } from "@/lib/filters";
+import { MONTH_ABBR } from "@/lib/dates";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { FestivalSize, Filters } from "@/types/festival";
 
@@ -22,11 +24,6 @@ const SIZES: { value: FestivalSize; label: string }[] = [
   { value: "small", label: "Small" },
   { value: "medium", label: "Medium" },
   { value: "large", label: "Large" },
-];
-
-const MONTHS = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 ];
 
 const DEFAULT_COUNTRIES = [
@@ -37,7 +34,8 @@ const DEFAULT_COUNTRIES = [
 
 function SearchInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const [localValue, setLocalValue] = useState(value);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  // `window.setTimeout` (not the ambient Node overload) so the handle is a number.
+  const timerRef = useRef<number | undefined>(undefined);
 
   // Sync local state when parent clears the search (e.g. "Clear all")
   useEffect(() => {
@@ -46,11 +44,11 @@ function SearchInput({ value, onChange }: { value: string; onChange: (v: string)
 
   const handleChange = (v: string) => {
     setLocalValue(v);
-    clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => onChange(v), 250);
+    window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => onChange(v), 250);
   };
 
-  useEffect(() => () => clearTimeout(timerRef.current), []);
+  useEffect(() => () => window.clearTimeout(timerRef.current), []);
 
   return (
     <div className="relative flex-1 min-w-[200px]">
@@ -81,6 +79,8 @@ interface FilterBarProps {
   onSortChange?: (sort: string) => void;
   resultCount: number;
   countries?: { code: string; name: string }[];
+  /** Years present in the dataset. Chips only appear once there is more than one. */
+  availableYears?: number[];
 }
 
 export function FilterBar({
@@ -91,6 +91,7 @@ export function FilterBar({
   onSortChange,
   resultCount,
   countries = DEFAULT_COUNTRIES,
+  availableYears = [],
 }: FilterBarProps) {
   const COUNTRIES = countries;
   const [isExpanded, setIsExpanded] = useState(false);
@@ -131,22 +132,22 @@ export function FilterBar({
     onFiltersChange({ ...filters, subGenres: newSubGenres });
   };
 
-  const handleDateRangeChange = (value: number[]) => {
-    onFiltersChange({ ...filters, dateRange: [value[0], value[1]] });
+  const handleMonthRangeChange = (value: number[]) => {
+    onFiltersChange({ ...filters, months: [value[0], value[1]] });
+  };
+
+  const toggleYear = (year: number) => {
+    const years = filters.years.includes(year)
+      ? filters.years.filter((y) => y !== year)
+      : [...filters.years, year].sort((a, b) => a - b);
+    onFiltersChange({ ...filters, years });
   };
 
   const clearFilters = () => {
-    onFiltersChange({ genres: [], subGenres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
+    onFiltersChange(defaultFilters());
   };
 
-  const isDateRangeFiltered = filters.dateRange[0] !== 1 || filters.dateRange[1] !== 12;
-  const activeFilterCount =
-    filters.countries.length +
-    filters.sizes.length +
-    filters.subGenres.length +
-    (isDateRangeFiltered ? 1 : 0) +
-    (filters.search ? 1 : 0) +
-    (filters.showPast ? 1 : 0);
+  const activeFilters = activeFilterCount(filters);
 
   return (
     <motion.div
@@ -170,9 +171,9 @@ export function FilterBar({
         >
           <Filter className="w-4 h-4 mr-2" />
           Filters
-          {activeFilterCount > 0 && (
+          {activeFilters > 0 && (
             <span className="ml-2 px-2 py-0.5 bg-primary text-primary-foreground rounded-full text-xs">
-              {activeFilterCount}
+              {activeFilters}
             </span>
           )}
         </Button>
@@ -192,7 +193,7 @@ export function FilterBar({
         )}
 
         {/* Clear Filters */}
-        {activeFilterCount > 0 && (
+        {activeFilters > 0 && (
           <Button variant="ghost" size="sm" onClick={clearFilters}>
             <X className="w-4 h-4 mr-1" />
             Clear all
@@ -204,6 +205,44 @@ export function FilterBar({
           {resultCount} festival{resultCount !== 1 ? "s" : ""}
         </span>
       </div>
+
+      {/* Season (year) chips — only meaningful once the dataset spans more than one year.
+          No selection means the rolling window: everything from today forward. */}
+      {availableYears.length > 1 && (
+        <div className="flex flex-wrap items-center gap-2 pt-3 border-t border-border">
+          <span className="text-sm font-medium text-muted-foreground mr-1">Season</span>
+          <button
+            type="button"
+            onClick={() => onFiltersChange({ ...filters, years: [] })}
+            aria-pressed={filters.years.length === 0}
+            className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+              filters.years.length === 0
+                ? "bg-primary text-primary-foreground"
+                : "bg-muted text-foreground hover:bg-muted/70"
+            }`}
+          >
+            All years
+          </button>
+          {availableYears.map((year) => {
+            const isActive = filters.years.includes(year);
+            return (
+              <button
+                key={year}
+                type="button"
+                onClick={() => toggleYear(year)}
+                aria-pressed={isActive}
+                className={`px-3 py-1.5 rounded-full text-sm transition-colors ${
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-foreground hover:bg-muted/70"
+                }`}
+              >
+                {year}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* Desktop Filters / Expanded Mobile Filters */}
       <motion.div
@@ -271,17 +310,18 @@ export function FilterBar({
             </div>
           )}
 
-          {/* Date Range Filter */}
+          {/* Month-of-year window. Deliberately year-independent: "every summer",
+              not "summer 2026" — narrowing to a season is what the year chips do. */}
           <div className="space-y-3 min-w-[200px] flex-1 max-w-[300px]">
             <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-muted-foreground">Date Range</span>
+              <span className="text-sm font-medium text-muted-foreground">Months</span>
               <span className="text-sm text-foreground">
-                {MONTHS[filters.dateRange[0] - 1]} – {MONTHS[filters.dateRange[1] - 1]}
+                {MONTH_ABBR[filters.months[0] - 1]} – {MONTH_ABBR[filters.months[1] - 1]}
               </span>
             </div>
             <Slider
-              value={filters.dateRange}
-              onValueChange={handleDateRangeChange}
+              value={filters.months}
+              onValueChange={handleMonthRangeChange}
               min={1}
               max={12}
               step={1}

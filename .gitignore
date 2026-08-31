@@ -31,6 +31,6 @@ npm-debug.log*
 ignorimages/
 Screenshots/
 
-# data files
-src/data/festivals.json
-src/data/festivals_depreciated.json
+# Scraper output. Globbed, so dropping src/data/festivals_2027.json in for the
+# next season never risks committing a megabyte of data.
+src/data/festivals*.json

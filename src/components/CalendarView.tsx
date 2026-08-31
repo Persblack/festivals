@@ -4,8 +4,14 @@ import { FestivalCard } from "./FestivalCard";
 import { FestivalDetail } from "./FestivalDetail";
 import { FilterBar } from "./FilterBar";
 import { Button } from "@/components/ui/button";
-import { getMonthName, getUniqueCountries } from "@/lib/utils";
-import { genreMatchesCategories } from "@/lib/genre-utils";
+import { getUniqueCountries } from "@/lib/utils";
+import {
+  applyFilters,
+  availableYears,
+  buildSearchIndex,
+  defaultFilters,
+  groupByMonth,
+} from "@/lib/filters";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
 import { Calendar } from "lucide-react";
@@ -18,81 +24,38 @@ interface CalendarViewProps {
 }
 
 export function CalendarView({ festivals }: CalendarViewProps) {
-  const [filters, setFilters] = useState<Filters>({ genres: [], subGenres: [], countries: [], sizes: [], dateRange: [new Date().getMonth() + 1, 12], search: "", showPast: false });
+  // Rolling window: no month or year narrowing, just "not over yet". The old
+  // default started the month slider at the current month, which hid January of
+  // the following season every December.
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
-  const [expandedMonths, setExpandedMonths] = useState<Record<number, number>>({});
+  // Keyed by `YYYY-MM`, not by month index — two seasons expand independently.
+  const [expandedMonths, setExpandedMonths] = useState<Record<string, number>>({});
   const { genres: globalGenres } = useGlobalGenreFilter();
 
-  const getMonthVisibleCount = useCallback((month: number) => {
-    return expandedMonths[month] ?? MONTH_INITIAL_COUNT;
-  }, [expandedMonths]);
-
-  const showMoreInMonth = useCallback((month: number) => {
+  const showMoreInMonth = useCallback((key: string) => {
     setExpandedMonths((prev) => ({
       ...prev,
-      [month]: (prev[month] ?? MONTH_INITIAL_COUNT) + MONTH_LOAD_MORE,
+      [key]: (prev[key] ?? MONTH_INITIAL_COUNT) + MONTH_LOAD_MORE,
     }));
   }, []);
 
-  // Get unique countries from festival data
   const countries = useMemo(() => getUniqueCountries(festivals), [festivals]);
+  const years = useMemo(() => availableYears(festivals), [festivals]);
+  const searchIndex = useMemo(() => buildSearchIndex(festivals), [festivals]);
 
-  // Filter festivals
-  const filteredFestivals = useMemo(() => {
-    return festivals.filter((festival) => {
-      const matchesGlobalGenre = genreMatchesCategories(festival.genres, globalGenres);
-      const matchesSubGenre =
-        filters.subGenres.length === 0 ||
-        festival.genres.some((g) => filters.subGenres.includes(g));
-      const matchesCountry =
-        filters.countries.length === 0 ||
-        filters.countries.includes(festival.country_code);
-      const matchesSize =
-        filters.sizes.length === 0 ||
-        filters.sizes.includes(festival.size === "massive" ? "large" : festival.size);
-      const festivalMonth = new Date(festival.start_date).getMonth() + 1;
-      const matchesDateRange =
-        festivalMonth >= filters.dateRange[0] && festivalMonth <= filters.dateRange[1];
-      const matchesSearch =
-        !filters.search ||
-        festival.lineup?.some((artist) =>
-          artist.toLowerCase().includes(filters.search.toLowerCase())
-        ) ||
-        festival.name.toLowerCase().includes(filters.search.toLowerCase());
-      const isPast = new Date() > new Date(festival.end_date);
-      const matchesPast = filters.showPast || !isPast;
-      return matchesGlobalGenre && matchesSubGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch && matchesPast;
-    });
-  }, [festivals, filters, globalGenres]);
+  const filteredFestivals = useMemo(
+    () => applyFilters(festivals, filters, globalGenres, { searchIndex }),
+    [festivals, filters, globalGenres, searchIndex],
+  );
 
-  // Group festivals by month
-  const festivalsByMonth = useMemo(() => {
-    const grouped = new Map<number, Festival[]>();
+  // Grouped by year AND month: grouping by month alone merges July 2026 into
+  // July 2027 the moment a second season is in the dataset.
+  const monthGroups = useMemo(() => groupByMonth(filteredFestivals), [filteredFestivals]);
+  const spansMultipleYears = new Set(monthGroups.map((group) => group.year)).size > 1;
 
-    filteredFestivals.forEach((festival) => {
-      const month = new Date(festival.start_date).getMonth();
-      if (!grouped.has(month)) {
-        grouped.set(month, []);
-      }
-      grouped.get(month)!.push(festival);
-    });
-
-    // Sort festivals within each month
-    grouped.forEach((festivals) => {
-      festivals.sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
-    });
-
-    // Return sorted entries
-    return Array.from(grouped.entries()).sort(([a], [b]) => a - b);
-  }, [filteredFestivals]);
-
-  const monthsWithFestivals = festivalsByMonth.map(([month]) => month);
-
-  const scrollToMonth = (month: number) => {
-    const element = document.getElementById(`month-${month}`);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+  const scrollToMonth = (key: string) => {
+    document.getElementById(`month-${key}`)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (
@@ -103,19 +66,21 @@ export function CalendarView({ festivals }: CalendarViewProps) {
         onFiltersChange={setFilters}
         resultCount={filteredFestivals.length}
         countries={countries}
+        availableYears={years}
       />
 
-      {/* Quick Jump Navigation */}
-      {monthsWithFestivals.length > 2 && (
+      {/* Quick Jump Navigation — year-qualified once more than one season is loaded,
+          otherwise two identical "Jan" chips would scroll to different places. */}
+      {monthGroups.length > 2 && (
         <div className="flex flex-wrap gap-2">
           <span className="text-sm text-muted-foreground mr-2">Jump to:</span>
-          {monthsWithFestivals.map((month) => (
+          {monthGroups.map((group) => (
             <button
-              key={month}
-              onClick={() => scrollToMonth(month)}
+              key={group.key}
+              onClick={() => scrollToMonth(group.key)}
               className="px-3 py-1.5 rounded-full bg-muted text-sm text-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
             >
-              {getMonthName(month)}
+              {spansMultipleYears ? group.shortLabel : group.label.split(" ")[0]}
             </button>
           ))}
         </div>
@@ -123,15 +88,16 @@ export function CalendarView({ festivals }: CalendarViewProps) {
 
       {/* Timeline */}
       <div className="space-y-12">
-        {festivalsByMonth.map(([month, monthFestivals], index) => {
-          const monthVisible = getMonthVisibleCount(month);
+        {monthGroups.map((group, index) => {
+          const monthVisible = expandedMonths[group.key] ?? MONTH_INITIAL_COUNT;
+          const monthFestivals = group.festivals;
           const visibleInMonth = monthFestivals.slice(0, monthVisible);
           const hasMoreInMonth = monthVisible < monthFestivals.length;
 
           return (
             <motion.section
-              key={month}
-              id={`month-${month}`}
+              key={group.key}
+              id={`month-${group.key}`}
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: Math.min(index * 0.05, 0.2) }}
@@ -145,7 +111,7 @@ export function CalendarView({ festivals }: CalendarViewProps) {
                   </div>
                   <div>
                     <h2 className="text-2xl font-bold text-foreground">
-                      {getMonthName(month)} 2026
+                      {group.label}
                     </h2>
                     <p className="text-sm text-muted-foreground">
                       {monthFestivals.length} festival{monthFestivals.length !== 1 ? "s" : ""}
@@ -171,9 +137,9 @@ export function CalendarView({ festivals }: CalendarViewProps) {
                   <Button
                     variant="outline"
                     className="rounded-xl"
-                    onClick={() => showMoreInMonth(month)}
+                    onClick={() => showMoreInMonth(group.key)}
                   >
-                    Show more in {getMonthName(month)} ({monthFestivals.length - monthVisible} remaining)
+                    Show more in {group.label} ({monthFestivals.length - monthVisible} remaining)
                   </Button>
                 </div>
               )}
@@ -194,7 +160,9 @@ export function CalendarView({ festivals }: CalendarViewProps) {
             No festivals found
           </h3>
           <p className="text-muted-foreground">
-            Try adjusting your filters to see more results.
+            {!filters.showPast && festivals.length > 0
+              ? "Every festival in the current selection has already happened — enable “Show past festivals” or widen your filters."
+              : "Try adjusting your filters to see more results."}
           </p>
         </motion.div>
       )}

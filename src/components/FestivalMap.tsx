@@ -2,7 +2,8 @@ import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { formatDateRange, getCountryFlag, getGenreColorHex, getSizeLabel } from "@/lib/utils";
 import { useSelectedFestivals } from "@/hooks/useSelectedFestivals";
-import type { Festival, Genre } from "@/types/festival";
+import { hasCoordinates } from "@/lib/guards";
+import type { Festival, MappableFestival } from "@/types/festival";
 import { Flame, MapPin } from "lucide-react";
 import {
   getMapConfig,
@@ -12,6 +13,20 @@ import {
   tileLayers,
   type MapConfig,
 } from "@/lib/map-config";
+
+/**
+ * Popup markup is assembled as a string and handed to Leaflet, which injects it
+ * via innerHTML — React's escaping never sees it. Scraped festival names really
+ * do contain `&`, `<` and `"`, so every interpolated value goes through here.
+ */
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
 
 interface FestivalMapProps {
   festivals: Festival[];
@@ -32,11 +47,14 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
   const styleRef = useRef<HTMLStyleElement | null>(null);
   const { isSelected, toggleSelection } = useSelectedFestivals();
 
-  // Filter out festivals with null coordinates
-  const validFestivals = useMemo(
-    () => festivals.filter((f) => f.latitude != null && f.longitude != null),
+  // Only festivals with real coordinates can reach Leaflet. The guard narrows
+  // to MappableFestival so the heat tuple, the neighbour scan and L.marker all
+  // see plain numbers instead of `number | null`.
+  const validFestivals = useMemo<MappableFestival[]>(
+    () => festivals.filter(hasCoordinates),
     [festivals]
   );
+  const hiddenCount = festivals.length - validFestivals.length;
 
   useEffect(() => {
     setIsClient(true);
@@ -112,14 +130,11 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
     if (showHeatMap) {
       (window as any).L = L;
       import("leaflet.heat").then(() => {
-        const points = validFestivals.map(
-          (f) =>
-            [f.latitude, f.longitude, 0.8] as [
-              number,
-              number,
-              number
-            ]
-        );
+        const points: [number, number, number][] = validFestivals.map((f) => [
+          f.latitude,
+          f.longitude,
+          0.8,
+        ]);
 
         const heat = (L as any).heatLayer(points, {
           radius: 40,
@@ -143,29 +158,30 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
   // Build popup HTML for a festival
   const buildPopupHTML = useCallback((festival: Festival) => {
     const selected = isSelected(festival.id);
+    const id = escapeHtml(festival.id);
     const genres = festival.genres
       .map(
         (g) =>
-          `<span style="background-color:${getGenreColorHex(g)}" class="px-2 py-0.5 text-xs rounded-full text-white inline-block">${g}</span>`
+          `<span style="background-color:${getGenreColorHex(g)}" class="px-2 py-0.5 text-xs rounded-full text-white inline-block">${escapeHtml(g)}</span>`
       )
       .join(" ");
 
     return `
       <div class="p-2 min-w-[200px] relative">
-        <button data-toggle-select="${festival.id}" class="absolute top-0 right-0 w-9 h-9 rounded-full flex items-center justify-center transition-colors ${selected ? "bg-primary text-white" : "bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"}" title="${selected ? "Remove from planner" : "Add to planner"}">
+        <button data-toggle-select="${id}" class="absolute top-0 right-0 w-9 h-9 rounded-full flex items-center justify-center transition-colors ${selected ? "bg-primary text-white" : "bg-black/60 hover:bg-black/80 text-white backdrop-blur-sm"}" title="${selected ? "Remove from planner" : "Add to planner"}">
           ${selected
             ? '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
             : '<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>'
           }
         </button>
-        <h3 class="font-bold text-lg text-grey-200 mb-2 pr-10">${festival.name}</h3>
+        <h3 class="font-bold text-lg text-grey-200 mb-2 pr-10">${escapeHtml(festival.name)}</h3>
         <div class="space-y-1.5 text-sm text-gray-300">
-          <p>${getCountryFlag(festival.country_code)} ${festival.city}, ${festival.country_name}</p>
+          <p>${getCountryFlag(festival.country_code)} ${escapeHtml(festival.city)}, ${escapeHtml(festival.country_name)}</p>
           <p>${formatDateRange(festival.start_date, festival.end_date)}</p>
           <p>${getSizeLabel(festival.size)}</p>
           <div class="flex flex-wrap gap-1 mt-2">${genres}</div>
         </div>
-        <button data-view-details="${festival.id}" class="mt-3 w-full px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">
+        <button data-view-details="${id}" class="mt-3 w-full px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">
           View Details
         </button>
       </div>
@@ -350,6 +366,13 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
           )}
           {showHeatMap ? "Show Markers" : "Heat Map"}
         </Button>
+
+        {hiddenCount > 0 && (
+          <p className="text-xs text-muted-foreground bg-card/90 backdrop-blur-sm border border-border rounded-lg px-2 py-1 text-right">
+            {hiddenCount} festival{hiddenCount === 1 ? "" : "s"} without coordinates{" "}
+            {hiddenCount === 1 ? "isn't" : "aren't"} shown
+          </p>
+        )}
       </div>
 
       {/* Legend */}
@@ -363,7 +386,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
               <div key={genre} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: getGenreColorHex(genre as Genre) }}
+                  style={{ backgroundColor: getGenreColorHex(genre) }}
                 />
                 <span className="text-xs text-foreground">{genre}</span>
               </div>

@@ -1,9 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { ListView } from "../components/ListView";
-import festivalsData from "../data/festivals.json";
-
-const festivals = festivalsData.festivals;
+import { festivals } from "@/lib/festival-data";
 ---
 
 <Layout title="All Festivals - Festival Atlas" description="Browse all music festivals with filters, sorting, and grid/table views.">

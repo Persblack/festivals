@@ -1,11 +1,18 @@
+import type { GenreCategory } from '@/types/festival';
+
+export type { GenreCategory };
+
 export type DisplayGenre =
   | 'EDM' | 'Techno' | 'Rock' | 'Metal' | 'Else'
   | 'Classical' | 'Folk' | 'Hardcore' | 'Hip-Hop'
   | 'Jazz' | 'Pop' | 'Punk' | 'Reggae';
 
-export type GenreCategory = 'EDM' | 'Hip-Hop' | 'Rock' | 'Metal' | 'Else';
-
-const GENRE_CATEGORY_MAP: Record<DisplayGenre, GenreCategory> = {
+/**
+ * Every genre the site knows how to colour, badge and filter. Normalization
+ * drops source genres missing from this map, so a new scraper genre shows up as
+ * a build-time repair note instead of an uncoloured badge nobody can filter.
+ */
+export const GENRE_CATEGORY_MAP: Record<string, GenreCategory> = {
   EDM: 'EDM',
   Techno: 'EDM',
   Hardcore: 'EDM',
@@ -19,7 +26,7 @@ const GENRE_CATEGORY_MAP: Record<DisplayGenre, GenreCategory> = {
   Jazz: 'Else',
   Pop: 'Else',
   Reggae: 'Else',
-};
+} satisfies Record<DisplayGenre, GenreCategory>;
 
 // Sub-genres only (excludes the main category names)
 export const SUB_GENRES: { value: string; label: string; category: GenreCategory }[] = [
@@ -34,7 +41,9 @@ export const SUB_GENRES: { value: string; label: string; category: GenreCategory
 ];
 
 export function getGenreCategory(genre: string): GenreCategory {
-  return GENRE_CATEGORY_MAP[genre as DisplayGenre] ?? 'Else';
+  // Object.hasOwn, not `in`/`?.`: 'constructor' and 'toString' would otherwise
+  // resolve through the prototype chain and pass as known genres.
+  return Object.hasOwn(GENRE_CATEGORY_MAP, genre) ? GENRE_CATEGORY_MAP[genre] : 'Else';
 }
 
 export function genreMatchesCategories(

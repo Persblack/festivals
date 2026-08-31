@@ -16,8 +16,10 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { motion } from "framer-motion";
-import type { Festival } from "../types/festival";
-import { getGenreColorHex, getCountryFlag } from "../lib/utils";
+import type { Festival } from "@/types/festival";
+import { getGenreColorHex, getCountryFlag } from "@/lib/utils";
+import { MONTH_ABBR, formatYearRange, monthOf, yearOf } from "@/lib/dates";
+import { availableYears } from "@/lib/filters";
 
 const EXTENDED_GENRE_COLORS: Record<string, string> = {
   EDM: "#3B82F6",
@@ -49,10 +51,11 @@ const SIZE_LABELS: Record<string, string> = {
   massive: "Massive",
 };
 
-const MONTH_ABBR = [
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
-];
+/**
+ * One accent per season, drawn from the palette the other charts already use.
+ * Index 0 is the timeline blue, so a single-year dataset looks exactly as before.
+ */
+const SERIES_COLORS = ["#3B82F6", "#A855F7", "#06B6D4", "#F59E0B", "#22C55E", "#EF4444"];
 
 const tooltipStyle = {
   backgroundColor: "#1C1C1C",
@@ -74,14 +77,44 @@ const cardVariants = {
 };
 
 export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
-  const monthlyData = useMemo(() => {
-    const counts = new Array(12).fill(0);
-    festivals.forEach((f) => {
-      const month = new Date(f.start_date).getMonth();
-      counts[month]++;
+  const years = useMemo(() => availableYears(festivals), [festivals]);
+
+  /**
+   * Twelve month-of-year buckets per season. Comparing the same month across
+   * years is the useful reading, so the seasons overlay rather than extending
+   * the axis to 24 chronological ticks.
+   */
+  const seasonChart = useMemo(() => {
+    const buckets: Record<string, number[]> = {};
+    for (const year of years) buckets[year] = Array.from({ length: 12 }, () => 0);
+
+    for (const festival of festivals) {
+      const year = yearOf(festival.start_date);
+      const month = monthOf(festival.start_date);
+      if (year === null || month === null) continue;
+      const bucket = buckets[year];
+      if (bucket) bucket[month] += 1;
+    }
+
+    const series = years.map((year, i) => ({
+      key: String(year),
+      color: SERIES_COLORS[i % SERIES_COLORS.length],
+    }));
+
+    const data = MONTH_ABBR.map((month, i) => {
+      const row: Record<string, string | number> = { month };
+      for (const entry of series) row[entry.key] = buckets[entry.key]?.[i] ?? 0;
+      return row;
     });
-    return counts.map((count, i) => ({ month: MONTH_ABBR[i], count }));
-  }, [festivals]);
+
+    return { data, series };
+  }, [festivals, years]);
+
+  const isMultiYear = years.length > 1;
+  const yearSpan = formatYearRange(years);
+  // These charts cover the whole dataset, past festivals included — a season
+  // histogram cut off at today would read as empty for every month behind us.
+  const seasonSpan = yearSpan === "" ? "" : `, ${yearSpan}`;
 
   const genreData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -143,7 +176,7 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
           Festival Season at a Glance
         </h2>
         <p className="text-muted-foreground">
-          Data-driven insights across {festivals.length} festivals in 2026
+          Data-driven insights across all {festivals.length} festivals{seasonSpan}
         </p>
       </div>
 
@@ -162,12 +195,21 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
           </h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlyData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+              <AreaChart data={seasonChart.data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
-                  <linearGradient id="timelineGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.4} />
-                    <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
-                  </linearGradient>
+                  {seasonChart.series.map((series) => (
+                    <linearGradient
+                      key={series.key}
+                      id={`timelineGradient-${series.key}`}
+                      x1="0"
+                      y1="0"
+                      x2="0"
+                      y2="1"
+                    >
+                      <stop offset="5%" stopColor={series.color} stopOpacity={0.4} />
+                      <stop offset="95%" stopColor={series.color} stopOpacity={0} />
+                    </linearGradient>
+                  ))}
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                 <XAxis
@@ -187,20 +229,40 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
                   contentStyle={tooltipStyle}
                   labelStyle={tooltipLabelStyle}
                   itemStyle={tooltipItemStyle}
-                  formatter={(value: number) => [`${value} festivals`, "Count"]}
+                  formatter={(value: number, name: string) => [
+                    `${value} festivals`,
+                    isMultiYear ? name : "Count",
+                  ]}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#3B82F6"
-                  strokeWidth={3}
-                  fill="url(#timelineGradient)"
-                  dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
-                />
+                {seasonChart.series.map((series) => (
+                  <Area
+                    key={series.key}
+                    type="monotone"
+                    dataKey={series.key}
+                    name={series.key}
+                    stroke={series.color}
+                    strokeWidth={3}
+                    fill={`url(#timelineGradient-${series.key})`}
+                    dot={{ fill: series.color, strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
+                  />
+                ))}
               </AreaChart>
             </ResponsiveContainer>
           </div>
+          {isMultiYear && (
+            <div className="flex flex-wrap justify-center gap-4 mt-2">
+              {seasonChart.series.map((series) => (
+                <div key={series.key} className="flex items-center gap-2 text-sm">
+                  <span
+                    className="w-3 h-3 rounded-full inline-block"
+                    style={{ backgroundColor: series.color }}
+                  />
+                  <span className="text-muted-foreground">{series.key}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
 
         {/* Chart 2: Genre Breakdown */}

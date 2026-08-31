@@ -6,7 +6,12 @@ import { FestivalDetail } from "./FestivalDetail";
 import { FilterBar } from "./FilterBar";
 import { PlannerTimeline } from "./PlannerTimeline";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
-import { genreMatchesCategories } from "@/lib/genre-utils";
+import {
+  applyFilters,
+  availableYears,
+  buildSearchIndex,
+  defaultFilters,
+} from "@/lib/filters";
 import type { Festival, Filters } from "@/types/festival";
 import { Calendar } from "lucide-react";
 
@@ -15,35 +20,21 @@ interface TimelineViewProps {
 }
 
 export function TimelineView({ festivals }: TimelineViewProps) {
-  const [filters, setFilters] = useState<Filters>({ genres: [], subGenres: [], countries: [], sizes: [], dateRange: [1, 12], search: "", showPast: false });
+  const [filters, setFilters] = useState<Filters>(defaultFilters);
   const [selectedFestival, setSelectedFestival] = useState<Festival | null>(null);
   const { genres: globalGenres } = useGlobalGenreFilter();
 
+  // One lowercased haystack per festival, rebuilt only when the dataset changes.
+  const searchIndex = useMemo(() => buildSearchIndex(festivals), [festivals]);
+
+  // Seasons present in the data — drives the year chips in the filter bar.
+  const years = useMemo(() => availableYears(festivals), [festivals]);
+
   // Filter festivals
-  const filteredFestivals = useMemo(() => {
-    return festivals.filter((festival) => {
-      const matchesGlobalGenre = genreMatchesCategories(festival.genres, globalGenres);
-      const matchesSubGenre =
-        filters.subGenres.length === 0 ||
-        festival.genres.some((g) => filters.subGenres.includes(g));
-      const matchesCountry =
-        filters.countries.length === 0 ||
-        filters.countries.includes(festival.country_code);
-      const matchesSize =
-        filters.sizes.length === 0 ||
-        filters.sizes.includes(festival.size === "massive" ? "large" : festival.size);
-      const festivalMonth = new Date(festival.start_date).getMonth() + 1;
-      const matchesDateRange =
-        festivalMonth >= filters.dateRange[0] && festivalMonth <= filters.dateRange[1];
-      const matchesSearch =
-        !filters.search ||
-        festival.lineup?.some((artist) =>
-          artist.toLowerCase().includes(filters.search.toLowerCase())
-        ) ||
-        festival.name.toLowerCase().includes(filters.search.toLowerCase());
-      return matchesGlobalGenre && matchesSubGenre && matchesCountry && matchesSize && matchesDateRange && matchesSearch;
-    });
-  }, [festivals, filters, globalGenres]);
+  const filteredFestivals = useMemo(
+    () => applyFilters(festivals, filters, globalGenres, { searchIndex }),
+    [festivals, filters, globalGenres, searchIndex],
+  );
 
   const handleFestivalClick = (festival: Festival) => {
     setSelectedFestival(festival);
@@ -56,6 +47,7 @@ export function TimelineView({ festivals }: TimelineViewProps) {
         filters={filters}
         onFiltersChange={setFilters}
         resultCount={filteredFestivals.length}
+        availableYears={years}
       />
 
       {/* Timeline */}

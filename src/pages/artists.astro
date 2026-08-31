@@ -1,9 +1,7 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { ArtistsPage } from "../components/ArtistsPage";
-import festivalsData from "../data/festivals.json";
-
-const festivals = festivalsData.festivals;
+import { festivals } from "@/lib/festival-data";
 ---
 
 <Layout title="Artists - Festival Atlas" description="Browse artists performing at Central European music festivals. Search by name and see which festivals they play.">

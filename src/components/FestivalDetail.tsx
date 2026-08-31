@@ -142,12 +142,14 @@ export function FestivalDetail({ festival, open, onClose, allFestivals, onFestiv
                 {formatPriceRange(festival.ticket_price_min, festival.ticket_price_max, festival.currency)}
               </Button>
             )}
-            <Button variant="outline" asChild>
-              <a href={festival.website} target="_blank" rel="noopener noreferrer">
-                <Globe className="w-4 h-4 mr-2" />
-                Website
-              </a>
-            </Button>
+            {festival.website && (
+              <Button variant="outline" asChild>
+                <a href={festival.website} target="_blank" rel="noopener noreferrer">
+                  <Globe className="w-4 h-4 mr-2" />
+                  Website
+                </a>
+              </Button>
+            )}
             {festival.instagram && (
               <Button variant="outline" asChild>
                 <a href={festival.instagram} target="_blank" rel="noopener noreferrer">
@@ -156,16 +158,20 @@ export function FestivalDetail({ festival, open, onClose, allFestivals, onFestiv
                 </a>
               </Button>
             )}
-            <Button variant="outline" asChild>
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${festival.latitude},${festival.longitude}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Navigation className="w-4 h-4 mr-2" />
-                Google Maps
-              </a>
-            </Button>
+            {/* Coordinates are nullable — a maps link built from `null,null`
+                searches for nothing. */}
+            {festival.latitude !== null && festival.longitude !== null && (
+              <Button variant="outline" asChild>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${festival.latitude},${festival.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Navigation className="w-4 h-4 mr-2" />
+                  Google Maps
+                </a>
+              </Button>
+            )}
             <Button
               variant="outline"
               className="md:hidden"
@@ -174,7 +180,7 @@ export function FestivalDetail({ festival, open, onClose, allFestivals, onFestiv
                   navigator.share({
                     title: festival.name,
                     text: `${festival.name} — ${formatDateRange(festival.start_date, festival.end_date)} in ${festival.city}, ${festival.country_name}`,
-                    url: festival.website,
+                    url: festival.website ?? window.location.href,
                   });
                 }
               }}

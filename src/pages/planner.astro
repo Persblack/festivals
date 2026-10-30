@@ -1,9 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { PlannerPage } from "../components/PlannerPage";
-import { festivals } from "@/lib/festival-data";
+import { PlannerPageIsland } from "../components/PlannerPage";
+import { festivalDataUrl } from "@/lib/festival-data-file";
 ---
 
-<Layout title="Festival Planner | Synners" description="Plan your festival season: add festivals and see them laid out on one timeline." noindex>
-  <PlannerPage client:load festivals={festivals} />
+<Layout preload={festivalDataUrl} title="Festival Planner | Synners" description="Plan your festival season: add festivals and see them laid out on one timeline." noindex>
+  <PlannerPageIsland client:load dataUrl={festivalDataUrl} />
 </Layout>

@@ -4,3 +4,10 @@ ErrorDocument 404 /404.html
 RewriteEngine On
 RewriteCond %{HTTP_HOST} ^www\.synners\.si$ [NC]
 RewriteRule ^(.*)$ https://synners.si/$1 [R=301,L]
+
+# Content-hashed files never change under their name: cache them for a year.
+<IfModule mod_headers.c>
+  <FilesMatch "(^festivals\.[0-9a-f]{12}\.json|\.[A-Za-z0-9_-]{8}\.(js|css|woff2?))$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>

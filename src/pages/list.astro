@@ -1,10 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { ListView } from "../components/ListView";
-import { festivals } from "@/lib/festival-data";
+import { ListViewIsland } from "../components/ListView";
+import { festivalDataUrl } from "@/lib/festival-data-file";
 ---
 
-<Layout title="All Music Festivals in Europe: Filter & Compare | Synners" description="Every music festival in Europe in one list. Filter by genre, country, size, month and artist, sort by date, compare in a table.">
+<Layout preload={festivalDataUrl} title="All Music Festivals in Europe: Filter & Compare | Synners" description="Every music festival in Europe in one list. Filter by genre, country, size, month and artist, sort by date, compare in a table.">
   <div class="space-y-6">
     <div class="text-center mb-8">
       <h1 class="text-4xl font-bold text-foreground mb-3">All festivals in Europe</h1>
@@ -13,6 +13,6 @@ import { festivals } from "@/lib/festival-data";
       </p>
     </div>
 
-    <ListView client:idle festivals={festivals} />
+    <ListViewIsland client:idle dataUrl={festivalDataUrl} />
   </div>
 </Layout>

@@ -1,10 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { MapPage } from "../components/MapPage";
-import { festivals } from "@/lib/festival-data";
+import { MapPageIsland } from "../components/MapPage";
+import { festivalDataUrl } from "@/lib/festival-data-file";
 ---
 
-<Layout title="Festival Map of Europe: Every Upcoming Festival | Synners" description="Every upcoming music festival in Europe on one interactive map, with a heat map of the busiest regions. Filter by genre, country and month.">
+<Layout preload={festivalDataUrl} title="Festival Map of Europe: Every Upcoming Festival | Synners" description="Every upcoming music festival in Europe on one interactive map, with a heat map of the busiest regions. Filter by genre, country and month.">
   <div class="space-y-6">
     <div class="text-center mb-8">
       <h1 class="text-4xl font-bold text-foreground mb-3">Festival map of Europe</h1>
@@ -13,6 +13,6 @@ import { festivals } from "@/lib/festival-data";
       </p>
     </div>
 
-    <MapPage client:load festivals={festivals} />
+    <MapPageIsland client:load dataUrl={festivalDataUrl} />
   </div>
 </Layout>

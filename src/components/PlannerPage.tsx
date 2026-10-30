@@ -12,6 +12,7 @@ import { RecommendedFestivals } from "./RecommendedFestivals";
 import { getRecommendedForPlanner } from "@/lib/recommendations";
 import { useSelectedFestivals } from "@/hooks/useSelectedFestivals";
 import type { Festival } from "@/types/festival";
+import { withFestivalData } from "./withFestivalData";
 
 interface PlannerPageProps {
   festivals: Festival[];
@@ -171,3 +172,6 @@ export function PlannerPage({ festivals }: PlannerPageProps) {
     </div>
   );
 }
+
+/** The page island: fetches the dataset file instead of taking it as a prop. */
+export const PlannerPageIsland = withFestivalData(PlannerPage);

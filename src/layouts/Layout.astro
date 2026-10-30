@@ -17,6 +17,8 @@ interface Props {
   /** Structured data objects, one `<script type="application/ld+json">` each. */
   jsonLd?: Record<string, unknown>[];
   noindex?: boolean;
+  /** A JSON file an island will fetch: start the download with the HTML. */
+  preload?: string;
 }
 
 const {
@@ -24,6 +26,7 @@ const {
   description = "Every music festival in Europe on one map and calendar: dates, lineups, tickets, filtered by the sin you came for.",
   jsonLd = [],
   noindex = false,
+  preload,
 } = Astro.props;
 
 const canonical = `${SITE_URL}${Astro.url.pathname}`;
@@ -39,6 +42,7 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="canonical" href={canonical} />
+    {preload && <link rel="preload" href={preload} as="fetch" crossorigin="anonymous" />}
     {noindex && <meta name="robots" content="noindex, follow" />}
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192" />

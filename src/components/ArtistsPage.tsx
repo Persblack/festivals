@@ -17,6 +17,7 @@ import { FestivalDetail } from "./FestivalDetail";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import { genreMatchesCategories } from "@/lib/genre-utils";
 import type { Festival, Artist } from "@/types/festival";
+import { withFestivalData } from "./withFestivalData";
 
 interface ArtistsPageProps {
   festivals: Festival[];
@@ -312,3 +313,6 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
     </div>
   );
 }
+
+/** The page island: fetches the dataset file instead of taking it as a prop. */
+export const ArtistsPageIsland = withFestivalData(ArtistsPage);

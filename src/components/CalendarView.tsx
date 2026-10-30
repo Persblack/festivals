@@ -15,6 +15,7 @@ import {
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
 import { Calendar } from "lucide-react";
+import { withFestivalData } from "./withFestivalData";
 
 const MONTH_INITIAL_COUNT = 12;
 const MONTH_LOAD_MORE = 12;
@@ -180,3 +181,6 @@ export function CalendarView({ festivals }: CalendarViewProps) {
     </div>
   );
 }
+
+/** The page island: fetches the dataset file instead of taking it as a prop. */
+export const CalendarViewIsland = withFestivalData(CalendarView);

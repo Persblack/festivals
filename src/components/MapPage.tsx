@@ -12,6 +12,7 @@ import { FestivalDetail } from "./FestivalDetail";
 import { FestivalMap } from "./FestivalMap";
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
+import { withFestivalData } from "./withFestivalData";
 
 interface MapPageProps {
   festivals: Festival[];
@@ -71,3 +72,6 @@ export function MapPage({ festivals }: MapPageProps) {
     </div>
   );
 }
+
+/** The page island: fetches the dataset file instead of taking it as a prop. */
+export const MapPageIsland = withFestivalData(MapPage);

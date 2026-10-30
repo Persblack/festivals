@@ -1,10 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { ArtistsPage } from "../components/ArtistsPage";
-import { festivals } from "@/lib/festival-data";
+import { ArtistsPageIsland } from "../components/ArtistsPage";
+import { festivalDataUrl } from "@/lib/festival-data-file";
 ---
 
-<Layout title="Festival Lineups: Find Where Your Artist Plays | Synners" description="Search festival lineups across Europe by artist and see every festival they play this season.">
+<Layout preload={festivalDataUrl} title="Festival Lineups: Find Where Your Artist Plays | Synners" description="Search festival lineups across Europe by artist and see every festival they play this season.">
   <div class="space-y-6">
     <div class="text-center mb-8">
       <h1 class="text-4xl font-bold text-foreground mb-3">Artists</h1>
@@ -13,6 +13,6 @@ import { festivals } from "@/lib/festival-data";
       </p>
     </div>
 
-    <ArtistsPage client:idle festivals={festivals} />
+    <ArtistsPageIsland client:idle dataUrl={festivalDataUrl} />
   </div>
 </Layout>

@@ -1,10 +1,10 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import { TimelineView } from "../components/TimelineView";
-import { festivals } from "@/lib/festival-data";
+import { TimelineViewIsland } from "../components/TimelineView";
+import { festivalDataUrl } from "@/lib/festival-data-file";
 ---
 
-<Layout title="Festival Timeline for Europe | Synners" description="Music festivals in Europe on a horizontal timeline, from this week to next summer.">
+<Layout preload={festivalDataUrl} title="Festival Timeline for Europe | Synners" description="Music festivals in Europe on a horizontal timeline, from this week to next summer.">
   <div class="space-y-6">
     <div class="text-center mb-8">
       <h1 class="text-4xl font-bold text-foreground mb-3">Festival Timeline</h1>
@@ -13,6 +13,6 @@ import { festivals } from "@/lib/festival-data";
       </p>
     </div>
 
-    <TimelineView client:load festivals={festivals} />
+    <TimelineViewIsland client:load dataUrl={festivalDataUrl} />
   </div>
 </Layout>

@@ -14,6 +14,7 @@ import {
 } from "@/lib/filters";
 import type { Festival, Filters } from "@/types/festival";
 import { Calendar } from "lucide-react";
+import { withFestivalData } from "./withFestivalData";
 
 interface TimelineViewProps {
   festivals: Festival[];
@@ -91,3 +92,6 @@ export function TimelineView({ festivals }: TimelineViewProps) {
     </div>
   );
 }
+
+/** The page island: fetches the dataset file instead of taking it as a prop. */
+export const TimelineViewIsland = withFestivalData(TimelineView);

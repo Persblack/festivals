@@ -19,6 +19,7 @@ import {
 import { useGlobalGenreFilter } from "@/hooks/useGlobalGenreFilter";
 import type { Festival, Filters } from "@/types/festival";
 import { Grid3X3, Table, ArrowUp, ExternalLink } from "lucide-react";
+import { withFestivalData } from "./withFestivalData";
 
 interface ListViewProps {
   festivals: Festival[];
@@ -292,3 +293,6 @@ export function ListView({ festivals }: ListViewProps) {
     </div>
   );
 }
+
+/** The page island: fetches the dataset file instead of taking it as a prop. */
+export const ListViewIsland = withFestivalData(ListView);

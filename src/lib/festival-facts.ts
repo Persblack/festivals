@@ -17,6 +17,8 @@ export interface Airport {
   iata: string;
   lat: number;
   lon: number;
+  /** OurAirports `large_airport`: the hubs most visitors fly into. */
+  large?: boolean;
 }
 
 /** Scheduled large/medium airports with an IATA code, cut to the dataset's area. */
@@ -33,19 +35,28 @@ export function haversineKm(lat1: number, lon1: number, lat2: number, lon2: numb
   return 2 * EARTH_RADIUS_KM * Math.asin(Math.min(1, Math.sqrt(a)));
 }
 
-/** The closest airports within `maxKm`, nearest first, distance rounded to whole km. */
+/**
+ * The closest airports within `maxKm`, nearest first, distance rounded to
+ * whole km. When none of the nearest `limit` is a large airport, the nearest
+ * large one in range is added: a regional field with two flights a week is
+ * rarely the one people book.
+ */
 export function nearestAirports(
   lat: number,
   lon: number,
   airports: readonly Airport[] = AIRPORTS,
   { maxKm = 150, limit = 2 } = {},
 ): { airport: Airport; km: number }[] {
-  return airports
+  const inRange = airports
     .map((airport) => ({ airport, km: haversineKm(lat, lon, airport.lat, airport.lon) }))
     .filter((a) => a.km <= maxKm)
-    .sort((a, b) => a.km - b.km)
-    .slice(0, limit)
-    .map((a) => ({ airport: a.airport, km: Math.round(a.km) }));
+    .sort((a, b) => a.km - b.km);
+  const picked = inRange.slice(0, limit);
+  if (!picked.some((a) => a.airport.large)) {
+    const large = inRange.find((a) => a.airport.large);
+    if (large) picked.push(large);
+  }
+  return picked.map((a) => ({ airport: a.airport, km: Math.round(a.km) }));
 }
 
 /** `3` for Fri-Sun. A single-day festival is 1. */
@@ -211,6 +222,12 @@ export function proseGenres(genres: string[]): string[] {
   return genres.filter((g) => g !== 'Else');
 }
 
+/** ` at Wacken Festival Grounds`, or nothing when the venue only repeats the city. */
+export function venueClause(f: Pick<Festival, 'venue' | 'city'>): string {
+  const venue = f.venue.trim();
+  return venue && artistKey(venue) !== artistKey(f.city) ? ` at ${venue}` : '';
+}
+
 /** The dataset's size bucket in words. No visitor numbers: the bucket is all we know. */
 const SIZE_WORDS: Record<Festival['size'], string> = {
   small: 'an intimate festival',
@@ -229,7 +246,7 @@ export function factualIntro(f: Festival, editions: readonly Festival[], isOver:
   const length = days === 1 ? 'one-day' : `${days}-day`;
   const sentences = [
     `${f.name} is a ${length} ${genres.length ? `${joinWords(genres)} ` : 'music '}festival in ${f.city}, ${f.country_name}.`,
-    `The ${f.year} edition ${isOver ? 'ran' : 'runs'} ${formatDateRange(f.start_date, f.end_date)}${f.venue ? ` at ${f.venue}` : ''}.`,
+    `The ${f.year} edition ${isOver ? 'ran' : 'runs'} ${formatDateRange(f.start_date, f.end_date)}${venueClause(f)}.`,
     `Synners lists it as ${SIZE_WORDS[f.size]}.`,
   ];
   if (f.ticket_price_min !== null || f.ticket_price_max !== null) {

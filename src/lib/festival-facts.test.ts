@@ -49,9 +49,18 @@ describe('nearestAirports', () => {
     expect(result[0].km).toBeLessThan(25);
   });
 
+  it('adds the nearest large airport when the closest ones are all regional', () => {
+    const withHub = [...airports, { name: 'Hub', city: 'H', iata: 'HUB', lat: 47, lon: 14.5, large: true }];
+    expect(nearestAirports(46.05, 14.5, withHub).map((r) => r.airport.iata)).toEqual(['NEA', 'HUB']);
+    const farHub = [...airports, { name: 'Hub', city: 'H', iata: 'HUB', lat: 47.25, lon: 14.5, large: true }];
+    expect(nearestAirports(46.05, 14.5, farHub).map((r) => r.airport.iata)).toEqual(['NEA', 'FAR', 'HUB']);
+    expect(nearestAirports(46.05, 14.5, farHub, { maxKm: 120 }).map((r) => r.airport.iata)).toEqual(['NEA']);
+  });
+
   it('drops airports beyond maxKm and honours the limit', () => {
     expect(nearestAirports(46.05, 14.5, airports, { maxKm: 50 }).map((r) => r.airport.iata)).toEqual(['NEA']);
     expect(nearestAirports(46.05, 14.5, airports, { limit: 1 })).toHaveLength(1);
+    expect(nearestAirports(46.05, 14.5, [{ name: 'L', city: 'L', iata: 'LLL', lat: 46.1, lon: 14.5, large: true }, ...airports], { limit: 1 })).toHaveLength(1);
   });
 
   it('finds Ljubljana airport for a festival in Ljubljana with the bundled data', () => {
@@ -153,5 +162,10 @@ describe('factualIntro', () => {
     expect(text).not.toContain('Else');
     expect(text).not.toContain('announced');
     expect(text).not.toMatch(/—/);
+  });
+
+  it('leaves out a venue that only repeats the city', () => {
+    const f = festival('a-2026', '2026-07-03', { city: 'Strukkamp', venue: ' strukkamp ' });
+    expect(factualIntro(f, [f], true)).toContain('ran Jul 3, 2026.');
   });
 });

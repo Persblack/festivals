@@ -38,13 +38,13 @@ export function AttendanceChart({ data }: AttendanceChartProps) {
           <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
           <XAxis
             dataKey="year"
-            stroke="#C7BDBD"
+            stroke="#BDBDBD"
             fontSize={12}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
-            stroke="#C7BDBD"
+            stroke="#BDBDBD"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -52,12 +52,12 @@ export function AttendanceChart({ data }: AttendanceChartProps) {
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1C1515",
+              backgroundColor: "#111111",
               border: "1px solid #333",
               borderRadius: "12px",
-              color: "#F2EEEE",
+              color: "#F5F5F5",
             }}
-            labelStyle={{ color: "#F2EEEE", fontWeight: "bold" }}
+            labelStyle={{ color: "#F5F5F5", fontWeight: "bold" }}
             formatter={(value: number, name: string, props: any) => {
               const yearData = data.find((d) => d.year === props.payload.year);
               return [

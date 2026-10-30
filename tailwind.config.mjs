@@ -5,16 +5,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Seven Sins palette: warm near-black ground, one blood red, bone text.
-        background: '#0E0B0B',
-        foreground: '#F2EEEE',
+        // Seven Sins palette: pure black ground, one blood red, bone text.
+        background: '#000000',
+        foreground: '#F5F5F5',
         card: {
-          DEFAULT: '#1C1515',
-          foreground: '#F2EEEE',
+          DEFAULT: '#111111',
+          foreground: '#F5F5F5',
         },
         muted: {
-          DEFAULT: '#261C1C',
-          foreground: '#C7BDBD',
+          DEFAULT: '#1C1C1C',
+          foreground: '#BDBDBD',
         },
         primary: {
           DEFAULT: '#D91A1A',
@@ -22,22 +22,22 @@ export default {
         },
         secondary: {
           DEFAULT: '#FF5C5C',
-          foreground: '#140D0D',
+          foreground: '#0A0A0A',
         },
         accent: {
-          DEFAULT: '#E8DCDC',
-          foreground: '#140D0D',
+          DEFAULT: '#E5E5E5',
+          foreground: '#0A0A0A',
         },
         destructive: {
           DEFAULT: '#FF5C5C',
-          foreground: '#140D0D',
+          foreground: '#0A0A0A',
         },
-        ink: '#140D0D',
-        border: '#3A2C2C',
+        ink: '#0A0A0A',
+        border: '#2A2A2A',
         // Control edge, >= 3:1 against card and field (WCAG 1.4.11).
-        input: '#857070',
+        input: '#7A7A7A',
         // Control fill, lighter than every surface a control sits on.
-        field: '#241A1A',
+        field: '#181818',
         ring: '#FF5C5C',
       },
       borderRadius: {

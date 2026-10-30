@@ -163,7 +163,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
     const genres = festival.genres
       .map(
         (g) =>
-          `<span style="background-color:${getGenreColorHex(g)}" class="px-2 py-0.5 text-xs rounded-full text-[#140D0D] inline-block">${escapeHtml(g)}</span>`
+          `<span style="background-color:${getGenreColorHex(g)}" class="px-2 py-0.5 text-xs rounded-full text-[#0A0A0A] inline-block">${escapeHtml(g)}</span>`
       )
       .join(" ");
 

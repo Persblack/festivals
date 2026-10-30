@@ -10,4 +10,11 @@ RewriteRule ^(.*)$ https://synners.si/$1 [R=301,L]
   <FilesMatch "(^festivals\.[0-9a-f]{12}\.json|\.[A-Za-z0-9_-]{8}\.(js|css|woff2?))$">
     Header set Cache-Control "public, max-age=31536000, immutable"
   </FilesMatch>
+
+  # Share images in /og/ keep their name across rebuilds: a week, not a year.
+  # FilesMatch sees only the file name, so the root PNGs (icons, og.png) are
+  # excluded by name and keep the host default.
+  <FilesMatch "^(?!(og|icon-[0-9]+|apple-touch-icon)\.png$)[a-z0-9-]+\.png$">
+    Header set Cache-Control "public, max-age=604800"
+  </FilesMatch>
 </IfModule>

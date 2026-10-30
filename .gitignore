@@ -34,3 +34,6 @@ Screenshots/
 # Scraper output. Globbed, so dropping src/data/festivals_2027.json in for the
 # next season never risks committing a megabyte of data.
 src/data/festivals*.json
+
+# Claude Code local settings and agent worktrees
+.claude/

@@ -6,7 +6,7 @@
 
 import type { Festival } from '@/types/festival';
 import { daysBetween, formatDateRange } from '@/lib/dates';
-import { byProminence, seriesSlug } from '@/lib/seo';
+import { byProminence, countryInSentence, seriesSlug } from '@/lib/seo';
 import type { Hub } from '@/lib/seo';
 import { formatPriceRange } from '@/lib/utils';
 import airportsFile from './airports.json';
@@ -286,7 +286,7 @@ export function hubMentions(
   const plural = (n: number) => (n === 1 ? 'festival' : 'festivals');
   if (country) {
     const n = country.festivals.length;
-    mentions.push({ path: country.path, label: `${n} upcoming ${plural(n)} in ${country.country}` });
+    mentions.push({ path: country.path, label: `${n} upcoming ${plural(n)} in ${countryInSentence(country.country!)}` });
   }
   for (const genreHub of genreHubs) {
     const combo = hubs.combos.find((h) => h.country === f.country_name && h.genre === genreHub.genre);

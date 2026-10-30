@@ -8,6 +8,7 @@ import { SelectFestivalButton } from "@/components/SelectFestivalButton";
 import { hubs, series, todayIso, upcoming } from "@/lib/hubs";
 import {
   breadcrumbJsonLd,
+  countryInSentence,
   byProminence,
   eventJsonLd,
   festivalPath,
@@ -271,7 +272,7 @@ const links = [
 
     {similar.length > 0 && (
       <section class="space-y-4">
-        <h2 class="text-3xl text-white">Similar festivals in {f.country_name}</h2>
+        <h2 class="text-3xl text-white">Similar festivals in {countryInSentence(f.country_name)}</h2>
         <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {similar.map((o) => (
             <li>

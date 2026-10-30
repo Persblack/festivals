@@ -6,7 +6,7 @@
 import Layout from "@/layouts/Layout.astro";
 import FestivalLinkList from "@/components/FestivalLinkList.astro";
 import type { Hub } from "@/lib/seo";
-import { breadcrumbJsonLd, busiestMonth, byProminence, festivalPath, headlineYear, slugify, topValues, SITE_URL } from "@/lib/seo";
+import { breadcrumbJsonLd, busiestMonth, byProminence, countryInSentence, festivalPath, headlineYear, slugify, topValues, SITE_URL } from "@/lib/seo";
 import { getGenreCategory, isGenreCategory, SINS } from "@/lib/genre-utils";
 import { faqJsonLd, faqSegments, hubFaq } from "@/lib/hub-faq";
 import { todayIso } from "@/lib/hubs";
@@ -29,7 +29,7 @@ const sin = hub.genre ? SINS[isGenreCategory(hub.genre) ? hub.genre : getGenreCa
 const listFilter = hub.genre && isGenreCategory(hub.genre) ? `?genre=${encodeURIComponent(hub.genre)}` : "";
 
 const what = hub.genre ? `${hub.genre} festival${count === 1 ? "" : "s"}` : `music festival${count === 1 ? "" : "s"}`;
-const where = hub.country ? `in ${hub.country}` : "across Europe";
+const where = hub.country ? `in ${countryInSentence(hub.country)}` : "across Europe";
 const description =
   `${count} upcoming ${what} ${where}` +
   (year ? ` for ${year}` : "") +

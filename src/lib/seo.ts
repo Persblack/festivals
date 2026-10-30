@@ -21,6 +21,11 @@ export function festivalPath(festivalId: string): string {
   return `/festivals/${seriesSlug(festivalId)}/`;
 }
 
+/** `in the Netherlands`, `in the Czech Republic`, `in Germany`. */
+export function countryInSentence(country: string): string {
+  return /^(Netherlands|Czech Republic|United Kingdom|United States)$/.test(country) ? `the ${country}` : country;
+}
+
 export function slugify(text: string): string {
   return text
     .normalize('NFKD')
@@ -186,7 +191,7 @@ export function buildHubs(upcoming: Festival[]): { countries: Hub[]; genres: Hub
     .sort((a, b) => b[1].length - a[1].length)
     .map(([country, festivals]) => ({
       path: `/countries/${slugify(country)}/`,
-      heading: `Music Festivals in ${country}`,
+      heading: `Music Festivals in ${countryInSentence(country)}`,
       festivals,
       country,
     }));
@@ -203,7 +208,7 @@ export function buildHubs(upcoming: Festival[]): { countries: Hub[]; genres: Hub
   const combos: Hub[] = countries.flatMap((countryHub) =>
     HUB_GENRES.map((genre) => ({
       path: `${countryHub.path}${slugify(genre)}/`,
-      heading: `${genre} Festivals in ${countryHub.country}`,
+      heading: `${genre} Festivals in ${countryInSentence(countryHub.country!)}`,
       festivals: countryHub.festivals.filter((f) => matchesHubGenre(f, genre)),
       country: countryHub.country,
       genre,

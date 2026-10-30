@@ -6,7 +6,7 @@
 
 import type { Festival } from '@/types/festival';
 import type { Hub } from '@/lib/seo';
-import { byProminence, festivalPath, seriesSlug, topValues } from '@/lib/seo';
+import { byProminence, countryInSentence, festivalPath, seriesSlug, topValues } from '@/lib/seo';
 import { MONTH_NAMES, formatDateRange, parseLocalDate, startOfToday, toDateString } from '@/lib/dates';
 import { formatPriceRange } from '@/lib/utils';
 
@@ -25,11 +25,6 @@ export interface FaqItem {
 /** `EDM` stays as it is, `Metal` reads as `metal` mid-sentence. */
 function genreWord(genre: string): string {
   return /^[A-Z]+$/.test(genre) ? genre : genre.toLowerCase();
-}
-
-/** `in the Netherlands`, `in the Czech Republic`, `in Germany`. */
-export function countryInSentence(country: string): string {
-  return /^(Netherlands|Czech Republic|United Kingdom|United States)$/.test(country) ? `the ${country}` : country;
 }
 
 function plural(n: number, one: string, many = `${one}s`): string {

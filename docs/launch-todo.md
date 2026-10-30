@@ -29,6 +29,6 @@ festival in Europe 2027 on one map"), say plainly that you built it, and answer 
 
 - [ ] Show HN on Hacker News ("Show HN: Every music festival in Europe on one map")
 - [ ] Product Hunt launch
-- [ ] Email 20 smaller festivals that have a page on Synners: "You're listed on Synners, here is your page" with the `/festivals/<name>/` link. Smaller festivals link back more often than big ones.
+- [ ] Send the 15 drafts in Gmail (account info@wassergo.de, subject "... auf Synners" / "... on Synners"); then email more smaller festivals that have a page on Synners: "You're listed on Synners, here is your page" with the `/festivals/<name>/` link. Smaller festivals link back more often than big ones.
 - [ ] Slovenian and Balkan music blogs and magazines: offer the map or a "festivals in Slovenia 2027" list
 - [ ] Festival Facebook groups and Discords (genre and country): share the hub page when someone asks "which festivals this summer?"

@@ -2,8 +2,9 @@ import type { APIRoute } from 'astro';
 import { dataUpdatedAt } from '@/lib/festival-data';
 import { hubs, series } from '@/lib/hubs';
 import { SITE_URL, lastmodOf, seriesSlug } from '@/lib/seo';
+import { isThinSeries } from '@/lib/festival-facts';
 
-/** Every indexable URL. The planner is per-visitor and stays out (it is noindex). */
+/** Every indexable URL. The planner and thin festival series are noindex and stay out. */
 export const GET: APIRoute = () => {
   const siteLastmod = dataUpdatedAt?.slice(0, 10) ?? null;
   const urls: { path: string; lastmod: string | null }[] = [
@@ -14,7 +15,8 @@ export const GET: APIRoute = () => {
       path: hub.path,
       lastmod: lastmodOf(hub.festivals),
     })),
-    ...[...series.values()].map((editions) => ({
+    // Thin series pages are noindex; listing them here would contradict that.
+    ...[...series.values()].filter((editions) => !isThinSeries(editions)).map((editions) => ({
       path: `/festivals/${seriesSlug(editions[0].id)}/`,
       lastmod: lastmodOf(editions),
     })),

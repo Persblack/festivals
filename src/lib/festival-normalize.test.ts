@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeFestivals } from './festival-normalize';
+import { cleanDescription, cleanVenue, normalizeFestivals } from './festival-normalize';
 
 /** A row shaped like real scraper output. */
 function row(overrides: Record<string, unknown> = {}) {
@@ -213,5 +213,27 @@ describe('normalizeFestivals — repairs', () => {
     const entry = health.repairs['no usable website URL'];
     expect(entry.count).toBe(12);
     expect(entry.samples).toHaveLength(5);
+  });
+});
+
+describe('directory clean-up', () => {
+  it('unglues directory venues and leaves real names alone', () => {
+    expect(cleanVenue('Orange ClubGrasweg 19Kiel,DE24118')).toBe('Orange Club, Grasweg 19');
+    expect(cleanVenue('Festsaal (ehemaliges Hotel zur Ems)Emsstraße 12Salzbergen,DE48499')).toBe('Festsaal (ehemaliges Hotel zur Ems), Emsstraße 12');
+    expect(cleanVenue('WildbachstadionWildbachstadionBissingen,DE86657')).toBe('Wildbachstadion');
+    expect(cleanVenue('Vauxhall Holiday ParkAcle New RdGreat Yarmouth,GBNR30 1TB')).toBe('Vauxhall Holiday Park, Acle New Rd');
+    expect(cleanVenue('Köln,DE50679')).toBe('');
+    expect(cleanVenue('Château de Beauregard568 Ancienne Route de OuistrehamHérouville-Saint-Clair,FR14200')).toBe('Château de Beauregard, 568 Ancienne Route de Ouistreham');
+    expect(cleanVenue('SchützenplatzBrückenstraßeBad Laasphe,DE57334')).toBe('Schützenplatz, Brückenstraße');
+    expect(cleanVenue('Steinmocker 53Steinmocker 53Neetzow-Liepen OT Steinmocker,DE17391')).toBe('Steinmocker 53');
+    expect(cleanVenue('Hof Dahnsdorf & ARTHOKHauptstr. 31Planetal OT Dahnsdorf,DE14806')).toBe('Hof Dahnsdorf & ARTHOK, Hauptstr. 31');
+    expect(cleanVenue('TivoliVredenburg')).toBe('TivoliVredenburg');
+    expect(cleanVenue('MatriX, Alter Postweg 2, 86343 Königsbrunn')).toBe('MatriX, Alter Postweg 2, 86343 Königsbrunn');
+  });
+
+  it('drops the directory teaser, keeps real descriptions', () => {
+    expect(cleanDescription('Das BO-MIT-ROCK Festival 2026 steigt am 07. März 2026 - schon 7 Bands im LineUp.')).toBeNull();
+    expect(cleanDescription('Infos zum Full Force 2026 - einen offiziellen Termin gibt es noch nicht.')).toBeNull();
+    expect(cleanDescription('Three days of metal on a farm field.')).toBe('Three days of metal on a farm field.');
   });
 });

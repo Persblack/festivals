@@ -21,6 +21,38 @@ const SIZE_BY_NAME: Record<string, FestivalSize> = {
   massive: 'massive',
 };
 
+/**
+ * A directory's German SEO teaser ("X 2026 steigt am 7. März 2026 - schon 7 Bands im
+ * LineUp. Was kosten die Tickets?"), copied verbatim and often a season stale. It is
+ * duplicate content in the wrong language: the page writes its own intro instead.
+ */
+const DIRECTORY_TEASER = /\bsteigt (am|vom)\b|^Infos zum\b/;
+
+export function cleanDescription(raw: unknown): string | null {
+  const text = asTrimmedString(raw);
+  return text && !DIRECTORY_TEASER.test(text) ? text : null;
+}
+
+/**
+ * Directory venues arrive glued as name + street + town: `Orange ClubGrasweg 19Kiel,DE24118`.
+ * Only strings with that `,CC<postcode>` tail are touched, so a real name with an inner
+ * capital (`TivoliVredenburg`) stays as it is. The town goes (the page shows the city), and a
+ * part repeated back to back is kept once. `Orange Club, Grasweg 19`; '' when only the town was
+ * there. The town is cut by position, not by matching the city field: that one is often
+ * spelled differently (`Wolfenbuettel`, `Bederkesa` for `Geestland - Bad Bederkesa`).
+ */
+export function cleanVenue(raw: unknown): string {
+  const venue = asTrimmedString(raw) ?? '';
+  const tail = /,\s?[A-Z]{2}[A-Z0-9 ]{3,9}$/;
+  if (!tail.test(venue)) return venue;
+  const parts = venue
+    .replace(tail, '')
+    .split(/(?<=[\p{Ll}\d)])(?=\p{Lu})|(?<=\p{Lu})(?=\p{Lu}\p{Ll})|(?<=\p{Ll})(?=\d)/u)
+    .map((p) => p.replace(/^[\s,]+|[\s,]+$/g, ''))
+    .filter((p, i, all) => p && p !== all[i - 1]);
+  return parts.slice(0, -1).join(', ');
+}
+
 export interface NormalizeResult {
   festivals: Festival[];
   health: DataHealth;
@@ -193,14 +225,14 @@ export function normalizeFestivals(
     const festival: Festival = {
       id,
       name,
-      description: asTrimmedString(raw.description),
+      description: cleanDescription(raw.description),
       start_date: startIso,
       end_date: endIso,
       year,
       city: asTrimmedString(raw.city) ?? '',
       country_code: (asTrimmedString(raw.country_code) ?? '').toUpperCase().slice(0, 2),
       country_name: asTrimmedString(raw.country_name) ?? '',
-      venue: asTrimmedString(raw.venue) ?? '',
+      venue: cleanVenue(raw.venue),
       latitude: coordinates?.latitude ?? null,
       longitude: coordinates?.longitude ?? null,
       genres,

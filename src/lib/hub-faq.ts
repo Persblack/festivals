@@ -59,7 +59,7 @@ export function hubFaq(hub: Hub, todayIso: string = toDateString(startOfToday())
 
   const kind = hub.genre ? `${genreWord(hub.genre)} festival` : 'music festival';
   const kinds = `${kind}s`;
-  const where = hub.country ? `in ${countryInSentence(hub.country)}` : 'in Europe';
+  const where = hub.country ? `in ${countryInSentence(hub.country)}` : hub.month ? `in Europe in ${hub.month}` : 'in Europe';
   /** `Wacken, Germany` on a Europe-wide hub, `Wacken` on a country hub. */
   const place = (f: Festival) => (hub.country ? f.city : `${f.city}, ${f.country_name}`);
   const items: FaqItem[] = [];
@@ -68,7 +68,8 @@ export function hubFaq(hub: Hub, todayIso: string = toDateString(startOfToday())
   const yearCounts = topValues(festivals.map((f) => String(f.year)), 1);
   const seasonYear = Number(yearCounts[0]);
   const season = festivals.filter((f) => f.year === seasonYear);
-  if (season.length >= 2) {
+  // A month hub is one month of one season: "busiest month" and "season opens" say nothing there.
+  if (season.length >= 2 && !hub.month) {
     const monthCounts = new Array(12).fill(0);
     for (const f of season) {
       const d = parseLocalDate(f.start_date);
@@ -166,7 +167,7 @@ export function hubFaq(hub: Hub, todayIso: string = toDateString(startOfToday())
 
   // Next: the first one that has not started yet.
   const next = festivals.find((f) => f.start_date >= todayIso);
-  if (next) {
+  if (next && !hub.month) {
     items.push({
       q: `What is the next ${kind} ${where}?`,
       a: `${next.name} in ${place(next)} is next, on ${formatDateRange(next.start_date, next.end_date)}.`,

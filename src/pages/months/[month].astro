@@ -1,0 +1,17 @@
+---
+import HubPage from "@/components/HubPage.astro";
+import { hubs } from "@/lib/hubs";
+import type { Hub } from "@/lib/seo";
+
+export function getStaticPaths() {
+  return hubs.months.map((hub, i) => ({
+    params: { month: hub.path.split("/")[2] },
+    // The months after this one first, in calendar order.
+    props: { hub, related: [...hubs.months.slice(i + 1), ...hubs.months.slice(0, i)] },
+  }));
+}
+
+const { hub, related } = Astro.props as { hub: Hub; related: Hub[] };
+---
+
+<HubPage hub={hub} related={related} crumbs={[{ name: "Home", path: "/" }, { name: "Months", path: "/months/" }, { name: hub.month!, path: hub.path }]} />

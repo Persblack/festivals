@@ -35,4 +35,17 @@ describe('seo', () => {
     // A category hub includes its sub-genres: Techno counts as EDM.
     expect(genres.find((h) => h.genre === 'EDM')!.festivals).toHaveLength(1);
   });
+
+  it('builds a month hub from the next occurrence of that month only', () => {
+    const july = (n: number, year: number) => festival(`j${n}-${year}`, `${year}-07-0${n}`);
+    const five = [1, 2, 3, 4, 5].map((n) => july(n, 2027));
+    // A July 2028 edition is a later season and stays off /months/july/.
+    const { months } = buildHubs([...five, july(6, 2028)], '2026-10-30');
+    expect(months.map((h) => [h.path, h.heading, h.festivals.length])).toEqual([
+      ['/months/july/', 'Music Festivals in Europe in July', 5],
+    ]);
+    // Once July 2027 is under way, the current month's hub is still this July.
+    expect(buildHubs(five, '2027-07-03').months).toHaveLength(1);
+    expect(buildHubs(five, '2027-08-01').months).toEqual([]);
+  });
 });

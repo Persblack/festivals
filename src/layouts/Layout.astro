@@ -164,7 +164,7 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
             For sinners, by sinners
           </p>
         </div>
-        <nav aria-label="Browse festivals" class="mt-8 grid gap-6 text-sm sm:grid-cols-2">
+        <nav aria-label="Browse festivals" class="mt-8 grid gap-6 text-sm sm:grid-cols-3">
           <div>
             <h2 class="mb-2 font-sans text-xs font-semibold uppercase tracking-widest text-muted-foreground">By country</h2>
             <ul class="flex flex-wrap gap-x-4 gap-y-1">
@@ -177,6 +177,13 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
             <ul class="flex flex-wrap gap-x-4 gap-y-1">
               {footerHubs.genres.map((hub) => <li><a href={hub.path} class="text-foreground/80 hover:text-white">{hub.genre}</a></li>)}
               <li><a href="/festivals/" class="text-secondary hover:text-white">Festivals A-Z</a></li>
+            </ul>
+          </div>
+          <div>
+            <h2 class="mb-2 font-sans text-xs font-semibold uppercase tracking-widest text-muted-foreground">By month</h2>
+            <ul class="flex flex-wrap gap-x-4 gap-y-1">
+              {footerHubs.months.map((hub) => <li><a href={hub.path} class="text-foreground/80 hover:text-white">{hub.month}</a></li>)}
+              <li><a href="/months/" class="text-secondary hover:text-white">All months</a></li>
             </ul>
           </div>
         </nav>

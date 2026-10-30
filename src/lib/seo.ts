@@ -8,7 +8,7 @@
 
 import type { Festival } from '@/types/festival';
 import { GENRE_CATEGORY_MAP, getGenreCategory, isGenreCategory } from '@/lib/genre-utils';
-import { MONTH_NAMES, parseLocalDate } from '@/lib/dates';
+import { MONTH_NAMES, parseLocalDate, startOfToday, toDateString } from '@/lib/dates';
 import { getGenreCoverImage } from '@/lib/utils';
 
 export const SITE_URL = 'https://synners.si';
@@ -172,13 +172,18 @@ export interface Hub {
   festivals: Festival[];
   country?: string;
   genre?: string;
+  /** `July`: the festivals starting in the next July still to come. */
+  month?: string;
 }
 
 /** Below this a combo hub would be a thin page; the country and genre hubs still cover it. */
 const MIN_COMBO_FESTIVALS = 5;
 
 /** Every hub page, built from the upcoming festivals only. */
-export function buildHubs(upcoming: Festival[]): { countries: Hub[]; genres: Hub[]; combos: Hub[] } {
+export function buildHubs(
+  upcoming: Festival[],
+  todayIso: string = toDateString(startOfToday()),
+): { countries: Hub[]; genres: Hub[]; combos: Hub[]; months: Hub[] } {
   const byCountry = new Map<string, Festival[]>();
   for (const f of upcoming) {
     if (!f.country_name) continue;
@@ -215,7 +220,24 @@ export function buildHubs(upcoming: Festival[]): { countries: Hub[]; genres: Hub
     })).filter((hub) => hub.festivals.length >= MIN_COMBO_FESTIVALS),
   );
 
-  return { countries, genres, combos };
+  // One evergreen URL per month, holding only its next occurrence: `/months/july/` is July 2027
+  // until July 2027 is over, so a search for "festivals in July" never mixes two seasons.
+  const thisYear = Number(todayIso.slice(0, 4));
+  const thisMonth = Number(todayIso.slice(5, 7)) - 1;
+  const months: Hub[] = MONTH_NAMES.map((month, m) => {
+    const prefix = `${m >= thisMonth ? thisYear : thisYear + 1}-${String(m + 1).padStart(2, '0')}`;
+    return {
+      path: `/months/${slugify(month)}/`,
+      heading: `Music Festivals in Europe in ${month}`,
+      festivals: upcoming.filter((f) => f.start_date.startsWith(prefix)),
+      month,
+    };
+  })
+    .filter((hub) => hub.festivals.length >= MIN_COMBO_FESTIVALS)
+    // Chronological from the current month on.
+    .sort((a, b) => a.festivals[0].start_date.localeCompare(b.festivals[0].start_date));
+
+  return { countries, genres, combos, months };
 }
 
 /** `2026-03-09 18:11:52` -> `2026-03-09`; null when there is no usable date. */

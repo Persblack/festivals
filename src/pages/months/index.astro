@@ -1,0 +1,25 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { hubs } from "@/lib/hubs";
+import { breadcrumbJsonLd, headlineYear } from "@/lib/seo";
+---
+
+<Layout
+  title="Music Festivals in Europe by Month | Synners"
+  description={`Upcoming music festivals in Europe month by month, from ${hubs.months[0]?.month} to ${hubs.months.at(-1)?.month}. Dates, lineups and tickets for each month.`}
+  jsonLd={[breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Months", path: "/months/" }])]}
+>
+  <div class="space-y-10">
+    <h1 class="text-5xl md:text-7xl text-white">Festivals by month</h1>
+    <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      {hubs.months.map((hub) => (
+        <li>
+          <a href={hub.path} class="flex flex-col gap-1.5 rounded-[18px] border border-border bg-card px-5 py-4 hover:border-input">
+            <span class="font-display text-3xl text-white">{hub.month} {headlineYear(hub.festivals)}</span>
+            <span class="text-sm text-muted-foreground">{hub.festivals.length} festivals</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Layout>

@@ -29,10 +29,10 @@ const sin = hub.genre ? SINS[isGenreCategory(hub.genre) ? hub.genre : getGenreCa
 const listFilter = hub.genre && isGenreCategory(hub.genre) ? `?genre=${encodeURIComponent(hub.genre)}` : "";
 
 const what = hub.genre ? `${hub.genre} festival${count === 1 ? "" : "s"}` : `music festival${count === 1 ? "" : "s"}`;
-const where = hub.country ? `in ${countryInSentence(hub.country)}` : "across Europe";
+const where = hub.country ? `in ${countryInSentence(hub.country)}` : hub.month ? `across Europe in ${hub.month}` : "across Europe";
 const description =
   `${count} upcoming ${what} ${where}` +
-  (year ? ` for ${year}` : "") +
+  (year ? (hub.month ? ` ${year}` : ` for ${year}`) : "") +
   `: dates, lineups, locations and tickets` +
   (biggest.length ? `, including ${biggest.map((f) => f.name).join(", ")}.` : ".");
 
@@ -66,7 +66,7 @@ const itemList = {
       <h1 class="text-5xl md:text-7xl text-white">{heading}</h1>
       <p class="text-lg leading-relaxed text-muted-foreground">
         <strong class="font-semibold text-white">{count} {what}</strong> still to come {where}.
-        {month && <> The busiest month is {month}.</>}
+        {month && !hub.month && <> The busiest month is {month}.</>}
         {cities.length > 0 && <> Most of them happen in {cities.join(", ")}.</>}
         {countries.length > 0 && <> The countries with the most: {countries.join(", ")}.</>}
         {biggest.length > 0 && <> The biggest names: {biggest.map((f, i) => <>{i > 0 && ", "}<a href={festivalPath(f.id)} class="text-secondary hover:text-white">{f.name}</a></>)}.</>}

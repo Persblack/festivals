@@ -8,10 +8,10 @@ import { isThinSeries } from '@/lib/festival-facts';
 export const GET: APIRoute = () => {
   const siteLastmod = dataUpdatedAt?.slice(0, 10) ?? null;
   const urls: { path: string; lastmod: string | null }[] = [
-    ...['/', '/map/', '/calendar/', '/list/', '/artists/', '/timeline/', '/festivals/', '/countries/', '/genres/'].map(
+    ...['/', '/map/', '/calendar/', '/list/', '/artists/', '/timeline/', '/festivals/', '/countries/', '/genres/', '/months/'].map(
       (path) => ({ path, lastmod: siteLastmod }),
     ),
-    ...[...hubs.countries, ...hubs.genres, ...hubs.combos].map((hub) => ({
+    ...[...hubs.countries, ...hubs.genres, ...hubs.combos, ...hubs.months].map((hub) => ({
       path: hub.path,
       lastmod: lastmodOf(hub.festivals),
     })),

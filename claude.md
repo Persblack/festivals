@@ -4,9 +4,9 @@
 
 Build a beautiful, performant, static website for discovering music festivals across Central Europe. The site features an interactive map view, calendar timeline, and dynamic filtering - all without user authentication or backend services. Data is stored locally in JSON format.
 
-**Domain:** festivals.klatterico.de  
-**Name:** Festival Atlas  
-**Tagline:** "Your Central European Festival Compass"
+**Domain:** synners.si  
+**Name:** Synners  
+**Tagline:** "Find your place to sin"
 
 ## Core Principles
 

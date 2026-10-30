@@ -1,4 +1,4 @@
-// Shared map configuration for Festival Atlas
+// Shared map configuration for Synners
 // Provides consistent marker and control styling across all maps
 
 // ============================================================================

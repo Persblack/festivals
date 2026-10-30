@@ -9,5 +9,5 @@ export default defineConfig({
       applyBaseStyles: false,
     }),
   ],
-  site: 'https://festivals.klatterico.de',
+  site: 'https://synners.si',
 });

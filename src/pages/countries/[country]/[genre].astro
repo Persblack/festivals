@@ -1,0 +1,38 @@
+---
+import HubPage from "@/components/HubPage.astro";
+import { hubs } from "@/lib/hubs";
+import type { Hub } from "@/lib/seo";
+
+export function getStaticPaths() {
+  return hubs.combos.map((hub) => {
+    const [, , country, genre] = hub.path.split("/");
+    const countryHub = hubs.countries.find((c) => c.country === hub.country)!;
+    const genreHub = hubs.genres.find((g) => g.genre === hub.genre)!;
+    return {
+      params: { country, genre },
+      props: {
+        hub,
+        countryHub,
+        related: [
+          countryHub,
+          genreHub,
+          ...hubs.combos.filter((c) => c !== hub && (c.country === hub.country || c.genre === hub.genre)),
+        ],
+      },
+    };
+  });
+}
+
+const { hub, countryHub, related } = Astro.props as { hub: Hub; countryHub: Hub; related: Hub[] };
+---
+
+<HubPage
+  hub={hub}
+  related={related}
+  crumbs={[
+    { name: "Home", path: "/" },
+    { name: "Countries", path: "/countries/" },
+    { name: hub.country!, path: countryHub.path },
+    { name: hub.genre!, path: hub.path },
+  ]}
+/>

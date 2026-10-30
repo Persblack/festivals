@@ -61,7 +61,9 @@ const cardVariants = {
   }),
 };
 
-export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
+export type AnalyticsFestival = Pick<Festival, "year" | "start_date" | "genres" | "country_code" | "country_name" | "lineup" | "size">;
+
+export function FestivalAnalytics({ festivals }: { festivals: AnalyticsFestival[] }) {
   const years = useMemo(() => availableYears(festivals), [festivals]);
 
   /**

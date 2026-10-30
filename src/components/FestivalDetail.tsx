@@ -12,6 +12,7 @@ import { GenreBadge } from "./GenreBadge";
 import { SelectFestivalButton } from "./SelectFestivalButton";
 import { RecommendedFestivals } from "./RecommendedFestivals";
 import { getRecommendedFestivals } from "@/lib/recommendations";
+import { festivalPath } from "@/lib/seo";
 import { formatDateRange, getCountryFlag, getSizeLabel, formatPriceRange, getGenreCoverImage } from "@/lib/utils";
 import type { Festival } from "@/types/festival";
 import {
@@ -25,6 +26,7 @@ import {
   Navigation,
   Share2,
   Clock,
+  ArrowUpRight,
 } from "lucide-react";
 
 function getCountdown(startDate: string, endDate: string) {
@@ -181,7 +183,7 @@ export function FestivalDetail({ festival, open, onClose, allFestivals, onFestiv
                   navigator.share({
                     title: festival.name,
                     text: `${festival.name} — ${formatDateRange(festival.start_date, festival.end_date)} in ${festival.city}, ${festival.country_name}`,
-                    url: festival.website ?? window.location.href,
+                    url: new URL(festivalPath(festival.id), window.location.origin).href,
                   });
                 }
               }}
@@ -190,6 +192,12 @@ export function FestivalDetail({ festival, open, onClose, allFestivals, onFestiv
               Share
             </Button>
             <SelectFestivalButton festivalId={festival.id} variant="full" />
+            <Button variant="outline" asChild>
+              <a href={festivalPath(festival.id)}>
+                <ArrowUpRight className="w-4 h-4 mr-2" />
+                Festival page
+              </a>
+            </Button>
           </div>
 
           {/* Description */}

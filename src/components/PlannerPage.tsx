@@ -76,7 +76,7 @@ export function PlannerPage({ festivals }: PlannerPageProps) {
         <FestivalSearch festivals={festivals} className="w-full max-w-md mb-6" />
         <p className="text-sm text-muted-foreground">or</p>
         <Button asChild variant="outline" className="mt-4">
-          <a href="/list">Browse All Festivals</a>
+          <a href="/list/">Browse All Festivals</a>
         </Button>
       </motion.div>
     );

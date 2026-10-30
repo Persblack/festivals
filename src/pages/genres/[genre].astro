@@ -1,0 +1,22 @@
+---
+import HubPage from "@/components/HubPage.astro";
+import { hubs } from "@/lib/hubs";
+import type { Hub } from "@/lib/seo";
+
+export function getStaticPaths() {
+  return hubs.genres.map((hub) => ({
+    params: { genre: hub.path.split("/")[2] },
+    props: {
+      hub,
+      related: [
+        ...hubs.combos.filter((c) => c.genre === hub.genre),
+        ...hubs.genres.filter((g) => g !== hub),
+      ],
+    },
+  }));
+}
+
+const { hub, related } = Astro.props as { hub: Hub; related: Hub[] };
+---
+
+<HubPage hub={hub} related={related} crumbs={[{ name: "Home", path: "/" }, { name: "Genres", path: "/genres/" }, { name: hub.genre!, path: hub.path }]} />

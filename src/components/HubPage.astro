@@ -1,0 +1,89 @@
+---
+/**
+ * One template for every hub (country, genre, country x genre): a headline with
+ * the season in it, a factual intro, links to neighbouring hubs, the list.
+ */
+import Layout from "@/layouts/Layout.astro";
+import FestivalLinkList from "@/components/FestivalLinkList.astro";
+import type { Hub } from "@/lib/seo";
+import { breadcrumbJsonLd, busiestMonth, byProminence, festivalPath, headlineYear, slugify, topValues, SITE_URL } from "@/lib/seo";
+import { getGenreCategory, isGenreCategory, SINS } from "@/lib/genre-utils";
+
+interface Props {
+  hub: Hub;
+  related: Hub[];
+  crumbs: { name: string; path: string }[];
+}
+
+const { hub, related, crumbs } = Astro.props;
+const year = headlineYear(hub.festivals);
+const heading = year ? `${hub.heading} ${year}` : hub.heading;
+const count = hub.festivals.length;
+const cities = topValues(hub.festivals.map((f) => f.city), 4);
+const countries = hub.country ? [] : topValues(hub.festivals.map((f) => f.country_name), 4);
+const biggest = [...hub.festivals].sort(byProminence).slice(0, 3);
+const month = busiestMonth(hub.festivals);
+const sin = hub.genre ? SINS[isGenreCategory(hub.genre) ? hub.genre : getGenreCategory(hub.genre)].sin : null;
+const listFilter = hub.genre && isGenreCategory(hub.genre) ? `?genre=${encodeURIComponent(hub.genre)}` : "";
+
+const what = hub.genre ? `${hub.genre} festival${count === 1 ? "" : "s"}` : `music festival${count === 1 ? "" : "s"}`;
+const where = hub.country ? `in ${hub.country}` : "across Europe";
+const description =
+  `${count} upcoming ${what} ${where}` +
+  (year ? ` for ${year}` : "") +
+  `: dates, lineups, locations and tickets` +
+  (biggest.length ? `, including ${biggest.map((f) => f.name).join(", ")}.` : ".");
+
+const itemList = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: heading,
+  numberOfItems: count,
+  itemListElement: hub.festivals.slice(0, 100).map((f, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    url: `${SITE_URL}${festivalPath(f.id)}`,
+    name: `${f.name} ${f.year}`,
+  })),
+};
+---
+
+<Layout title={`${heading} | Synners`} description={description} jsonLd={[breadcrumbJsonLd(crumbs), itemList]}>
+  <div class="space-y-10">
+    <nav aria-label="Breadcrumb" class="text-sm text-muted-foreground">
+      <ol class="flex flex-wrap gap-2">
+        {crumbs.map((c, i) => (
+          <li>{i > 0 && <span aria-hidden="true" class="mr-2">/</span>}{i === crumbs.length - 1 ? <span aria-current="page" class="text-foreground">{c.name}</span> : <a href={c.path} class="hover:text-white">{c.name}</a>}</li>
+        ))}
+      </ol>
+    </nav>
+
+    <header class="max-w-3xl space-y-4">
+      <h1 class="text-5xl md:text-7xl text-white">{heading}</h1>
+      <p class="text-lg leading-relaxed text-muted-foreground">
+        <strong class="font-semibold text-white">{count} {what}</strong> still to come {where}.
+        {month && <> The busiest month is {month}.</>}
+        {cities.length > 0 && <> Most of them happen in {cities.join(", ")}.</>}
+        {countries.length > 0 && <> The countries with the most: {countries.join(", ")}.</>}
+        {biggest.length > 0 && <> The biggest names: {biggest.map((f, i) => <>{i > 0 && ", "}<a href={festivalPath(f.id)} class="text-secondary hover:text-white">{f.name}</a></>)}.</>}
+        {sin && <> Your sin: {sin}.</>}
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href={`/list/${listFilter}`} class="rounded-xl border border-input bg-field px-5 py-3 text-sm font-bold uppercase tracking-wider text-white hover:bg-muted">Filter in the list</a>
+        <a href="/map/" class="rounded-xl border border-input bg-field px-5 py-3 text-sm font-bold uppercase tracking-wider text-white hover:bg-muted">See them on the map</a>
+      </div>
+    </header>
+
+    {related.length > 0 && (
+      <nav aria-label="Related pages">
+        <ul class="flex flex-wrap gap-2">
+          {related.slice(0, 8).map((r) => (
+            <li><a href={r.path} class="inline-block rounded-full border border-input bg-field px-4 py-2 text-sm text-foreground hover:bg-muted">{r.heading} <span class="text-muted-foreground">{r.festivals.length}</span></a></li>
+          ))}
+        </ul>
+      </nav>
+    )}
+
+    <FestivalLinkList festivals={hub.festivals} />
+  </div>
+</Layout>

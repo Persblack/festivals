@@ -1,0 +1,30 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { hubs, upcoming } from "@/lib/hubs";
+import { getCountryFlag } from "@/lib/utils";
+import { breadcrumbJsonLd } from "@/lib/seo";
+
+const codeOf = (country: string) => upcoming.find((f) => f.country_name === country)?.country_code ?? "";
+---
+
+<Layout
+  title="Music Festivals by Country in Europe | Synners"
+  description={`Upcoming music festivals in ${hubs.countries.length} European countries, from ${hubs.countries.slice(0, 3).map((h) => h.country).join(", ")} to the smaller scenes. Pick a country, then a genre.`}
+  jsonLd={[breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Countries", path: "/countries/" }])]}
+>
+  <div class="space-y-10">
+    <h1 class="text-5xl md:text-7xl text-white">Festivals by country</h1>
+    <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {hubs.countries.map((hub) => (
+        <li class="rounded-2xl border border-border bg-card p-5">
+          <a href={hub.path} class="text-xl font-semibold text-white hover:text-secondary">{getCountryFlag(codeOf(hub.country!))} {hub.country} <span class="text-sm font-normal text-muted-foreground">{hub.festivals.length} festivals</span></a>
+          <ul class="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-sm">
+            {hubs.combos.filter((c) => c.country === hub.country).map((c) => (
+              <li><a href={c.path} class="inline-block py-1 text-muted-foreground hover:text-white">{c.genre} ({c.festivals.length})</a></li>
+            ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Layout>

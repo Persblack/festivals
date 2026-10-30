@@ -1,0 +1,27 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { hubs } from "@/lib/hubs";
+import { breadcrumbJsonLd } from "@/lib/seo";
+import { getGenreColorHex } from "@/lib/utils";
+---
+
+<Layout
+  title="Music Festivals by Genre in Europe | Synners"
+  description={`Upcoming festivals in Europe by genre: ${hubs.genres.map((h) => h.genre).join(", ")}. Dates, lineups and tickets for each.`}
+  jsonLd={[breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Genres", path: "/genres/" }])]}
+>
+  <div class="space-y-10">
+    <h1 class="text-5xl md:text-7xl text-white">Festivals by genre</h1>
+    <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      {hubs.genres.map((hub) => (
+        <li>
+          <a href={hub.path} class="group flex flex-col gap-1.5 rounded-[18px] border border-border bg-card px-5 py-4 hover:border-input">
+            <span class="font-display text-3xl text-white">{hub.genre}</span>
+            <span class="text-sm text-muted-foreground">{hub.festivals.length} festivals</span>
+            <span class="h-1 w-10 rounded-full transition-all duration-300 group-hover:w-full" style={`background:${getGenreColorHex(hub.genre!)}`}></span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</Layout>

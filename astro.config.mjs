@@ -10,4 +10,6 @@ export default defineConfig({
     }),
   ],
   site: 'https://synners.si',
+  // Hostinger 301s /map to /map/; canonical and internal links use the slash form.
+  trailingSlash: 'always',
 });

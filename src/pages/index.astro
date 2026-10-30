@@ -8,8 +8,10 @@ import { FeaturedFestivals } from "../components/FeaturedFestivals";
 import { ThisWeekFestivals } from "../components/ThisWeekFestivals";
 import { RandomFestivalButton } from "../components/RandomFestivalButton";
 import { FestivalAnalytics } from "../components/FestivalAnalytics";
+import { hubs } from "@/lib/hubs";
+import { SITE_URL, festivalPath, headlineYear } from "@/lib/seo";
+import { getCountryFlag } from "@/lib/utils";
 
-const featuredFestivals = festivals.filter((f) => f.featured);
 
 /**
  * Every headline number on this page describes the rolling window — everything
@@ -17,6 +19,12 @@ const featuredFestivals = festivals.filter((f) => f.featured);
  * advertise last season's festivals as if they were still bookable.
  */
 const upcoming = upcomingFestivals(festivals);
+// Islands get only what they render: every prop is serialized into the HTML.
+const featuredFestivals = upcoming.filter((f) => f.featured);
+const analyticsFestivals = upcoming.map(({ year, start_date, genres, country_code, country_name, lineup, size }) => ({
+  year, start_date, genres, country_code, country_name, lineup, size,
+}));
+const randomPaths = [...new Set(upcoming.map((f) => festivalPath(f.id)))];
 const upcomingCountries = new Set(upcoming.map((f) => f.country_name));
 const upcomingGenres = new Set(upcoming.flatMap((f) => f.genres));
 const upcomingArtistCount = new Set(upcoming.flatMap((f) => f.lineup)).size;
@@ -54,7 +62,14 @@ const thisWeekFestivals = festivals.filter((f) => {
 });
 ---
 
-<Layout title="Synners - Find your place to sin">
+<Layout
+  title={`Music Festivals in Europe ${headlineYear(upcoming) ?? ""}: Map, Dates & Lineups | Synners`}
+  description={`${upcoming.length} upcoming music festivals in ${upcomingCountries.size} European countries on one map and calendar. Dates, lineups and tickets, sorted by the sin you came for.`}
+  jsonLd={[
+    { "@context": "https://schema.org", "@type": "WebSite", name: "Synners", url: `${SITE_URL}/`, description: "Find your place to sin: music festivals in Europe." },
+    { "@context": "https://schema.org", "@type": "Organization", name: "Synners", url: `${SITE_URL}/`, logo: `${SITE_URL}/icon-512.png` },
+  ]}
+>
   <div class="space-y-20">
     <!-- Hero Section -->
     <section class="flex flex-wrap items-stretch gap-8 pt-4">
@@ -69,13 +84,13 @@ const thisWeekFestivals = festivals.filter((f) => {
           <a href="#sins" class="rounded-xl bg-primary px-7 py-4 text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#B3122A]">
             Choose your sin
           </a>
-          <a href="/map" class="rounded-xl border border-input bg-field px-7 py-4 text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-muted">
+          <a href="/map/" class="rounded-xl border border-input bg-field px-7 py-4 text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-muted">
             Open the map
           </a>
-          <RandomFestivalButton client:load festivals={festivals} />
+          <RandomFestivalButton client:load paths={randomPaths} />
         </div>
       </div>
-      <a href={`/list?genre=${topSin.genre}`} class="group relative min-h-[420px] flex-[1_1_340px] overflow-hidden rounded-[28px]">
+      <a href={`/list/?genre=${topSin.genre}`} class="group relative min-h-[420px] flex-[1_1_340px] overflow-hidden rounded-[28px]">
         <img src="/hero-10.webp" alt="" class="absolute inset-0 h-full w-full object-cover grayscale contrast-125 brightness-75 transition-transform duration-700 group-hover:scale-105" />
         <div class="absolute inset-0 bg-primary mix-blend-multiply"></div>
         <div class="absolute bottom-5 left-5 rounded-2xl bg-background px-5 py-4">
@@ -91,7 +106,7 @@ const thisWeekFestivals = festivals.filter((f) => {
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {sinTiles.map((t) => (
           <a
-            href={`/list?genre=${t.genre}`}
+            href={`/list/?genre=${t.genre}`}
             class="group flex flex-col gap-1.5 rounded-[18px] border border-[#333333] bg-card px-5 py-4 transition-colors hover:border-transparent"
           >
             <span class="font-display text-4xl uppercase leading-none text-white">{t.sin}</span>
@@ -102,6 +117,16 @@ const thisWeekFestivals = festivals.filter((f) => {
       </div>
     </section>
 
+    <!-- Where to sin: crawlable entry points to every country hub -->
+    <section>
+      <h2 class="mb-6 text-4xl md:text-5xl text-white">Where to sin</h2>
+      <ul class="flex flex-wrap gap-2">
+        {hubs.countries.map((hub) => (
+          <li><a href={hub.path} class="inline-block rounded-full border border-input bg-field px-4 py-2 text-sm text-foreground hover:bg-muted">{getCountryFlag(hub.festivals[0].country_code)} {hub.country} <span class="text-muted-foreground">{hub.festivals.length}</span></a></li>
+        ))}
+      </ul>
+    </section>
+
     <!-- Featured Festivals -->
     <section>
       <div class="flex items-center justify-between mb-8">
@@ -110,7 +135,7 @@ const thisWeekFestivals = festivals.filter((f) => {
           <p class="text-muted-foreground">The ones worth confessing to</p>
         </div>
         <a
-          href="/list"
+          href="/list/"
           class="font-bold uppercase tracking-wider text-secondary hover:text-white transition-colors"
         >
           View all
@@ -136,15 +161,15 @@ const thisWeekFestivals = festivals.filter((f) => {
 
     <!-- Analytics -->
     <section>
-      <FestivalAnalytics client:visible festivals={festivals} />
+      <FestivalAnalytics client:visible festivals={analyticsFestivals} />
     </section>
 
     <!-- CTA Section -->
     <section class="rounded-[28px] bg-primary px-8 py-14 md:px-14">
       <h2 class="max-w-3xl text-5xl md:text-7xl text-white">Plan the summer you'll regret properly.</h2>
       <div class="mt-8 flex flex-wrap gap-3">
-        <a href="/planner" class="rounded-xl bg-background px-7 py-4 text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-ink">Open the planner</a>
-        <a href="/calendar" class="rounded-xl border border-white/80 px-7 py-4 text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-white/10">See the calendar</a>
+        <a href="/planner/" class="rounded-xl bg-background px-7 py-4 text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-ink">Open the planner</a>
+        <a href="/calendar/" class="rounded-xl border border-white/80 px-7 py-4 text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-white/10">See the calendar</a>
       </div>
     </section>
   </div>

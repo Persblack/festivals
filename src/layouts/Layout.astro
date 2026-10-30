@@ -2,6 +2,8 @@
 import { GlobalGenreFilter } from "@/components/GlobalGenreFilter";
 import { dataUpdatedAt, festivals, yearRangeLabel } from "@/lib/festival-data";
 import { formatUpdatedAt } from "@/lib/dates";
+import { SITE_URL, jsonLd as toJsonLd } from "@/lib/seo";
+import { footerHubs } from "@/lib/hubs";
 // Self-hosted: no request to Google from the visitor's browser.
 import "@fontsource/anton";
 import "@fontsource/inter/400.css";
@@ -12,9 +14,20 @@ import "@fontsource/inter/700.css";
 interface Props {
   title: string;
   description?: string;
+  /** Structured data objects, one `<script type="application/ld+json">` each. */
+  jsonLd?: Record<string, unknown>[];
+  noindex?: boolean;
 }
 
-const { title, description = "Discover the best music festivals across Central Europe. Interactive map, calendar, and comprehensive festival information." } = Astro.props;
+const {
+  title,
+  description = "Every music festival in Europe on one map and calendar: dates, lineups, tickets, filtered by the sin you came for.",
+  jsonLd = [],
+  noindex = false,
+} = Astro.props;
+
+const canonical = `${SITE_URL}${Astro.url.pathname}`;
+const ogImage = `${SITE_URL}/og.png`;
 
 const updatedLabel = formatUpdatedAt(dataUpdatedAt);
 ---
@@ -25,20 +38,32 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/icon-192.png" sizes="192x192" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#000000" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Open Graph -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_GB" />
     <meta property="og:site_name" content="Synners" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
 
+    {jsonLd.map((data) => <script type="application/ld+json" set:html={toJsonLd(data)} />)}
 
     <title>{title}</title>
   </head>
@@ -55,19 +80,19 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
             <a href="/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Home
             </a>
-            <a href="/map" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/map/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Map
             </a>
-            <a href="/calendar" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/calendar/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Calendar
             </a>
-            <a href="/list" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/list/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               List
             </a>
-            <a href="/artists" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/artists/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Artists
             </a>
-            <a href="/planner" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/planner/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Planner
             </a>
           </div>
@@ -93,19 +118,19 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
             <a href="/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Home
             </a>
-            <a href="/map" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/map/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Map
             </a>
-            <a href="/calendar" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/calendar/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Calendar
             </a>
-            <a href="/list" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/list/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               List
             </a>
-            <a href="/artists" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/artists/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Artists
             </a>
-            <a href="/planner" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/planner/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Planner
             </a>
           </div>
@@ -132,6 +157,22 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
             For sinners, by sinners
           </p>
         </div>
+        <nav aria-label="Browse festivals" class="mt-8 grid gap-6 text-sm sm:grid-cols-2">
+          <div>
+            <h2 class="mb-2 font-sans text-xs font-semibold uppercase tracking-widest text-muted-foreground">By country</h2>
+            <ul class="flex flex-wrap gap-x-4 gap-y-1">
+              {footerHubs.countries.map((hub) => <li><a href={hub.path} class="text-foreground/80 hover:text-white">{hub.country}</a></li>)}
+              <li><a href="/countries/" class="text-secondary hover:text-white">All countries</a></li>
+            </ul>
+          </div>
+          <div>
+            <h2 class="mb-2 font-sans text-xs font-semibold uppercase tracking-widest text-muted-foreground">By genre</h2>
+            <ul class="flex flex-wrap gap-x-4 gap-y-1">
+              {footerHubs.genres.map((hub) => <li><a href={hub.path} class="text-foreground/80 hover:text-white">{hub.genre}</a></li>)}
+              <li><a href="/festivals/" class="text-secondary hover:text-white">Festivals A-Z</a></li>
+            </ul>
+          </div>
+        </nav>
         <p class="mt-6 text-center text-xs text-muted-foreground/70">
           {festivals.length} festival{festivals.length === 1 ? "" : "s"} · {yearRangeLabel}{updatedLabel ? ` · Data updated ${updatedLabel}` : ""}
         </p>

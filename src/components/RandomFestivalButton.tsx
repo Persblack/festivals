@@ -1,40 +1,23 @@
 "use client";
 
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FestivalDetail } from "./FestivalDetail";
 import { Shuffle } from "lucide-react";
-import type { Festival } from "@/types/festival";
 
 interface RandomFestivalButtonProps {
-  festivals: Festival[];
+  /** Festival page paths. Paths, not festivals: the whole dataset as a prop was megabytes of HTML. */
+  paths: string[];
 }
 
-export function RandomFestivalButton({ festivals }: RandomFestivalButtonProps) {
-  const [selected, setSelected] = useState<Festival | null>(null);
-
-  const pickRandom = () => {
-    const random = festivals[Math.floor(Math.random() * festivals.length)];
-    setSelected(random);
-  };
-
+export function RandomFestivalButton({ paths }: RandomFestivalButtonProps) {
   return (
-    <>
-      <Button
-        onClick={pickRandom}
-        size="lg"
-        variant="outline"
-        className="h-auto rounded-xl px-7 py-4 text-base font-bold tracking-wider"
-      >
-        <Shuffle className="w-5 h-5 mr-2" />
-        Surprise Me
-      </Button>
-
-      <FestivalDetail
-        festival={selected}
-        open={selected !== null}
-        onClose={() => setSelected(null)}
-      />
-    </>
+    <Button
+      onClick={() => window.location.assign(paths[Math.floor(Math.random() * paths.length)])}
+      size="lg"
+      variant="outline"
+      className="h-auto rounded-xl px-7 py-4 text-base font-bold tracking-wider"
+    >
+      <Shuffle className="w-5 h-5 mr-2" />
+      Surprise Me
+    </Button>
   );
 }

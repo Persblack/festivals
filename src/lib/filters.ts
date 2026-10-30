@@ -192,7 +192,7 @@ export function groupByMonth(festivals: Festival[]): MonthGroup[] {
 }
 
 /** Ascending years present in a festival list — the source for the year chips. */
-export function availableYears(festivals: Festival[]): number[] {
+export function availableYears(festivals: Pick<Festival, "year">[]): number[] {
   const years = new Set<number>();
   for (const festival of festivals) years.add(festival.year);
   return [...years].sort((a, b) => a - b);

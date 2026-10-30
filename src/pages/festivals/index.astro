@@ -1,0 +1,42 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { series, todayIso } from "@/lib/hubs";
+import { breadcrumbJsonLd, leadEdition } from "@/lib/seo";
+
+const entries = [...series.entries()]
+  .map(([slug, editions]) => ({ slug, lead: leadEdition(editions, todayIso) }))
+  .sort((a, b) => a.lead.name.localeCompare(b.lead.name, "en", { sensitivity: "base" }));
+
+const letterOf = (name: string) => {
+  const first = name.normalize("NFKD").charAt(0).toUpperCase();
+  return /[A-Z]/.test(first) ? first : "#";
+};
+const letters = new Map<string, typeof entries>();
+for (const entry of entries) {
+  const letter = letterOf(entry.lead.name);
+  letters.set(letter, [...(letters.get(letter) ?? []), entry]);
+}
+---
+
+<Layout
+  title="All Music Festivals in Europe A-Z | Synners"
+  description={`An A-Z index of ${entries.length} European music festivals with dates, lineups, locations and tickets.`}
+  jsonLd={[breadcrumbJsonLd([{ name: "Home", path: "/" }, { name: "Festivals A-Z", path: "/festivals/" }])]}
+>
+  <div class="space-y-10">
+    <h1 class="text-5xl md:text-7xl text-white">Festivals A-Z</h1>
+    <nav aria-label="Letters" class="flex flex-wrap gap-2">
+      {[...letters.keys()].map((l) => <a href={`#letter-${l}`} class="flex h-10 w-10 items-center justify-center rounded-full border border-input bg-field text-sm font-semibold text-white hover:bg-muted">{l}</a>)}
+    </nav>
+    {[...letters.entries()].map(([letter, list]) => (
+      <section id={`letter-${letter}`} class="scroll-mt-40">
+        <h2 class="mb-4 text-4xl text-white">{letter}</h2>
+        <ul class="columns-1 gap-6 text-sm sm:columns-2 lg:columns-3">
+          {list.map(({ slug, lead }) => (
+            <li class="break-inside-avoid py-1"><a href={`/festivals/${slug}/`} class="inline-block py-1 text-foreground hover:text-secondary">{lead.name}</a> <span class="text-muted-foreground">{lead.city}, {lead.year}</span></li>
+          ))}
+        </ul>
+      </section>
+    ))}
+  </div>
+</Layout>

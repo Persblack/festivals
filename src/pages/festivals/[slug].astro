@@ -1,0 +1,190 @@
+---
+/**
+ * One evergreen page per festival series. It leads with the next edition (or
+ * the latest, once a series has no future date) and lists the others below.
+ */
+import Layout from "@/layouts/Layout.astro";
+import { SelectFestivalButton } from "@/components/SelectFestivalButton";
+import { hubs, series, todayIso, upcoming } from "@/lib/hubs";
+import {
+  breadcrumbJsonLd,
+  byProminence,
+  eventJsonLd,
+  festivalPath,
+  leadEdition,
+  matchesHubGenre,
+  seriesSlug,
+} from "@/lib/seo";
+import { formatDateRange } from "@/lib/dates";
+import { getGenreCategory } from "@/lib/genre-utils";
+import { formatPriceRange, getCountryFlag, getGenreColorHex, getGenreCoverImage, getSizeLabel } from "@/lib/utils";
+import type { Festival } from "@/types/festival";
+
+export function getStaticPaths() {
+  return [...series.entries()].map(([slug, editions]) => ({ params: { slug }, props: { editions } }));
+}
+
+const { editions } = Astro.props as { editions: Festival[] };
+const f = leadEdition(editions, todayIso);
+const isOver = f.end_date < todayIso;
+const others = editions.filter((e) => e !== f).reverse();
+const dates = formatDateRange(f.start_date, f.end_date);
+const price = formatPriceRange(f.ticket_price_min, f.ticket_price_max, f.currency);
+const hasPrice = f.ticket_price_min !== null || f.ticket_price_max !== null;
+
+const countryHub = hubs.countries.find((h) => h.country === f.country_name);
+const genreHubs = hubs.genres.filter((h) => f.genres.some((g) => matchesHubGenre({ ...f, genres: [g] }, h.genre!)));
+const comboHubs = hubs.combos.filter((h) => h.country === f.country_name && genreHubs.some((g) => g.genre === h.genre));
+
+const categories = new Set(f.genres.map(getGenreCategory));
+const mySlug = seriesSlug(f.id);
+const similar = upcoming
+  .filter((o) => seriesSlug(o.id) !== mySlug && o.country_name === f.country_name && o.genres.some((g) => categories.has(getGenreCategory(g))))
+  .sort(byProminence)
+  .slice(0, 6);
+
+const headliners = f.lineup.slice(0, 3);
+// "Else" is the catch-all bucket, not a genre anyone would read as one.
+const named = f.genres.filter((g) => g !== "Else");
+const genreWords = named.length ? named.join(", ") : "music";
+const title = `${f.name} ${f.year}: ${f.lineup.length ? "Dates, Lineup & Tickets" : "Dates & Tickets"} | Synners`;
+const description =
+  `${f.name} ${f.year} ${isOver ? "took place" : "takes place"} ${dates} in ${f.city}, ${f.country_name}. ` +
+  `${genreWords} festival` +
+  (headliners.length ? ` with ${headliners.join(", ")}${f.lineup.length > 3 ? " and more" : ""}` : "") +
+  (hasPrice ? `. Tickets ${price}.` : ".");
+
+const crumbs = [
+  { name: "Home", path: "/" },
+  ...(countryHub ? [{ name: countryHub.country!, path: countryHub.path }] : []),
+  { name: f.name, path: festivalPath(f.id) },
+];
+const events = editions.filter((e) => e === f || e.end_date >= todayIso).map(eventJsonLd);
+
+const facts: [string, string][] = [
+  ["Dates", dates],
+  ["Location", `${f.city}, ${f.country_name}`],
+  ...(f.venue ? [["Venue", f.venue] as [string, string]] : []),
+  ["Genres", f.genres.join(", ")],
+  ["Size", getSizeLabel(f.size)],
+  ["Tickets", price],
+  ...(f.lineup.length ? [["Lineup", `${f.lineup.length} artists announced`] as [string, string]] : []),
+];
+const links = [
+  f.ticket_link && { href: f.ticket_link, label: `Tickets · ${price}`, primary: true },
+  f.website && { href: f.website, label: "Official website" },
+  f.instagram && { href: f.instagram, label: "Instagram" },
+  f.latitude !== null && f.longitude !== null && { href: `https://www.google.com/maps/search/?api=1&query=${f.latitude},${f.longitude}`, label: "Directions" },
+].filter(Boolean) as { href: string; label: string; primary?: boolean }[];
+---
+
+<Layout title={title} description={description} jsonLd={[...events, breadcrumbJsonLd(crumbs)]}>
+  <article class="space-y-10">
+    <nav aria-label="Breadcrumb" class="text-sm text-muted-foreground">
+      <ol class="flex flex-wrap gap-2">
+        {crumbs.map((c, i) => (
+          <li>{i > 0 && <span aria-hidden="true" class="mr-2">/</span>}{i === crumbs.length - 1 ? <span aria-current="page" class="text-foreground">{c.name}</span> : <a href={c.path} class="hover:text-white">{c.name}</a>}</li>
+        ))}
+      </ol>
+    </nav>
+
+    <header class="relative overflow-hidden rounded-[28px]">
+      <img src={getGenreCoverImage(f.genres)} alt="" width="1200" height="600" class="absolute inset-0 h-full w-full object-cover grayscale contrast-125" />
+      <div class="absolute inset-0 bg-primary mix-blend-multiply"></div>
+      <div class="absolute inset-0 bg-black/45"></div>
+      <div class="relative space-y-4 px-6 py-12 md:px-12 md:py-20">
+        <h1 class="text-5xl md:text-8xl text-white">{f.name} {f.year}</h1>
+        <p class="text-lg text-white/90">{dates} · {getCountryFlag(f.country_code)} {f.city}, {f.country_name}</p>
+        <div class="flex flex-wrap gap-1.5">
+          {f.genres.map((g) => <span class="rounded-full px-3 py-1 text-xs font-semibold uppercase text-ink" style={`background:${getGenreColorHex(g)}`}>{g}</span>)}
+        </div>
+        {isOver && <p class="inline-block rounded-full bg-background px-4 py-1.5 text-sm text-muted-foreground">This edition is over. Next dates not announced yet.</p>}
+      </div>
+    </header>
+
+    <div class="flex flex-wrap gap-3">
+      {links.map((l) => (
+        <a href={l.href} target="_blank" rel="noopener" class={l.primary
+          ? "rounded-xl bg-primary px-5 py-3 text-sm font-bold uppercase tracking-wider text-white hover:bg-[#B3122A]"
+          : "rounded-xl border border-input bg-field px-5 py-3 text-sm font-bold uppercase tracking-wider text-white hover:bg-muted"}>{l.label}</a>
+      ))}
+      <SelectFestivalButton client:visible festivalId={f.id} variant="full" />
+    </div>
+
+    <div class="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <div class="space-y-10">
+        <section class="space-y-3">
+          <h2 class="text-3xl text-white">About {f.name}</h2>
+          <p class="max-w-2xl leading-relaxed text-muted-foreground">
+            {f.description ?? `${f.name} is a ${named.length ? named.join(" and ") : "music"} festival in ${f.city}, ${f.country_name}.`}
+            {" "}The {f.year} edition {isOver ? "ran" : "runs"} {dates}{f.venue ? ` at ${f.venue}` : ""}.
+          </p>
+        </section>
+
+        {f.lineup.length > 0 && (
+          <section class="space-y-3">
+            <h2 class="text-3xl text-white">{f.name} {f.year} lineup</h2>
+            <ul class="flex flex-wrap gap-2">
+              {f.lineup.map((artist) => <li class="rounded-full bg-muted px-3 py-1.5 text-sm text-foreground">{artist}</li>)}
+            </ul>
+          </section>
+        )}
+
+        {others.length > 0 && (
+          <section class="space-y-3">
+            <h2 class="text-3xl text-white">Other editions</h2>
+            <ul class="space-y-3">
+              {others.map((e) => (
+                <li class="rounded-2xl border border-border bg-card p-4">
+                  <p class="font-semibold text-white">{e.name} {e.year} <span class="font-normal text-muted-foreground">· {formatDateRange(e.start_date, e.end_date)} · {e.city}</span></p>
+                  {e.lineup.length > 0 && <p class="mt-1 text-sm text-muted-foreground">{e.lineup.slice(0, 12).join(", ")}{e.lineup.length > 12 ? ` and ${e.lineup.length - 12} more` : ""}</p>}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+      </div>
+
+      <aside class="space-y-8">
+        <section class="rounded-2xl border border-border bg-card p-5">
+          <h2 class="mb-4 text-2xl text-white">Quick facts</h2>
+          <dl class="space-y-3 text-sm">
+            {facts.map(([k, v]) => (
+              <div>
+                <dt class="text-xs font-semibold uppercase tracking-widest text-muted-foreground">{k}</dt>
+                <dd class="text-foreground">{v}</dd>
+              </div>
+            ))}
+          </dl>
+        </section>
+
+        {(countryHub || genreHubs.length > 0) && (
+          <nav aria-label="Browse more" class="space-y-2">
+            <h2 class="text-2xl text-white">More like this</h2>
+            <ul class="flex flex-wrap gap-2">
+              {[...comboHubs, ...(countryHub ? [countryHub] : []), ...genreHubs].map((h) => (
+                <li><a href={h.path} class="inline-block rounded-full border border-input bg-field px-4 py-2 text-sm text-foreground hover:bg-muted">{h.heading}</a></li>
+              ))}
+            </ul>
+          </nav>
+        )}
+      </aside>
+    </div>
+
+    {similar.length > 0 && (
+      <section class="space-y-4">
+        <h2 class="text-3xl text-white">Similar festivals in {f.country_name}</h2>
+        <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {similar.map((o) => (
+            <li>
+              <a href={festivalPath(o.id)} class="flex h-full flex-col gap-1 rounded-2xl border border-border bg-card p-4 hover:border-input">
+                <span class="text-lg font-semibold text-white">{o.name}</span>
+                <span class="text-sm text-muted-foreground">{formatDateRange(o.start_date, o.end_date)} · {o.city}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+  </article>
+</Layout>

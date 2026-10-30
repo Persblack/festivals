@@ -31,20 +31,20 @@ export function AttendanceChart({ data }: AttendanceChartProps) {
         <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
           <defs>
             <linearGradient id="attendanceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.4} />
-              <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
+              <stop offset="5%" stopColor="#FF5C5C" stopOpacity={0.4} />
+              <stop offset="95%" stopColor="#FF5C5C" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
           <XAxis
             dataKey="year"
-            stroke="#9CA3AF"
+            stroke="#C7BDBD"
             fontSize={12}
             tickLine={false}
             axisLine={false}
           />
           <YAxis
-            stroke="#9CA3AF"
+            stroke="#C7BDBD"
             fontSize={12}
             tickLine={false}
             axisLine={false}
@@ -52,12 +52,12 @@ export function AttendanceChart({ data }: AttendanceChartProps) {
           />
           <Tooltip
             contentStyle={{
-              backgroundColor: "#1C1C1C",
+              backgroundColor: "#1C1515",
               border: "1px solid #333",
               borderRadius: "12px",
-              color: "#FAFAFA",
+              color: "#F2EEEE",
             }}
-            labelStyle={{ color: "#FAFAFA", fontWeight: "bold" }}
+            labelStyle={{ color: "#F2EEEE", fontWeight: "bold" }}
             formatter={(value: number, name: string, props: any) => {
               const yearData = data.find((d) => d.year === props.payload.year);
               return [
@@ -66,7 +66,7 @@ export function AttendanceChart({ data }: AttendanceChartProps) {
                     {formatAttendance(value)} attendees
                   </div>
                   {yearData?.notable_acts && (
-                    <div className="text-xs text-gray-400">
+                    <div className="text-xs text-muted-foreground">
                       {yearData.notable_acts.join(", ")}
                     </div>
                   )}
@@ -78,10 +78,10 @@ export function AttendanceChart({ data }: AttendanceChartProps) {
           <Area
             type="monotone"
             dataKey="attendance"
-            stroke="#3B82F6"
+            stroke="#FF5C5C"
             strokeWidth={3}
             fill="url(#attendanceGradient)"
-            dot={{ fill: "#3B82F6", strokeWidth: 2, r: 4 }}
+            dot={{ fill: "#FF5C5C", strokeWidth: 2, r: 4 }}
             activeDot={{ r: 6, stroke: "#fff", strokeWidth: 2 }}
           />
         </AreaChart>

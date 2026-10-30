@@ -77,8 +77,9 @@ export function FestivalDetail({ festival, open, onClose, allFestivals, onFestiv
           <img
             src={getGenreCoverImage(festival.genres)}
             alt=""
-            className="absolute inset-0 w-full h-full object-cover blur-[3px] scale-105"
+            className="absolute inset-0 w-full h-full object-cover grayscale contrast-125 blur-[3px] scale-105"
           />
+          <div className="absolute inset-0 bg-primary mix-blend-multiply" />
 
           {/* Dark overlay for readability */}
           <div className="absolute inset-0 bg-black/40" />
@@ -218,7 +219,7 @@ export function FestivalDetail({ festival, open, onClose, allFestivals, onFestiv
               className="space-y-3"
             >
               <h4 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                <Music className="w-5 h-5 text-primary" />
+                <Music className="w-5 h-5 text-secondary" />
                 Lineup
               </h4>
               <div className="flex flex-wrap gap-2">

@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
-import { getGenreCategory } from "@/lib/genre-utils";
+import { getGenreColorHex } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface GenreBadgeProps {
   genre: string;
@@ -7,11 +8,11 @@ interface GenreBadgeProps {
 }
 
 export function GenreBadge({ genre, className }: GenreBadgeProps) {
-  const category = getGenreCategory(genre);
-  const variant = category.toLowerCase() as 'edm' | 'hip-hop' | 'rock' | 'metal' | 'else';
-
   return (
-    <Badge variant={variant} className={className}>
+    <Badge
+      className={cn("text-ink shadow-none", className)}
+      style={{ backgroundColor: getGenreColorHex(genre) }}
+    >
       {genre}
     </Badge>
   );

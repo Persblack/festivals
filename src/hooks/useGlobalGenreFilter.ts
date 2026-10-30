@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import type { GenreCategory } from "@/types/festival";
+import { isGenreCategory } from "@/lib/genre-utils";
 
 const STORAGE_KEY = "festival-atlas-global-genres";
 const EVENT_NAME = "global-genre-filter-change";
@@ -21,8 +22,13 @@ export function useGlobalGenreFilter() {
     return readStorage();
   });
 
-  // Sync from sessionStorage on mount (handles SSR hydration)
+  // Sync from sessionStorage on mount (handles SSR hydration). A `?genre=`
+  // link (the homepage's sin tiles) replaces the stored choice.
   useEffect(() => {
+    const fromUrl = new URLSearchParams(window.location.search).get("genre");
+    if (fromUrl && isGenreCategory(fromUrl)) {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify([fromUrl]));
+    }
     setGenres(readStorage());
   }, []);
 

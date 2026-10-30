@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useMemo, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { formatDateRange, getCountryFlag, getGenreColorHex, getSizeLabel } from "@/lib/utils";
+import { GENRE_CATEGORIES, SINS } from "@/lib/genre-utils";
 import { useSelectedFestivals } from "@/hooks/useSelectedFestivals";
 import { hasCoordinates } from "@/lib/guards";
 import type { Festival, MappableFestival } from "@/types/festival";
@@ -141,11 +142,11 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
           blur: 30,
           maxZoom: 10,
           gradient: {
-            0.2: "#3B82F6",
-            0.4: "#06B6D4",
-            0.6: "#10B981",
-            0.8: "#F59E0B",
-            1.0: "#EF4444",
+            0.2: "#5A0A12",
+            0.4: "#B3122A",
+            0.6: "#FF3B1F",
+            0.8: "#FF9F43",
+            1.0: "#FFE8C2",
           },
         });
 
@@ -162,7 +163,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
     const genres = festival.genres
       .map(
         (g) =>
-          `<span style="background-color:${getGenreColorHex(g)}" class="px-2 py-0.5 text-xs rounded-full text-white inline-block">${escapeHtml(g)}</span>`
+          `<span style="background-color:${getGenreColorHex(g)}" class="px-2 py-0.5 text-xs rounded-full text-[#140D0D] inline-block">${escapeHtml(g)}</span>`
       )
       .join(" ");
 
@@ -181,7 +182,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
           <p>${getSizeLabel(festival.size)}</p>
           <div class="flex flex-wrap gap-1 mt-2">${genres}</div>
         </div>
-        <button data-view-details="${id}" class="mt-3 w-full px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors">
+        <button data-view-details="${id}" class="mt-3 w-full px-3 py-2 bg-primary text-white rounded-lg text-sm font-semibold uppercase tracking-wide hover:bg-[#B3122A] transition-colors">
           View Details
         </button>
       </div>
@@ -242,7 +243,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
         const scale = count >= 50 ? 2.2 : count >= 10 ? 1.8 : 1.5;
         const dim = Math.round(baseSize * scale);
         const clusterOpts = { ...mapConfig.markerOptions, size: dim, innerDot: false };
-        const markerHTML = generateMarkerHTML("#3B82F6", clusterOpts);
+        const markerHTML = generateMarkerHTML("#D91A1A", clusterOpts);
         const iconOpts = getMarkerIconOptions(clusterOpts);
 
         return L.divIcon({
@@ -318,7 +319,7 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
     return (
       <div className="h-full w-full flex items-center justify-center bg-card rounded-2xl">
         <div className="text-center">
-          <MapPin className="w-12 h-12 mx-auto text-primary animate-pulse mb-3" />
+          <MapPin className="w-12 h-12 mx-auto text-secondary animate-pulse mb-3" />
           <p className="text-muted-foreground">Loading map...</p>
         </div>
       </div>
@@ -382,13 +383,15 @@ export function FestivalMap({ festivals, onFestivalClick }: FestivalMapProps) {
             Legend
           </h4>
           <div className="space-y-1.5">
-            {["EDM", "Techno", "Rock", "Metal", "Else"].map((genre) => (
+            {GENRE_CATEGORIES.map((genre) => (
               <div key={genre} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full"
-                  style={{ backgroundColor: getGenreColorHex(genre) }}
+                  style={{ backgroundColor: SINS[genre].color }}
                 />
-                <span className="text-xs text-foreground">{genre}</span>
+                <span className="text-xs text-foreground">
+                  <span className="font-display text-sm uppercase">{SINS[genre].sin}</span> · {genre}
+                </span>
               </div>
             ))}
           </div>

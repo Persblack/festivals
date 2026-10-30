@@ -179,7 +179,7 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
                 }}
                 className="relative cursor-pointer rounded-xl bg-card border border-border/50 p-4 text-center hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-200 hover:-translate-y-1"
               >
-                <span className="absolute top-2 left-2 text-xs font-bold text-primary">
+                <span className="absolute top-2 left-2 text-xs font-bold text-secondary">
                   #{i + 1}
                 </span>
                 <p className="font-semibold text-foreground text-sm mt-2 line-clamp-2">
@@ -222,7 +222,7 @@ export function ArtistsPage({ festivals }: ArtistsPageProps) {
                       {artist.festivalCount !== 1 ? "s" : ""}
                     </p>
                   </div>
-                  <span className="text-sm text-primary hover:underline">
+                  <span className="text-sm text-secondary hover:underline">
                     Collapse
                   </span>
                 </div>

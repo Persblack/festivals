@@ -37,8 +37,9 @@ export const ArtistCard = memo(function ArtistCard({
         <img
           src={getArtistCoverImage(genres)}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover blur-[2px] scale-105"
+          className="absolute inset-0 w-full h-full object-cover grayscale contrast-125 blur-[2px] scale-105"
         />
+        <div className="absolute inset-0 bg-primary mix-blend-multiply" />
         <div className="absolute inset-0 bg-black/50" />
 
         {/* Artist name centered */}
@@ -62,7 +63,7 @@ export const ArtistCard = memo(function ArtistCard({
       {/* Content */}
       <div className="p-4 space-y-3">
         <div className="flex items-center gap-2 text-muted-foreground text-sm">
-          <Music className="w-4 h-4 text-primary" />
+          <Music className="w-4 h-4 text-secondary" />
           <span>
             {festivalCount} festival{festivalCount !== 1 ? "s" : ""}
           </span>

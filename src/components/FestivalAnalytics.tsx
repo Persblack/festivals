@@ -21,27 +21,12 @@ import { getGenreColorHex, getCountryFlag } from "@/lib/utils";
 import { MONTH_ABBR, formatYearRange, monthOf, yearOf } from "@/lib/dates";
 import { availableYears } from "@/lib/filters";
 
-const EXTENDED_GENRE_COLORS: Record<string, string> = {
-  EDM: "#3B82F6",
-  Techno: "#06B6D4",
-  Rock: "#EF4444",
-  Metal: "#9CA3AF",
-  Else: "#A855F7",
-  Pop: "#F59E0B",
-  "Hip-Hop": "#22C55E",
-  Folk: "#F97316",
-  Jazz: "#8B5CF6",
-  Punk: "#FB7185",
-  Reggae: "#4ADE80",
-  Hardcore: "#EC4899",
-  Classical: "#C4B5FD",
-};
-
 const SIZE_COLORS: Record<string, string> = {
-  small: "#06B6D4",
-  medium: "#3B82F6",
-  large: "#A855F7",
-  massive: "#EF4444",
+  // Ordinal, so one red ramp: the bigger the crowd, the hotter.
+  small: "#7A2E2E",
+  medium: "#B3122A",
+  large: "#E0301E",
+  massive: "#FF8A80",
 };
 
 const SIZE_LABELS: Record<string, string> = {
@@ -53,19 +38,19 @@ const SIZE_LABELS: Record<string, string> = {
 
 /**
  * One accent per season, drawn from the palette the other charts already use.
- * Index 0 is the timeline blue, so a single-year dataset looks exactly as before.
+ * Index 0 is the timeline red, so a single-year dataset looks exactly as before.
  */
-const SERIES_COLORS = ["#3B82F6", "#A855F7", "#06B6D4", "#F59E0B", "#22C55E", "#EF4444"];
+const SERIES_COLORS = ["#FF5C5C", "#E8DCDC", "#FF9F43", "#B79CFF", "#7BD389", "#FF6FB0"];
 
 const tooltipStyle = {
-  backgroundColor: "#1C1C1C",
-  border: "1px solid #333",
+  backgroundColor: "#1C1515",
+  border: "1px solid #3A2C2C",
   borderRadius: "12px",
-  color: "#FAFAFA",
+  color: "#F2EEEE",
 };
 
-const tooltipItemStyle = { color: "#FAFAFA" };
-const tooltipLabelStyle = { color: "#FAFAFA", fontWeight: "bold" as const };
+const tooltipItemStyle = { color: "#F2EEEE" };
+const tooltipLabelStyle = { color: "#F2EEEE", fontWeight: "bold" as const };
 
 const cardVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -214,13 +199,13 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                 <XAxis
                   dataKey="month"
-                  stroke="#9CA3AF"
+                  stroke="#C7BDBD"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
                 />
                 <YAxis
-                  stroke="#9CA3AF"
+                  stroke="#C7BDBD"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
@@ -287,7 +272,7 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
                 <XAxis
                   type="number"
-                  stroke="#9CA3AF"
+                  stroke="#C7BDBD"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
@@ -295,7 +280,7 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
                 <YAxis
                   type="category"
                   dataKey="genre"
-                  stroke="#9CA3AF"
+                  stroke="#C7BDBD"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
@@ -312,7 +297,7 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
                   {genreData.map((entry) => (
                     <Cell
                       key={entry.genre}
-                      fill={EXTENDED_GENRE_COLORS[entry.genre] || getGenreColorHex(entry.genre)}
+                      fill={getGenreColorHex(entry.genre)}
                     />
                   ))}
                 </Bar>
@@ -338,14 +323,14 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
               <BarChart data={countryData} margin={{ top: 10, right: 10, left: 0, bottom: 30 }}>
                 <defs>
                   <linearGradient id="countryGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#A855F7" stopOpacity={1} />
-                    <stop offset="100%" stopColor="#3B82F6" stopOpacity={1} />
+                    <stop offset="0%" stopColor="#FF5C5C" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#D91A1A" stopOpacity={1} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" vertical={false} />
                 <XAxis
                   dataKey="name"
-                  stroke="#9CA3AF"
+                  stroke="#C7BDBD"
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
@@ -359,7 +344,7 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
                   }}
                 />
                 <YAxis
-                  stroke="#9CA3AF"
+                  stroke="#C7BDBD"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
@@ -398,7 +383,7 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
                 <CartesianGrid strokeDasharray="3 3" stroke="#333" horizontal={false} />
                 <XAxis
                   type="number"
-                  stroke="#9CA3AF"
+                  stroke="#C7BDBD"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
@@ -409,7 +394,7 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
                 <YAxis
                   type="category"
                   dataKey="genre"
-                  stroke="#9CA3AF"
+                  stroke="#C7BDBD"
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
@@ -429,7 +414,7 @@ export function FestivalAnalytics({ festivals }: { festivals: Festival[] }) {
                   {artistGenreData.map((entry) => (
                     <Cell
                       key={entry.genre}
-                      fill={EXTENDED_GENRE_COLORS[entry.genre] || getGenreColorHex(entry.genre)}
+                      fill={getGenreColorHex(entry.genre)}
                     />
                   ))}
                 </Bar>

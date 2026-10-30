@@ -11,12 +11,6 @@ const badgeVariants = cva(
         secondary: "bg-secondary text-secondary-foreground shadow-secondary/30",
         destructive: "bg-destructive text-destructive-foreground",
         outline: "border border-border text-foreground bg-transparent",
-        edm: "bg-genre-edm text-white shadow-genre-edm/30",
-        techno: "bg-genre-techno text-white shadow-genre-techno/30",
-        rock: "bg-genre-rock text-white shadow-genre-rock/30",
-        metal: "bg-genre-metal text-white shadow-genre-metal/30",
-        else: "bg-genre-else text-white shadow-genre-else/30",
-        "hip-hop": "bg-orange-500 text-white shadow-orange-500/30",
       },
     },
     defaultVariants: {

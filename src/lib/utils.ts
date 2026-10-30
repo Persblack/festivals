@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import { SINS, getGenreCategory } from "./genre-utils";
 
 // Festival dates live in one place. Re-exported here so the many existing
 // `@/lib/utils` imports keep working against a single implementation.
@@ -24,26 +25,9 @@ export function getCountryFlag(countryCode: string): string {
   );
 }
 
-export function getGenreColor(genre: string): string {
-  const colors: Record<string, string> = {
-    'EDM': 'bg-genre-edm',
-    'Techno': 'bg-genre-techno',
-    'Rock': 'bg-genre-rock',
-    'Metal': 'bg-genre-metal',
-    'Else': 'bg-genre-else',
-  };
-  return colors[genre] || 'bg-gray-500';
-}
-
+/** Colour of the sin a genre belongs to; sub-genres share their category's. */
 export function getGenreColorHex(genre: string): string {
-  const colors: Record<string, string> = {
-    'EDM': '#3B82F6',
-    'Techno': '#06B6D4',
-    'Rock': '#EF4444',
-    'Metal': '#9CA3AF',
-    'Else': '#A855F7',
-  };
-  return colors[genre] || '#6B7280';
+  return SINS[getGenreCategory(genre)].color;
 }
 
 export function getSizeLabel(size: string): string {

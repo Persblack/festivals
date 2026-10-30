@@ -106,11 +106,11 @@ export function CalendarView({ festivals }: CalendarViewProps) {
               {/* Month Header */}
               <div className="flex items-center gap-4 mb-6">
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
                     <Calendar className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-bold text-foreground">
+                    <h2 className="text-3xl text-white">
                       {group.label}
                     </h2>
                     <p className="text-sm text-muted-foreground">
@@ -118,7 +118,7 @@ export function CalendarView({ festivals }: CalendarViewProps) {
                     </p>
                   </div>
                 </div>
-                <div className="flex-1 h-px bg-gradient-to-r from-border to-transparent" />
+                <div className="flex-1 h-px bg-border" />
               </div>
 
               {/* Festival Grid */}

@@ -60,8 +60,9 @@ export const FestivalCard = React.memo(function FestivalCard({ festival, onClick
         <img
           src={getGenreCoverImage(festival.genres)}
           alt=""
-          className="absolute inset-0 w-full h-full object-cover blur-[2px] scale-105"
+          className="absolute inset-0 w-full h-full object-cover grayscale contrast-125 blur-[2px] scale-105"
         />
+        <div className="absolute inset-0 bg-primary mix-blend-multiply" />
 
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-black/40" />
@@ -97,7 +98,7 @@ export const FestivalCard = React.memo(function FestivalCard({ festival, onClick
       <div className="p-4">
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <MapPin className="w-4 h-4 text-primary" />
+            <MapPin className="w-4 h-4 text-secondary" />
             <span>
               {getCountryFlag(festival.country_code)} {festival.city}, {festival.country_name}
             </span>

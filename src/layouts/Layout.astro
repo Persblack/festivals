@@ -2,6 +2,12 @@
 import { GlobalGenreFilter } from "@/components/GlobalGenreFilter";
 import { dataUpdatedAt, festivals, yearRangeLabel } from "@/lib/festival-data";
 import { formatUpdatedAt } from "@/lib/dates";
+// Self-hosted: no request to Google from the visitor's browser.
+import "@fontsource/anton";
+import "@fontsource/inter/400.css";
+import "@fontsource/inter/500.css";
+import "@fontsource/inter/600.css";
+import "@fontsource/inter/700.css";
 
 interface Props {
   title: string;
@@ -33,10 +39,6 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <title>{title}</title>
   </head>
@@ -44,42 +46,35 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
     <header class="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <nav class="container mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
-          <a href="/" class="logo-link flex items-center gap-3 group">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center transition-transform group-hover:scale-110">
-              <svg class="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-              </svg>
-            </div>
-            <div>
-              <span class="text-xl font-bold text-foreground">Synners</span>
-              <span class="hidden sm:inline text-xs text-muted-foreground ml-2">{yearRangeLabel} Festivals</span>
-            </div>
+          <a href="/" class="logo-link group flex items-baseline gap-3">
+            <span class="font-display text-3xl text-foreground transition-colors group-hover:text-white">Synners<span class="text-primary">.</span></span>
+            <span class="hidden sm:inline text-xs font-semibold uppercase tracking-widest text-muted-foreground">{yearRangeLabel} Festivals</span>
           </a>
 
           <div class="hidden md:flex items-center gap-1">
-            <a href="/" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Home
             </a>
-            <a href="/map" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/map" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Map
             </a>
-            <a href="/calendar" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/calendar" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Calendar
             </a>
-            <a href="/list" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/list" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               List
             </a>
-            <a href="/artists" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/artists" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Artists
             </a>
-            <a href="/planner" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/planner" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Planner
             </a>
           </div>
 
           <!-- Mobile Menu -->
           <div class="md:hidden">
-            <button id="mobile-menu-btn" class="p-2 rounded-lg hover:bg-muted transition-colors">
+            <button id="mobile-menu-btn" type="button" aria-label="Menu" aria-controls="mobile-menu" aria-expanded="false" class="flex h-11 w-11 items-center justify-center rounded-full border border-input bg-field hover:bg-muted transition-colors">
               <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
               </svg>
@@ -95,22 +90,22 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
         <!-- Mobile Navigation -->
         <div id="mobile-menu" class="hidden md:hidden mt-4 pb-2 border-t border-border pt-4">
           <div class="flex flex-col gap-2">
-            <a href="/" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Home
             </a>
-            <a href="/map" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/map" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Map
             </a>
-            <a href="/calendar" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/calendar" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Calendar
             </a>
-            <a href="/list" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/list" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               List
             </a>
-            <a href="/artists" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/artists" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Artists
             </a>
-            <a href="/planner" class="px-4 py-2 rounded-lg text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
+            <a href="/planner" class="px-4 py-2.5 rounded-full text-sm font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground hover:bg-muted transition-colors">
               Planner
             </a>
           </div>
@@ -129,19 +124,12 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
     <footer class="border-t border-border mt-16">
       <div class="container mx-auto px-4 py-8">
         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
-              <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-              </svg>
-            </div>
-            <span class="text-sm font-medium text-foreground">Synners</span>
-          </div>
+          <span class="font-display text-2xl text-foreground">Synners<span class="text-primary">.</span></span>
           <p class="text-sm text-muted-foreground">
             Find your place to sin
           </p>
           <p class="text-sm text-muted-foreground">
-            Made with love for festival lovers
+            For sinners, by sinners
           </p>
         </div>
         <p class="mt-6 text-center text-xs text-muted-foreground/70">
@@ -155,7 +143,8 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
       const mobileMenu = document.getElementById('mobile-menu');
 
       mobileMenuBtn?.addEventListener('click', () => {
-        mobileMenu?.classList.toggle('hidden');
+        const open = !mobileMenu?.classList.toggle('hidden');
+        mobileMenuBtn.setAttribute('aria-expanded', String(open));
       });
 
       // Highlight active nav link (exclude logo link)
@@ -164,6 +153,7 @@ const updatedLabel = formatUpdatedAt(dataUpdatedAt);
         if (link.getAttribute('href') === currentPath) {
           link.classList.remove('text-muted-foreground');
           link.classList.add('text-foreground', 'bg-muted');
+          link.setAttribute('aria-current', 'page');
         }
       });
     </script>

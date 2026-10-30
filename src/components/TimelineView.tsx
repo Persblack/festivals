@@ -58,7 +58,7 @@ export function TimelineView({ festivals }: TimelineViewProps) {
           className="space-y-4"
         >
           <div className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-primary" />
+            <Calendar className="w-5 h-5 text-secondary" />
             <h2 className="text-xl font-semibold text-foreground">Festival Timeline</h2>
           </div>
           <PlannerTimeline

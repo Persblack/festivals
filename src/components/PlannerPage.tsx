@@ -113,7 +113,7 @@ export function PlannerPage({ festivals }: PlannerPageProps) {
           className="grid grid-cols-3 gap-4"
         >
           <div className="p-4 rounded-xl bg-card border border-border text-center">
-            <p className="text-3xl font-bold text-primary">{stats.festivalCount}</p>
+            <p className="text-3xl font-bold text-secondary">{stats.festivalCount}</p>
             <p className="text-sm text-muted-foreground">Festivals</p>
           </div>
           <div className="p-4 rounded-xl bg-card border border-border text-center">
@@ -130,7 +130,7 @@ export function PlannerPage({ festivals }: PlannerPageProps) {
       {/* Timeline */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-          <CalendarDays className="w-5 h-5 text-primary" />
+          <CalendarDays className="w-5 h-5 text-secondary" />
           Timeline
         </h2>
         <PlannerTimeline
@@ -142,7 +142,7 @@ export function PlannerPage({ festivals }: PlannerPageProps) {
       {/* Map */}
       <div className="space-y-4">
         <h2 className="text-xl font-semibold text-foreground flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-primary" />
+          <MapPin className="w-5 h-5 text-secondary" />
           Map
         </h2>
         <div className="h-[400px] rounded-2xl overflow-hidden border border-border">

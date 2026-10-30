@@ -40,6 +40,25 @@ export const SUB_GENRES: { value: string; label: string; category: GenreCategory
   { value: 'Reggae', label: 'Reggae', category: 'Else' },
 ];
 
+/**
+ * The brand: each filter category is a sin. Five categories, so five sins;
+ * Greed and Sloth wait for a category of their own. Colours are light enough
+ * for dark ink on a filled badge and for text on the dark ground (>= 4.5:1).
+ */
+export const SINS = {
+  EDM: { sin: 'Lust', numeral: 'I', color: '#FF6FB0' },
+  'Hip-Hop': { sin: 'Envy', numeral: 'II', color: '#7BD389' },
+  Rock: { sin: 'Pride', numeral: 'III', color: '#B79CFF' },
+  Metal: { sin: 'Wrath', numeral: 'IV', color: '#FF5C5C' },
+  Else: { sin: 'Gluttony', numeral: 'V', color: '#FF9F43' },
+} satisfies Record<GenreCategory, { sin: string; numeral: string; color: string }>;
+
+export const GENRE_CATEGORIES = Object.keys(SINS) as GenreCategory[];
+
+export function isGenreCategory(value: string): value is GenreCategory {
+  return Object.hasOwn(SINS, value);
+}
+
 export function getGenreCategory(genre: string): GenreCategory {
   // Object.hasOwn, not `in`/`?.`: 'constructor' and 'toString' would otherwise
   // resolve through the prototype chain and pass as known genres.

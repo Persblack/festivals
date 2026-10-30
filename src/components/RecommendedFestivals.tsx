@@ -26,7 +26,7 @@ export function RecommendedFestivals({
       className="space-y-4"
     >
       <h4 className="text-lg font-semibold text-foreground flex items-center gap-2">
-        <Sparkles className="w-5 h-5 text-primary" />
+        <Sparkles className="w-5 h-5 text-secondary" />
         {title}
       </h4>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Calendar, MapPin } from "lucide-react";
 import { GenreBadge } from "./GenreBadge";
-import { formatDateRange, getCountryFlag } from "@/lib/utils";
+import { formatDateRange, getCountryFlag, getGenreColorHex } from "@/lib/utils";
 import {
   daysBetween,
   formatMonthDay,
@@ -13,43 +13,6 @@ import {
   toDateString,
 } from "@/lib/dates";
 import type { Festival } from "@/types/festival";
-
-const genreColors: Record<string, { bg: string; border: string; shadow: string; gradient: string }> = {
-  EDM: {
-    bg: "bg-blue-500/20",
-    border: "border-blue-500/40",
-    shadow: "shadow-blue-500/20 hover:shadow-blue-500/40",
-    gradient: "from-blue-600/90 to-blue-500/70",
-  },
-  Techno: {
-    bg: "bg-cyan-500/20",
-    border: "border-cyan-500/40",
-    shadow: "shadow-cyan-500/20 hover:shadow-cyan-500/40",
-    gradient: "from-cyan-600/90 to-cyan-500/70",
-  },
-  Rock: {
-    bg: "bg-red-500/20",
-    border: "border-red-500/40",
-    shadow: "shadow-red-500/20 hover:shadow-red-500/40",
-    gradient: "from-red-600/90 to-red-500/70",
-  },
-  Metal: {
-    bg: "bg-gray-500/20",
-    border: "border-gray-400/40",
-    shadow: "shadow-gray-500/20 hover:shadow-gray-400/40",
-    gradient: "from-gray-600/90 to-gray-500/70",
-  },
-  Else: {
-    bg: "bg-purple-500/20",
-    border: "border-purple-500/40",
-    shadow: "shadow-purple-500/20 hover:shadow-purple-500/40",
-    gradient: "from-purple-600/90 to-purple-500/70",
-  },
-};
-
-function getGenreStyle(genres: string[]) {
-  return genreColors[genres[0]] || genreColors.Else;
-}
 
 interface PlannerTimelineProps {
   festivals: Festival[];
@@ -213,7 +176,7 @@ export function PlannerTimeline({ festivals, onFestivalClick }: PlannerTimelineP
             const leftPercent = (dayOffset / totalDays) * 100;
             const widthPercent = Math.max((duration / totalDays) * 100, 3); // Min 3% width for visibility
             const row = rowAssignments.get(festival.id) || 0;
-            const style = getGenreStyle(festival.genres);
+            const color = getGenreColorHex(festival.genres[0]);
 
             return (
               <motion.div
@@ -230,16 +193,16 @@ export function PlannerTimeline({ festivals, onFestivalClick }: PlannerTimelineP
                   minWidth: "130px",
                 }}
               >
-                <div className={`h-[84px] rounded-2xl bg-gradient-to-r ${style.gradient} border ${style.border} shadow-lg ${style.shadow} backdrop-blur-sm transition-all duration-200 hover:scale-[1.03] hover:-translate-y-0.5 hover:z-10 overflow-hidden`}>
+                <div className="h-[84px] rounded-2xl transition-transform duration-200 hover:scale-[1.03] hover:-translate-y-0.5 hover:z-10 overflow-hidden" style={{ backgroundColor: color }}>
                   <div className="px-3 py-2.5 h-full flex flex-col justify-center gap-1">
-                    <p className="text-sm font-bold text-white truncate drop-shadow-sm">
+                    <p className="text-sm font-bold text-ink truncate">
                       {festival.name}
                     </p>
-                    <p className="text-[11px] text-white/80 truncate flex items-center gap-1">
+                    <p className="text-[11px] text-ink/80 truncate flex items-center gap-1">
                       <MapPin className="w-3 h-3 shrink-0" />
                       {getCountryFlag(festival.country_code)} {festival.city}
                     </p>
-                    <p className="text-[11px] text-white/80 truncate flex items-center gap-1">
+                    <p className="text-[11px] text-ink/80 truncate flex items-center gap-1">
                       <Calendar className="w-3 h-3 shrink-0" />
                       {formatMonthDay(festival.start_date)}–{formatMonthDay(festival.end_date)}
                     </p>
@@ -256,7 +219,7 @@ export function PlannerTimeline({ festivals, onFestivalClick }: PlannerTimelineP
         {festivals
           .sort((a, b) => a.start_date.localeCompare(b.start_date))
           .map((festival, index) => {
-            const style = getGenreStyle(festival.genres);
+            const color = getGenreColorHex(festival.genres[0]);
             return (
               <motion.div
                 key={festival.id}
@@ -265,10 +228,10 @@ export function PlannerTimeline({ festivals, onFestivalClick }: PlannerTimelineP
                 transition={{ delay: index * 0.06, type: "spring", stiffness: 300, damping: 25 }}
                 whileHover={{ y: -2 }}
                 onClick={() => onFestivalClick(festival)}
-                className={`relative p-4 rounded-2xl bg-card border ${style.border} cursor-pointer shadow-lg ${style.shadow} transition-all duration-200 overflow-hidden`}
+                className="relative p-4 rounded-2xl bg-card border border-border cursor-pointer transition-all duration-200 overflow-hidden"
               >
                 {/* Subtle genre accent bar */}
-                <div className={`absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b ${style.gradient}`} />
+                <div className="absolute left-0 top-0 bottom-0 w-1" style={{ backgroundColor: color }} />
 
                 <div className="flex items-start justify-between gap-3 pl-2">
                   <div className="flex-1 min-w-0">

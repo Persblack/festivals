@@ -24,7 +24,7 @@ export function RandomFestivalButton({ festivals }: RandomFestivalButtonProps) {
         onClick={pickRandom}
         size="lg"
         variant="outline"
-        className="rounded-full px-8"
+        className="h-auto rounded-xl px-7 py-4 text-base font-bold tracking-wider"
       >
         <Shuffle className="w-5 h-5 mr-2" />
         Surprise Me

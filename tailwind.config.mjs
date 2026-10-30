@@ -5,42 +5,40 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0F0F0F',
-        foreground: '#FAFAFA',
+        // Seven Sins palette: warm near-black ground, one blood red, bone text.
+        background: '#0E0B0B',
+        foreground: '#F2EEEE',
         card: {
-          DEFAULT: '#1C1C1C',
-          foreground: '#FAFAFA',
+          DEFAULT: '#1C1515',
+          foreground: '#F2EEEE',
         },
         muted: {
-          DEFAULT: '#252525',
-          foreground: '#9CA3AF',
+          DEFAULT: '#261C1C',
+          foreground: '#C7BDBD',
         },
         primary: {
-          DEFAULT: '#3B82F6',
+          DEFAULT: '#D91A1A',
           foreground: '#FFFFFF',
         },
         secondary: {
-          DEFAULT: '#A855F7',
-          foreground: '#FFFFFF',
+          DEFAULT: '#FF5C5C',
+          foreground: '#140D0D',
         },
         accent: {
-          DEFAULT: '#06B6D4',
-          foreground: '#FFFFFF',
+          DEFAULT: '#E8DCDC',
+          foreground: '#140D0D',
         },
         destructive: {
-          DEFAULT: '#EF4444',
-          foreground: '#FFFFFF',
+          DEFAULT: '#FF5C5C',
+          foreground: '#140D0D',
         },
-        border: '#333333',
-        input: '#252525',
-        ring: '#3B82F6',
-        genre: {
-          edm: '#3B82F6',
-          techno: '#06B6D4',
-          rock: '#EF4444',
-          metal: '#9CA3AF',
-          else: '#A855F7',
-        },
+        ink: '#140D0D',
+        border: '#3A2C2C',
+        // Control edge, >= 3:1 against card and field (WCAG 1.4.11).
+        input: '#857070',
+        // Control fill, lighter than every surface a control sits on.
+        field: '#241A1A',
+        ring: '#FF5C5C',
       },
       borderRadius: {
         lg: '16px',
@@ -49,6 +47,7 @@ export default {
         full: '9999px',
       },
       fontFamily: {
+        display: ['Anton', 'Impact', 'sans-serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
       },
       animation: {

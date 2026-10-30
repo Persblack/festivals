@@ -96,7 +96,8 @@ const facts: [string, string][] = [
   ["Size", getSizeLabel(f.size)],
   ["Tickets", price],
   ...(f.lineup.length ? [["Lineup", `${f.lineup.length} artists announced`] as [string, string]] : []),
-  ...(airports?.length ? [["Nearest airport", `${airports[0].airport.iata}, ${airports[0].km} km (straight line)`] as [string, string]] : []),
+  // The large airport when one is in range: a naval airfield 54 km away is not where visitors fly in.
+  ...(airports?.length ? (({ airport, km }) => [["Airport", `${airport.city} (${airport.iata}), ${km} km (straight line)`] as [string, string]])(airports.find((a) => a.airport.large) ?? airports[0]) : []),
 ];
 const links = [
   f.ticket_link && { href: f.ticket_link, label: `Tickets · ${price}`, primary: true },

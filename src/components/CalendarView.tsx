@@ -136,7 +136,7 @@ export function CalendarView({ festivals }: CalendarViewProps) {
                 <div className="flex justify-center mt-6">
                   <Button
                     variant="outline"
-                    className="rounded-xl"
+                    className="h-auto whitespace-normal rounded-xl py-2.5 text-center"
                     onClick={() => showMoreInMonth(group.key)}
                   >
                     Show more in {group.label} ({monthFestivals.length - monthVisible} remaining)

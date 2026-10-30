@@ -16,6 +16,18 @@ import {
   seriesSlug,
 } from "@/lib/seo";
 import { formatDateRange } from "@/lib/dates";
+import {
+  durationDays,
+  factualIntro,
+  hubMentions,
+  isThinSeries,
+  joinWords,
+  nearbyFestivals,
+  nearestAirports,
+  sameDates,
+  sameLineupElsewhere,
+  venueClause,
+} from "@/lib/festival-facts";
 import { getGenreCategory } from "@/lib/genre-utils";
 import { formatPriceRange, getCountryFlag, getGenreColorHex, getGenreCoverImage, getSizeLabel } from "@/lib/utils";
 import type { Festival } from "@/types/festival";
@@ -43,6 +55,19 @@ const similar = upcoming
   .sort(byProminence)
   .slice(0, 6);
 
+const thin = isThinSeries(editions);
+const days = durationDays(f);
+const airports = f.latitude !== null && f.longitude !== null ? nearestAirports(f.latitude, f.longitude) : null;
+// The lead edition often has no lineup yet; the last one announced still says who this festival books.
+const lineupEdition = f.lineup.length ? f : [...editions].reverse().find((e) => e.lineup.length > 0);
+const sharedLineup = lineupEdition ? sameLineupElsewhere(lineupEdition, upcoming) : [];
+const overlapping = isOver ? [] : sameDates(f, upcoming);
+const nearby = nearbyFestivals(f, upcoming);
+const mentions = hubMentions(f, hubs, genreHubs);
+const inHubs = !isOver;
+const airportText = (a: { airport: { name: string; city: string; iata: string }; km: number }) =>
+  `${a.airport.name} (${a.airport.iata})${a.airport.city && !a.airport.name.includes(a.airport.city) ? ` in ${a.airport.city}` : ""}, ${a.km} km away`;
+
 const headliners = f.lineup.slice(0, 3);
 // "Else" is the catch-all bucket, not a genre anyone would read as one.
 const named = f.genres.filter((g) => g !== "Else");
@@ -66,9 +91,11 @@ const facts: [string, string][] = [
   ["Location", `${f.city}, ${f.country_name}`],
   ...(f.venue ? [["Venue", f.venue] as [string, string]] : []),
   ["Genres", f.genres.join(", ")],
+  ["Duration", days === 1 ? "1 day" : `${days} days`],
   ["Size", getSizeLabel(f.size)],
   ["Tickets", price],
   ...(f.lineup.length ? [["Lineup", `${f.lineup.length} artists announced`] as [string, string]] : []),
+  ...(airports?.length ? [["Nearest airport", `${airports[0].airport.iata}, ${airports[0].km} km (straight line)`] as [string, string]] : []),
 ];
 const links = [
   f.ticket_link && { href: f.ticket_link, label: `Tickets · ${price}`, primary: true },
@@ -78,7 +105,7 @@ const links = [
 ].filter(Boolean) as { href: string; label: string; primary?: boolean }[];
 ---
 
-<Layout title={title} description={description} jsonLd={[...events, breadcrumbJsonLd(crumbs)]}>
+<Layout title={title} description={description} jsonLd={[...events, breadcrumbJsonLd(crumbs)]} noindex={thin}>
   <article class="space-y-10">
     <nav aria-label="Breadcrumb" class="text-sm text-muted-foreground">
       <ol class="flex flex-wrap gap-2">
@@ -111,22 +138,76 @@ const links = [
       <SelectFestivalButton client:visible festivalId={f.id} variant="full" />
     </div>
 
-    <div class="grid gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+    <div class="grid grid-cols-1 gap-10 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
       <div class="space-y-10">
         <section class="space-y-3">
-          <h2 class="text-3xl text-white">About {f.name}</h2>
-          <p class="max-w-2xl leading-relaxed text-muted-foreground">
-            {f.description ?? `${f.name} is a ${named.length ? named.join(" and ") : "music"} festival in ${f.city}, ${f.country_name}.`}
-            {" "}The {f.year} edition {isOver ? "ran" : "runs"} {dates}{f.venue ? ` at ${f.venue}` : ""}.
+          <h2 class="break-words text-3xl text-white">About {f.name}</h2>
+          <p class="max-w-2xl break-words leading-relaxed text-muted-foreground">
+            {f.description?.trim()
+              ? `${f.description.trim()} The ${f.year} edition ${isOver ? "ran" : "runs"} ${dates}${venueClause(f)}.`
+              : factualIntro(f, editions, isOver)}
           </p>
+          {mentions.length > 0 && (
+            <p class="max-w-2xl break-words leading-relaxed text-muted-foreground">
+              {inHubs ? "On Synners it is one of " : "Synners lists "}
+              {mentions.map((m, i) => (
+                <>{i > 0 && (i === mentions.length - 1 ? " and " : ", ")}<a href={m.path} class="text-foreground underline decoration-border underline-offset-4 hover:text-white">{m.label}</a></>
+              ))}.
+            </p>
+          )}
         </section>
 
         {f.lineup.length > 0 && (
           <section class="space-y-3">
-            <h2 class="text-3xl text-white">{f.name} {f.year} lineup</h2>
+            <h2 class="break-words text-3xl text-white">{f.name} {f.year} lineup</h2>
             <ul class="flex flex-wrap gap-2">
               {f.lineup.map((artist) => <li class="rounded-full bg-muted px-3 py-1.5 text-sm text-foreground">{artist}</li>)}
             </ul>
+          </section>
+        )}
+
+        {sharedLineup.length > 0 && (
+          <section class="space-y-3">
+            <h2 class="text-3xl text-white">Where these artists also play</h2>
+            <p class="max-w-2xl text-sm text-muted-foreground">Upcoming festivals on Synners that list artists from the {lineupEdition!.name} {lineupEdition!.year} lineup.</p>
+            <ul class="space-y-3">
+              {sharedLineup.map(({ festival: o, artists }) => (
+                <li class="rounded-2xl border border-border bg-card p-4">
+                  <a href={festivalPath(o.id)} class="break-words font-semibold text-white hover:underline">{o.name} {o.year}</a>
+                  <span class="text-muted-foreground"> · {formatDateRange(o.start_date, o.end_date)} · {o.city}, {o.country_name}</span>
+                  <p class="mt-1 break-words text-sm text-muted-foreground">
+                    {artists.length === 1 ? "Also booked: " : `${artists.length} shared artists: `}
+                    {joinWords(artists.slice(0, 8))}{artists.length > 8 ? ` and ${artists.length - 8} more` : ""}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {(airports || nearby.length > 0) && (
+          <section class="space-y-3">
+            <h2 class="text-3xl text-white">Getting there</h2>
+            {airports && (
+              <p class="max-w-2xl break-words leading-relaxed text-muted-foreground">
+                {airports.length === 0
+                  ? `There is no airport with scheduled flights within 150 km of ${f.city} in a straight line.`
+                  : `Nearest ${airports.length === 1 ? "airport" : "airports"} with scheduled flights: ${joinWords(airports.map(airportText))}. Distances are in a straight line from the festival's map position, so the trip by road is longer.`}
+              </p>
+            )}
+            {nearby.length > 0 && (
+              <>
+                <h3 class="pt-2 text-xl text-white">Upcoming festivals nearby</h3>
+                <ul class="space-y-2">
+                  {nearby.map(({ festival: o, km }) => (
+                    <li class="break-words text-sm text-muted-foreground">
+                      <a href={festivalPath(o.id)} class="font-semibold text-white hover:underline">{o.name}</a>
+                      {" "}· {formatDateRange(o.start_date, o.end_date)} · {o.city}{km > 0 ? `, ${km} km away` : ", same location"}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
           </section>
         )}
 
@@ -170,6 +251,23 @@ const links = [
         )}
       </aside>
     </div>
+
+    {overlapping.length > 0 && (
+      <section class="space-y-4">
+        <h2 class="text-3xl text-white">On the same dates</h2>
+        <p class="max-w-2xl text-sm text-muted-foreground">Other festivals on Synners that overlap with {dates}.</p>
+        <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {overlapping.map((o) => (
+            <li>
+              <a href={festivalPath(o.id)} class="flex h-full flex-col gap-1 rounded-2xl border border-border bg-card p-4 hover:border-input">
+                <span class="break-words text-lg font-semibold text-white">{o.name}</span>
+                <span class="text-sm text-muted-foreground">{formatDateRange(o.start_date, o.end_date)} · {getCountryFlag(o.country_code)} {o.city}, {o.country_name}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
 
     {similar.length > 0 && (
       <section class="space-y-4">

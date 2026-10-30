@@ -63,7 +63,7 @@ const thisWeekFestivals = festivals.filter((f) => {
           Find your<br />place to <span class="text-primary">sin.</span>
         </h1>
         <p class="max-w-xl text-lg md:text-xl leading-relaxed text-muted-foreground">
-          {upcoming.length} festivals across {upcomingCountries.size} countries, sorted by the only thing that matters: which sin you came for.
+          <strong class="font-semibold text-white">{upcoming.length} festivals</strong> and <strong class="font-semibold text-white">{uniqueArtists} artists</strong> across <strong class="font-semibold text-white">{upcomingCountries.size} countries</strong> and <strong class="font-semibold text-white">{upcomingGenres.size} genres</strong>, sorted by the only thing that matters: which sin you came for.
         </p>
         <div class="flex flex-wrap gap-3">
           <a href="#sins" class="rounded-xl bg-primary px-7 py-4 text-base font-bold uppercase tracking-wider text-white transition-colors hover:bg-[#B3122A]">
@@ -79,7 +79,7 @@ const thisWeekFestivals = festivals.filter((f) => {
         <img src="/hero-10.webp" alt="" class="absolute inset-0 h-full w-full object-cover grayscale contrast-125 brightness-75 transition-transform duration-700 group-hover:scale-105" />
         <div class="absolute inset-0 bg-primary mix-blend-multiply"></div>
         <div class="absolute bottom-5 left-5 rounded-2xl bg-background px-5 py-4">
-          <div class="font-display text-4xl text-white">{topSin.numeral} · {topSin.sin}</div>
+          <div class="font-display text-4xl text-white">{topSin.sin}</div>
           <div class="mt-1 text-sm text-muted-foreground">{topSin.count} {topSin.genre} festivals ahead</div>
         </div>
       </a>
@@ -92,31 +92,14 @@ const thisWeekFestivals = festivals.filter((f) => {
         {sinTiles.map((t) => (
           <a
             href={`/list?genre=${t.genre}`}
-            class="group flex min-h-[170px] flex-col gap-2 rounded-[18px] border border-[#333333] bg-card p-5 transition-colors hover:border-transparent"
-            style={`--sin:${t.color}`}
+            class="group flex flex-col gap-1.5 rounded-[18px] border border-[#333333] bg-card px-5 py-4 transition-colors hover:border-transparent"
           >
-            <span class="text-sm font-bold tracking-widest" style={`color:${t.color}`}>{t.numeral}</span>
-            <span class="mt-auto font-display text-4xl uppercase leading-none text-white">{t.sin}</span>
+            <span class="font-display text-4xl uppercase leading-none text-white">{t.sin}</span>
             <span class="text-sm text-muted-foreground">{t.genre === "Else" ? "Everything else" : t.genre} · {t.count}</span>
             <span class="h-1 w-10 rounded-full transition-all duration-300 group-hover:w-full" style={`background:${t.color}`}></span>
           </a>
         ))}
       </div>
-    </section>
-
-    <!-- Quick Stats -->
-    <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
-      {[
-        [upcoming.length, "Festivals ahead"],
-        [upcomingCountries.size, "Countries"],
-        [upcomingGenres.size, "Genres"],
-        [uniqueArtists, "Artists booked"],
-      ].map(([value, label]) => (
-        <div class="rounded-[18px] border border-border bg-card p-6">
-          <div class="font-display text-5xl md:text-6xl text-white">{value}</div>
-          <div class="mt-2 text-sm font-semibold uppercase tracking-widest text-muted-foreground">{label}</div>
-        </div>
-      ))}
     </section>
 
     <!-- Featured Festivals -->

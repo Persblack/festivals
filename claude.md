@@ -505,6 +505,13 @@ Chart component for visualizing festival growth over years (used in FestivalDeta
 
 ## Design System
 
+> **Superseded 2026-10-30 by the "Seven Sins" look.** Ground `#0E0B0B`, one blood red
+> (`#D91A1A` fills, `#FF5C5C` for red text), bone text, Anton uppercase headings over Inter,
+> both self-hosted via `@fontsource`. Each filter category is a sin (Lust = EDM, Envy =
+> Hip-Hop, Pride = Rock, Wrath = Metal, Gluttony = Else); sin names and colours live in
+> `SINS` in `src/lib/genre-utils.ts`, the tokens in `tailwind.config.mjs`. The blue/purple
+> palette and genre colours below are historical.
+
 ### Dark Theme Color Palette
 
 **Critical Design Direction:**

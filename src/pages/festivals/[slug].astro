@@ -106,7 +106,7 @@ const links = [
 ].filter(Boolean) as { href: string; label: string; primary?: boolean }[];
 ---
 
-<Layout title={title} description={description} jsonLd={[...events, breadcrumbJsonLd(crumbs)]} noindex={thin}>
+<Layout title={title} description={description} jsonLd={[...events, breadcrumbJsonLd(crumbs)]} noindex={thin} image={`/og/${mySlug}.png`}>
   <article class="space-y-10">
     <nav aria-label="Breadcrumb" class="text-sm text-muted-foreground">
       <ol class="flex flex-wrap gap-2">

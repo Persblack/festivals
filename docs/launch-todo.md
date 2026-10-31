@@ -45,3 +45,18 @@ Goal: a Synners Instagram page fed by a bot from the site data. Two post series:
 - [ ] Claude: posting script after `scripts/deploy.sh`. The Graph API fetches images by public URL, so the slides are published to synners.si first, then posted. Remember what was posted (`.cache/`) so a rerun posts nothing twice.
 - [ ] Claude: add it to the existing Monday LaunchAgent (weekly post; the monthly post on the first Monday of each month). Caption with festival handles where `instagram` is known, plus a link to `/months/<month>/`.
 - [ ] Before the first post: Rico approves one test post (sending content out in his name).
+
+## Report a missing festival (backlog)
+
+Goal: visitors tell us about festivals the site does not list yet.
+
+**v1, manual:**
+- [ ] Rico: decide the inbox (e.g. a new `hello@synners.si` at Hostinger). There is no Synners address yet.
+- [ ] Claude: a "Festival missing?" link on the list, hub and 404 pages. A `mailto:` with a prefilled subject and body (name, town, website, dates) needs no backend and collects nothing on the site itself.
+- [ ] Rico: reads the mails and adds the festival by hand (or asks Claude to).
+
+**v2, automatic:**
+- [ ] A small form endpoint (the site is static, so a Hostinger PHP script or a serverless function). It stores the report, adds a rate limit and a honeypot, and never sends the visitor's address anywhere.
+- [ ] A job sends each report to the Claude API (Sonnet, own key under a project-specific name, never `ANTHROPIC_API_KEY`). The model checks whether the festival exists (its own website), that it is a music festival, which country it is in, and that the site does not have it yet (same dedupe as `europe_build.py`).
+- [ ] If it passes, the job fetches the official site with the existing date extraction and writes the row to a `festivals_reported.json`. The next weekly rebuild publishes it. Unclear cases go into a review list for Rico, never straight onto the site.
+- [ ] Privacy notice on the form page: what is stored and for how long. Delete reports after processing.

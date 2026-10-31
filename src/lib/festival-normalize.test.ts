@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cleanDescription, cleanVenue, normalizeFestivals } from './festival-normalize';
+import { cleanDescription, cleanVenue, countryName, normalizeFestivals } from './festival-normalize';
 
 /** A row shaped like real scraper output. */
 function row(overrides: Record<string, unknown> = {}) {
@@ -229,6 +229,12 @@ describe('directory clean-up', () => {
     expect(cleanVenue('Hof Dahnsdorf & ARTHOKHauptstr. 31Planetal OT Dahnsdorf,DE14806')).toBe('Hof Dahnsdorf & ARTHOK, Hauptstr. 31');
     expect(cleanVenue('TivoliVredenburg')).toBe('TivoliVredenburg');
     expect(cleanVenue('MatriX, Alter Postweg 2, 86343 Königsbrunn')).toBe('MatriX, Alter Postweg 2, 86343 Königsbrunn');
+  });
+
+  it('gives every GB festival one country name', () => {
+    expect(countryName('GB', 'England')).toBe('United Kingdom');
+    expect(countryName('NO', 'Norway')).toBe('Norway');
+    expect(countryName('NO', '  ')).toBe('');
   });
 
   it('drops the directory teaser, keeps real descriptions', () => {

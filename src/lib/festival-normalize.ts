@@ -53,6 +53,17 @@ export function cleanVenue(raw: unknown): string {
   return parts.slice(0, -1).join(', ');
 }
 
+/**
+ * One name per country code: hub pages group by name, so two spellings split one country
+ * into two pages. The older scrapers wrote "England" for every GB festival (Scottish and
+ * Welsh ones too); the world directories write "United Kingdom".
+ */
+const COUNTRY_NAME_BY_CODE: Record<string, string> = { GB: 'United Kingdom' };
+
+export function countryName(code: string, raw: unknown): string {
+  return COUNTRY_NAME_BY_CODE[code] ?? asTrimmedString(raw) ?? '';
+}
+
 export interface NormalizeResult {
   festivals: Festival[];
   health: DataHealth;
@@ -222,6 +233,7 @@ export function normalizeFestivals(
       repaired('year field disagreed with start_date (derived from start_date)', id);
     }
 
+    const countryCode = (asTrimmedString(raw.country_code) ?? '').toUpperCase().slice(0, 2);
     const festival: Festival = {
       id,
       name,
@@ -230,8 +242,8 @@ export function normalizeFestivals(
       end_date: endIso,
       year,
       city: asTrimmedString(raw.city) ?? '',
-      country_code: (asTrimmedString(raw.country_code) ?? '').toUpperCase().slice(0, 2),
-      country_name: asTrimmedString(raw.country_name) ?? '',
+      country_code: countryCode,
+      country_name: countryName(countryCode, raw.country_name),
       venue: cleanVenue(raw.venue),
       latitude: coordinates?.latitude ?? null,
       longitude: coordinates?.longitude ?? null,

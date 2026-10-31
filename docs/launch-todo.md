@@ -32,3 +32,16 @@ festival in Europe 2027 on one map"), say plainly that you built it, and answer 
 - [ ] Send the 15 drafts in Gmail (account info@wassergo.de, subject "... auf Synners" / "... on Synners"); then email more smaller festivals that have a page on Synners: "You're listed on Synners, here is your page" with the `/festivals/<name>/` link. Smaller festivals link back more often than big ones.
 - [ ] Slovenian and Balkan music blogs and magazines: offer the map or a "festivals in Slovenia 2027" list
 - [ ] Festival Facebook groups and Discords (genre and country): share the hub page when someone asks "which festivals this summer?"
+
+## Instagram (backlog)
+
+Goal: a Synners Instagram page fed by a bot from the site data. Two post series:
+- Monthly, on the 1st: "Festivals of the month" (carousel, one slide per festival).
+- Weekly, on Monday: "Festivals next week".
+
+- [ ] Rico: create the Instagram account (professional: Business or Creator) and a Facebook Page, and link them. Claude cannot create accounts or log in.
+- [ ] Rico: create a Meta developer app with Instagram content publishing and generate a long-lived token. It goes into the Mac keychain or a local `.env`, never into the repo.
+- [ ] Claude: generate the slides at build time with the existing satori share-image code (`src/lib/og-image.ts`, 1080×1350 portrait), from the same "upcoming at build time" data the hubs use.
+- [ ] Claude: posting script after `scripts/deploy.sh`. The Graph API fetches images by public URL, so the slides are published to synners.si first, then posted. Remember what was posted (`.cache/`) so a rerun posts nothing twice.
+- [ ] Claude: add it to the existing Monday LaunchAgent (weekly post; the monthly post on the first Monday of each month). Caption with festival handles where `instagram` is known, plus a link to `/months/<month>/`.
+- [ ] Before the first post: Rico approves one test post (sending content out in his name).
